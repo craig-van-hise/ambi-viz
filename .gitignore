@@ -9,3 +9,5 @@ __pycache__/
 id_rsa
 .gemini/
 .agent/
+PRPs/
+
