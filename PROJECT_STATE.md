@@ -25,10 +25,10 @@ src
 
 ## 2. Tech Stack
 
--   **Language**: TypeScript
+-   **Language**: TypeScript / C++ (WASM)
 -   **Framework**: React (Vite)
 -   **Graphics**: Three.js (WebGL)
--   **Audio**: Web Audio API, ambisonics (JSAmbisonics)
+-   **Audio**: Web Audio API, Google Open Binaural Renderer (OBR)
 -   **Build Tool**: Vite
 
 ## 3. Status
@@ -47,3 +47,6 @@ src
 -   Fixed shader coordinate mapping for correct orientation.
 -   Added "Front", "Back", "Left", "Right" labels.
 -   Refined Gain control range (0-10).
+-   Integrated Google Open Binaural Renderer (OBR) C++ library compiled to WebAssembly.
+-   Implemented robust AudioWorklet processor (`obr-processor.js`) using Emscripten.
+-   Fixed WASM initialization, memory handoff (SOFA), and Worklet fetch polyfills.

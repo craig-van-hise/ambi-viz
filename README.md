@@ -30,7 +30,7 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 
 -   **Frontend**: React + TypeScript + Vite
 -   **3D Graphics**: Three.js + Custom GLSL Shaders
--   **Audio**: Web Audio API + JSAmbisonics
+-   **Audio**: Web Audio API + Google Open Binaural Renderer (OBR) via WebAssembly
 -   **Styling**: CSS (Vanilla)
 
 ## Project Structure
