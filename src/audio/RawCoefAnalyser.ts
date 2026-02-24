@@ -51,6 +51,7 @@ export class RawCoefAnalyser {
     getCovarianceMatrix(): Float32Array {
         // Retrieve fresh data for all channels
         for (let i = 0; i < this.nCh; i++) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             this.analysers[i].getFloatTimeDomainData(this.dataArrays[i] as any);
         }
 
@@ -96,6 +97,7 @@ export class RawCoefAnalyser {
         // Re-calculating is faster than allocating matrix if we just want UI.
         const coeffs = new Float32Array(this.nCh);
         for (let i = 0; i < this.nCh; i++) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             this.analysers[i].getFloatTimeDomainData(this.dataArrays[i] as any);
             let sumSq = 0;
             const data = this.dataArrays[i];

@@ -1,0 +1,1491 @@
+In file included from src/audio/obr_wrapper.cpp:8:
+In file included from deps/obr/obr/renderer/obr_impl.h:17:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from src/audio/obr_wrapper.cpp:8:
+In file included from deps/obr/obr/renderer/obr_impl.h:17:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from src/audio/obr_wrapper.cpp:8:
+In file included from deps/obr/obr/renderer/obr_impl.h:17:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/renderer/audio_element_config.cc:9:
+In file included from deps/obr/obr/renderer/audio_element_config.h:15:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/renderer/audio_element_config.cc:9:
+In file included from deps/obr/obr/renderer/audio_element_config.h:15:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/renderer/audio_element_config.cc:9:
+In file included from deps/obr/obr/renderer/audio_element_config.h:15:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/renderer/obr_impl.cc:9:
+In file included from deps/obr/obr/renderer/obr_impl.h:17:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/renderer/obr_impl.cc:9:
+In file included from deps/obr/obr/renderer/obr_impl.h:17:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/renderer/obr_impl.cc:9:
+In file included from deps/obr/obr/renderer/obr_impl.h:17:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+deps/obr/obr/renderer/obr_impl.cc:73:19: warning: 'MutexLock' is deprecated: Use the constructor that takes a reference instead [-Wdeprecated-declarations]
+   73 |   absl::MutexLock lock(&mutex_);
+      |                   ^
+deps/abseil-cpp/absl/synchronization/mutex.h:633:5: note: 'MutexLock' has been explicitly marked deprecated here
+  633 |   [[deprecated("Use the constructor that takes a reference instead")]]
+      |     ^
+deps/obr/obr/renderer/obr_impl.cc:119:19: warning: 'MutexLock' is deprecated: Use the constructor that takes a reference instead [-Wdeprecated-declarations]
+  119 |   absl::MutexLock lock(&mutex_);
+      |                   ^
+deps/abseil-cpp/absl/synchronization/mutex.h:633:5: note: 'MutexLock' has been explicitly marked deprecated here
+  633 |   [[deprecated("Use the constructor that takes a reference instead")]]
+      |     ^
+deps/obr/obr/renderer/obr_impl.cc:190:19: warning: 'MutexLock' is deprecated: Use the constructor that takes a reference instead [-Wdeprecated-declarations]
+  190 |   absl::MutexLock lock(&mutex_);
+      |                   ^
+deps/abseil-cpp/absl/synchronization/mutex.h:633:5: note: 'MutexLock' has been explicitly marked deprecated here
+  633 |   [[deprecated("Use the constructor that takes a reference instead")]]
+      |     ^
+6 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/ambisonic_binaural_decoder.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/ambisonic_binaural_decoder.h:16:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/fft_manager.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/ambisonic_binaural_decoder.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/ambisonic_binaural_decoder.h:16:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/fft_manager.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/ambisonic_binaural_decoder.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/ambisonic_binaural_decoder.h:16:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/fft_manager.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/dsp_utils.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/dsp_utils.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/dsp_utils.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/dsp_utils.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/dsp_utils.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/dsp_utils.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/fft_manager.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/fft_manager.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/fft_manager.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/fft_manager.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/fft_manager.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/fft_manager.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/partitioned_fft_filter.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/partitioned_fft_filter.h:14:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/fft_manager.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/partitioned_fft_filter.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/partitioned_fft_filter.h:14:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/fft_manager.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/partitioned_fft_filter.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/partitioned_fft_filter.h:14:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/fft_manager.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/planar_interleaved_conversion.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/planar_interleaved_conversion.h:16:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/planar_interleaved_conversion.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/planar_interleaved_conversion.h:16:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/planar_interleaved_conversion.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/planar_interleaved_conversion.h:16:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/resampler.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/resampler.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/resampler.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/resampler.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/resampler.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/resampler.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/sample_type_conversion.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/sample_type_conversion.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/sample_type_conversion.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/sample_type_conversion.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/sample_type_conversion.cc:13:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/sample_type_conversion.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/sh_hrir_creator.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/sh_hrir_creator.h:15:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/resampler.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/sh_hrir_creator.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/sh_hrir_creator.h:15:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/resampler.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/sh_hrir_creator.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/sh_hrir_creator.h:15:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/resampler.h:14:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/wav_reader.cc:17:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/wav_reader.cc:17:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/wav_reader.cc:17:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_ambient_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_ambient_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_ambient_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_ambient_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_ambient_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_ambient_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_ambient_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_ambient_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_ambient_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_ambient_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_ambient_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_ambient_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_direct_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_direct_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_direct_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_direct_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_direct_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_direct_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_direct_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_direct_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_direct_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_direct_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_direct_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_direct_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_reverberant_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_reverberant_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_reverberant_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_reverberant_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_reverberant_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_reverberant_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_reverberant_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_reverberant_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_reverberant_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_reverberant_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_reverberant_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_1_oa_reverberant_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_ambient_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_ambient_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_ambient_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_ambient_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_ambient_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_ambient_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_ambient_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_ambient_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_ambient_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_ambient_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_ambient_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_ambient_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_direct_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_direct_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_direct_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_direct_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_direct_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_direct_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_direct_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_direct_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_direct_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_direct_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_direct_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_direct_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_reverberant_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_reverberant_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_reverberant_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_reverberant_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_reverberant_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_reverberant_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_reverberant_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_reverberant_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_reverberant_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_reverberant_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_reverberant_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_2_oa_reverberant_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_ambient_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_ambient_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_ambient_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_ambient_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_ambient_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_ambient_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_ambient_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_ambient_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_ambient_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_ambient_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_ambient_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_ambient_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_direct_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_direct_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_direct_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_direct_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_direct_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_direct_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_direct_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_direct_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_direct_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_direct_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_direct_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_direct_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_reverberant_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_reverberant_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_reverberant_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_reverberant_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_reverberant_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_reverberant_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_reverberant_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_reverberant_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_reverberant_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_reverberant_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_reverberant_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_3_oa_reverberant_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_ambient_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_ambient_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_ambient_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_ambient_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_ambient_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_ambient_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_ambient_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_ambient_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_ambient_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_ambient_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_ambient_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_ambient_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_direct_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_direct_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_direct_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_direct_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_direct_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_direct_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_direct_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_direct_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_direct_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_direct_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_direct_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_direct_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_reverberant_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_reverberant_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_reverberant_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_reverberant_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_reverberant_l.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_reverberant_l.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_reverberant_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_reverberant_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_reverberant_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_reverberant_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_reverberant_r.cc:9:
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_4_oa_reverberant_r.h:12:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_wrapper.cc:17:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_wrapper.cc:17:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_binaural_decoder/binaural_filters/binaural_filters_wrapper.cc:17:
+In file included from deps/abseil-cpp/absl/types/span.h:65:
+In file included from deps/abseil-cpp/absl/base/attributes.h:39:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_encoder/ambisonic_encoder.cc:8:
+In file included from deps/obr/obr/ambisonic_encoder/ambisonic_encoder.h:16:
+In file included from deps/abseil-cpp/absl/container/flat_hash_map.h:40:
+In file included from deps/abseil-cpp/absl/algorithm/container.h:53:
+In file included from deps/abseil-cpp/absl/algorithm/algorithm.h:29:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_encoder/ambisonic_encoder.cc:8:
+In file included from deps/obr/obr/ambisonic_encoder/ambisonic_encoder.h:16:
+In file included from deps/abseil-cpp/absl/container/flat_hash_map.h:40:
+In file included from deps/abseil-cpp/absl/algorithm/container.h:53:
+In file included from deps/abseil-cpp/absl/algorithm/algorithm.h:29:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_encoder/ambisonic_encoder.cc:8:
+In file included from deps/obr/obr/ambisonic_encoder/ambisonic_encoder.h:16:
+In file included from deps/abseil-cpp/absl/container/flat_hash_map.h:40:
+In file included from deps/abseil-cpp/absl/algorithm/container.h:53:
+In file included from deps/abseil-cpp/absl/algorithm/algorithm.h:29:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_encoder/associated_legendre_polynomials_generator.cc:14:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_encoder/associated_legendre_polynomials_generator.cc:14:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_encoder/associated_legendre_polynomials_generator.cc:14:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/ambisonic_rotator/ambisonic_rotator.cc:9:
+In file included from deps/obr/obr/ambisonic_rotator/ambisonic_rotator.h:16:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_rotator/ambisonic_rotator.cc:9:
+In file included from deps/obr/obr/ambisonic_rotator/ambisonic_rotator.h:16:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/ambisonic_rotator/ambisonic_rotator.cc:9:
+In file included from deps/obr/obr/ambisonic_rotator/ambisonic_rotator.h:16:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/audio_buffer/audio_buffer.cc:9:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/audio_buffer/audio_buffer.cc:9:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/audio_buffer/audio_buffer.cc:9:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/audio_buffer/channel_view.cc:9:
+In file included from deps/obr/obr/audio_buffer/channel_view.h:15:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/audio_buffer/channel_view.cc:9:
+In file included from deps/obr/obr/audio_buffer/channel_view.h:15:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/audio_buffer/channel_view.cc:9:
+In file included from deps/obr/obr/audio_buffer/channel_view.h:15:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+In file included from deps/obr/obr/audio_buffer/simd_utils.cc:20:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/audio_buffer/simd_utils.cc:20:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/audio_buffer/simd_utils.cc:20:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+In file included from deps/obr/obr/audio_buffer/simd_utils.cc:21:
+deps/obr/obr/audio_buffer/simd_macros.h:53:2: warning: "Not using SIMD optimizations!" [-W#warnings]
+   53 | #warning "Not using SIMD optimizations!"
+      |  ^
+4 warnings generated.
+In file included from deps/obr/obr/peak_limiter/peak_limiter.cc:8:
+In file included from deps/obr/obr/peak_limiter/peak_limiter.h:12:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:841:8: warning: macro '__EMSCRIPTEN_major__' has been marked as deprecated: Use __EMSCRIPTEN_MAJOR__ instead [-Wdeprecated-pragma]
+  841 | #ifdef __EMSCRIPTEN_major__
+      |        ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:10:82: note: macro marked 'deprecated' here
+   10 | #pragma clang deprecated(__EMSCRIPTEN_major__, "Use __EMSCRIPTEN_MAJOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/peak_limiter/peak_limiter.cc:8:
+In file included from deps/obr/obr/peak_limiter/peak_limiter.h:12:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:842:5: warning: macro '__EMSCRIPTEN_minor__' has been marked as deprecated: Use __EMSCRIPTEN_MINOR__ instead [-Wdeprecated-pragma]
+  842 | #if __EMSCRIPTEN_minor__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:11:82: note: macro marked 'deprecated' here
+   11 | #pragma clang deprecated(__EMSCRIPTEN_minor__, "Use __EMSCRIPTEN_MINOR__ instead")
+      |                                                                                  ^
+In file included from deps/obr/obr/peak_limiter/peak_limiter.cc:8:
+In file included from deps/obr/obr/peak_limiter/peak_limiter.h:12:
+In file included from deps/obr/obr/audio_buffer/audio_buffer.h:16:
+In file included from deps/abseil-cpp/absl/log/check.h:37:
+In file included from deps/abseil-cpp/absl/log/internal/check_impl.h:20:
+In file included from deps/abseil-cpp/absl/base/optimization.h:40:
+deps/abseil-cpp/absl/base/config.h:845:5: warning: macro '__EMSCRIPTEN_tiny__' has been marked as deprecated: Use __EMSCRIPTEN_TINY__ instead [-Wdeprecated-pragma]
+  845 | #if __EMSCRIPTEN_tiny__ >= 1000
+      |     ^
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h:12:80: note: macro marked 'deprecated' here
+   12 | #pragma clang deprecated(__EMSCRIPTEN_tiny__, "Use __EMSCRIPTEN_TINY__ instead")
+      |                                                                                ^
+3 warnings generated.
+emcc: warning: MODULARIZE is only valid when generating JavaScript output [-Wunused-command-line-argument]
+emcc: warning: EXPORT_ES6 is only valid when generating JavaScript output [-Wunused-command-line-argument]
+wasm-ld: error: symbol exported via --export not found: obr_init
+wasm-ld: error: symbol exported via --export not found: obr_process
+wasm-ld: error: symbol exported via --export not found: obr_load_sofa
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: absl::status_internal::StatusRep::Unref() const
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: char const* absl::log_internal::MakeCheckOpString<unsigned long long, unsigned long long>(unsigned long long, unsigned long long, char const*)
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: absl::log_internal::LogMessageFatal::LogMessageFatal(char const*, int, char const*)
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: absl::log_internal::LogMessage::Flush()
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: absl::log_internal::LogMessageFatal::~LogMessageFatal()
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: absl::log_internal::LogMessageFatal::LogMessageFatal(char const*, int, char const*)
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: absl::log_internal::LogMessage::Flush()
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: absl::log_internal::LogMessageFatal::~LogMessageFatal()
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: char const* absl::log_internal::MakeCheckOpString<unsigned long long, unsigned long long>(unsigned long long, unsigned long long, char const*)
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: absl::log_internal::LogMessageFatal::LogMessageFatal(char const*, int, char const*)
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: absl::log_internal::LogMessage::Flush()
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: absl::log_internal::LogMessageFatal::~LogMessageFatal()
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: absl::log_internal::LogMessageFatal::LogMessageFatal(char const*, int, char const*)
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: absl::log_internal::LogMessage::Flush()
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o: undefined symbol: absl::log_internal::LogMessageFatal::~LogMessageFatal()
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/audio_element_config.o: undefined symbol: absl::log_internal::LogMessage::LogMessage(char const*, int, absl::log_internal::LogMessage::ErrorTag)
+wasm-ld: error: /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/audio_element_config.o: undefined symbol: absl::log_internal::LogMessage::Flush()
+wasm-ld: error: too many errors emitted, stopping now (use -error-limit=0 to see all errors)
+emcc: error: ''/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/bin/wasm-ld' -o public/obr.wasm /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/tmpxzicl1balibemscripten_js_symbols.so --strip-debug --export=malloc --export=free --export=obr_init --export=obr_process --export=obr_load_sofa --export=emscripten_stack_get_current --export=_emscripten_stack_restore --export-if-defined=__start_em_asm --export-if-defined=__stop_em_asm --export-if-defined=__start_em_lib_deps --export-if-defined=__stop_em_lib_deps --export-if-defined=__start_em_js --export-if-defined=__stop_em_js --export-table -z stack-size=65536 --no-growable-memory --initial-heap=16777216 --no-stack-first --table-base=1 --global-base=1024 /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_wrapper.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/audio_element_config.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/obr_impl.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/ambisonic_binaural_decoder.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/dsp_utils.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/fft_manager.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/partitioned_fft_filter.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/planar_interleaved_conversion.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/resampler.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/sample_type_conversion.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/sh_hrir_creator.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/wav_reader.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/wav.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_1_oa_ambient_l.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_1_oa_ambient_r.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_1_oa_direct_l.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_1_oa_direct_r.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_1_oa_reverberant_l.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_1_oa_reverberant_r.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_2_oa_ambient_l.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_2_oa_ambient_r.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_2_oa_direct_l.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_2_oa_direct_r.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_2_oa_reverberant_l.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_2_oa_reverberant_r.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_3_oa_ambient_l.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_3_oa_ambient_r.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_3_oa_direct_l.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_3_oa_direct_r.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_3_oa_reverberant_l.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_3_oa_reverberant_r.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_4_oa_ambient_l.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_4_oa_ambient_r.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_4_oa_direct_l.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_4_oa_direct_r.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_4_oa_reverberant_l.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_4_oa_reverberant_r.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/binaural_filters_wrapper.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/ambisonic_encoder.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/associated_legendre_polynomials_generator.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/ambisonic_rotator.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/audio_buffer.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/channel_view.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/simd_utils.o /var/folders/9p/5xftpxyd42bbsh4b150p_tsr0000gn/T/emscripten_temp_lyknjrjg/peak_limiter.o pffft.o '-L/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten' '-L/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/src/lib' '/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/crt1.o' -lGL-getprocaddr -lal -lhtml5 -lstandalonewasm-nocatch -lstubs -lc -ldlmalloc -lcompiler_rt -lc++-noexcept -lc++abi-noexcept -lsockets -mllvm -combiner-global-alias-analysis=false -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr' failed (returned 1)

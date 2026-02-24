@@ -1,22 +1,29 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
 import { FileLoader } from './components/FileLoader';
+import { HrtfSelector } from './components/HrtfSelector';
 import { AudioEngine } from './audio/AudioEngine';
-// @ts-ignore
 import { AmbiScene } from './visualizer/AmbiScene';
+import type { ViewMode } from './visualizer/AmbiScene';
+import { Throttle } from './utils/Throttle';
 
 function App() {
   const [audioEngine] = useState(() => new AudioEngine());
   const [isPlaying, setIsPlaying] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<AmbiScene | null>(null);
-  const [gain, setGain] = useState(2.0); // Start with reasonable gain
+  const [gain, setGain] = useState(2.0);
+  const [viewMode, setViewMode] = useState<ViewMode>('inside');
+
+  // Throttle covariance updates to ~24fps (render stays at 60fps)
+  const throttleRef = useRef(new Throttle(24));
 
   const handleFileLoaded = async (file: File) => {
     try {
       console.log('Loading file:', file.name);
       await audioEngine.loadFile(file);
       setIsPlaying(true);
+      throttleRef.current.reset();
       if (audioEngine.audioCtx.state === 'suspended') {
         audioEngine.resume();
       }
@@ -26,11 +33,29 @@ function App() {
     }
   };
 
+  const handleHrtfSelect = async (url: string) => {
+    if (audioEngine.obrDecoder) {
+      try {
+        await audioEngine.obrDecoder.loadSofa(url);
+      } catch (e) {
+        console.error('Error changing HRTF:', e);
+      }
+    }
+  };
+
+  const toggleViewMode = useCallback(() => {
+    const newMode: ViewMode = viewMode === 'inside' ? 'outside' : 'inside';
+    setViewMode(newMode);
+    if (sceneRef.current) {
+      sceneRef.current.setViewMode(newMode);
+    }
+  }, [viewMode]);
+
   // Initialize 3D Scene
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const scene = new AmbiScene(containerRef.current);
+    const scene = new AmbiScene(containerRef.current, 0.6);
     sceneRef.current = scene;
 
     return () => {
@@ -38,21 +63,25 @@ function App() {
     };
   }, []);
 
-  // Update Loop
+  // Update Loop — render at 60fps, data at ~24fps
   useEffect(() => {
     let outputAnimationFrameId: number;
 
     const loop = () => {
-      // Get Smoothed Coefficients (still needed for AudioEngine internals/ballistics)
-      audioEngine.update();
+      const now = performance.now();
 
-      // Get Covariance Matrix for Visualization
-      const cov = audioEngine.getCovariance();
+      // Only update audio data at throttled rate
+      if (throttleRef.current.shouldUpdate(now)) {
+        audioEngine.update();
 
-      // Update Scene
-      if (sceneRef.current) {
-        sceneRef.current.updateCovariance(cov, audioEngine.order, gain);
+        const cov = audioEngine.getCovariance();
+        if (sceneRef.current) {
+          sceneRef.current.updateCovariance(cov, audioEngine.order, gain);
+        }
       }
+
+      // Scene renders at full 60fps (orbit controls stay smooth)
+      // The AmbiScene.animate() handles its own rAF loop — we just update data here
 
       outputAnimationFrameId = requestAnimationFrame(loop);
     };
@@ -64,9 +93,10 @@ function App() {
 
   return (
     <div className="container">
-      <h1>AmbiViz Phase 2</h1>
+      <h1>AmbiViz</h1>
       <div style={{ marginBottom: '20px' }}>
         <FileLoader onFileLoaded={handleFileLoaded} />
+        <HrtfSelector onSelect={handleHrtfSelect} />
       </div>
 
       <div className="viz-container">
@@ -74,15 +104,16 @@ function App() {
         <div
           ref={containerRef}
           style={{
-            width: '800px',
-            height: '600px',
-            margin: '0 auto',
-            border: '1px solid #444',
+            width: '100%',
+            aspectRatio: '2.35 / 1',
+            border: '1px solid #333',
             background: '#000',
-            position: 'relative'
+            position: 'relative',
+            borderRadius: '4px',
+            overflow: 'hidden',
           }}
         />
-        <div style={{ marginTop: '10px', display: 'flex', gap: '20px', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ marginTop: '10px', display: 'flex', gap: '20px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
           <span>Status: {isPlaying ? 'Playing' : 'Idle'} | Order: {audioEngine.order}</span>
           <label>
             Gain:
@@ -97,16 +128,30 @@ function App() {
             />
             <span style={{ marginLeft: '5px' }}>{gain.toFixed(1)}</span>
           </label>
+          <button
+            onClick={toggleViewMode}
+            style={{
+              padding: '6px 16px',
+              background: viewMode === 'inside' ? '#2196F3' : '#FF9800',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '0.85em',
+              fontWeight: 'bold',
+            }}
+          >
+            {viewMode === 'inside' ? '👁 Inside View' : '🔭 Outside View'}
+          </button>
         </div>
       </div>
 
       <div style={{ marginTop: '20px', fontSize: '0.9em', color: '#666' }}>
-        <p><strong>Instructions:</strong> Drag and drop a 4, 9, or 16 channel file.</p>
-        <p><strong>Checkpoint 2 Validation:</strong></p>
-        <ul>
-          <li><strong>"Spiky Ball"</strong>: The sphere should deform and point towards the sound source.</li>
-          <li>Front = Right on Screen (Initially), depending on Camera.</li>
-        </ul>
+        <p><strong>Instructions:</strong> Drag and drop a 4, 9, or 16 channel Ambisonic file.</p>
+        <p><strong>Controls:</strong> {viewMode === 'inside'
+          ? 'Click and drag to look around (3DoF head rotation).'
+          : 'Click and drag to orbit. Scroll to zoom. Right-click to pan.'
+        }</p>
       </div>
     </div>
   );

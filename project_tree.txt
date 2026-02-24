@@ -1,0 +1,53 @@
+
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz
+├── PROJECT_STATE.md
+├── README.md
+├── convert_sofa_to_json.py
+├── eslint.config.js
+├── index.html
+├── inspect_sofa.py
+├── package-lock.json
+├── package.json
+├── project_tree.txt
+├── public
+|  ├── HRTF_default.sofa.json
+|  ├── hrtf
+|  |  ├── MIT_KEMAR_Normal.sofa
+|  |  ├── Neumann_KU100_48k.sofa
+|  |  └── hrtf_kemar.json
+|  └── vite.svg
+├── src
+|  ├── App.css
+|  ├── App.tsx
+|  ├── assets
+|  |  └── react.svg
+|  ├── audio
+|  |  ├── AudioEngine.ts
+|  |  └── RawCoefAnalyser.ts
+|  ├── components
+|  |  └── FileLoader.tsx
+|  ├── index.css
+|  ├── main.tsx
+|  ├── types
+|  |  └── ambisonics.d.ts
+|  ├── utils
+|  |  ├── Throttle.test.ts
+|  |  └── Throttle.ts
+|  └── visualizer
+|     ├── AmbiScene.ts
+|     ├── shaderMath.test.ts
+|     ├── shaderMath.ts
+|     └── shaders
+|        └── ambisonic.ts
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── vite.config.ts
+└── vitest.config.ts
+
+directory: 819 file: 6133
+
+ignored: directory (81)
+
+
+[2K[1G

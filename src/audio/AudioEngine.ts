@@ -1,19 +1,19 @@
-import * as ambisonics from 'ambisonics';
-// @ts-ignore
+import { OBRDecoder } from './OBRDecoder';
 import { RawCoefAnalyser } from './RawCoefAnalyser';
 
 export class AudioEngine {
     audioCtx: AudioContext;
     sourceNode: AudioBufferSourceNode | null = null;
     rawAnalyser: RawCoefAnalyser | null = null;
-    binDecoder: any | null = null; // JSAmbisonics.binDecoder
+    obrDecoder: OBRDecoder | null = null;
     order: number = 1;
 
     // Smoothing state
     smoothedCoeffs: Float32Array;
 
     constructor() {
-        this.audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        this.audioCtx = new AudioContextClass();
         this.smoothedCoeffs = new Float32Array(16); // Max order 3 (16 channels)
     }
 
@@ -25,6 +25,9 @@ export class AudioEngine {
     }
 
     async setupGraph(buffer: AudioBuffer) {
+        // 0. Resume context (Modern browser policy)
+        await this.audioCtx.resume();
+
         // 1. Detect Order
         const nCh = buffer.numberOfChannels;
         if (nCh === 4) this.order = 1;
@@ -36,7 +39,7 @@ export class AudioEngine {
             // In a real app we might handle mismatch or error out
         }
 
-        // 2. Prepare Nodes
+        // 2. Prepare Source Node
         if (this.sourceNode) this.sourceNode.stop();
         this.sourceNode = this.audioCtx.createBufferSource();
         this.sourceNode.buffer = buffer;
@@ -45,24 +48,25 @@ export class AudioEngine {
         // 3. Raw Data Extraction
         this.rawAnalyser = new RawCoefAnalyser(this.audioCtx, this.order);
 
-        // 4. Binaural Decoder
-        this.binDecoder = new ambisonics.binDecoder(this.audioCtx, this.order);
+        // 4. Binaural Decoder (OBR)
+        this.obrDecoder = new OBRDecoder(this.audioCtx, this.order);
 
-        // Load HRIR (using local JSON converted from SOFA)
-        const loader = new ambisonics.HRIRloader_local(this.audioCtx, this.order, (decodedBuffer: AudioBuffer) => {
-            console.log('HRIR loaded from JSON');
-            this.binDecoder.updateFilters(decodedBuffer);
-        });
-        loader.load('/hrtf/hrtf_kemar.json');
+        // --- INITIALIZATION GATE ---
+        // Await full setup before connecting signal path
+        await this.obrDecoder.init();
+        // We use absolute path/relative to public root as handled by vite
+        await this.obrDecoder.loadSofa('/hrtf/MIT_KEMAR_Normal.sofa');
 
         // 5. Connect Graph
         // Source -> RawAnalyser -> BinDecoder -> Destination
         // RawAnalyser has .in and .out (pass-through)
         this.sourceNode.connect(this.rawAnalyser.in);
-        this.rawAnalyser.out.connect(this.binDecoder.in);
-        this.binDecoder.out.connect(this.audioCtx.destination);
+        this.rawAnalyser.out.connect(this.obrDecoder.in);
+        this.obrDecoder.out.connect(this.audioCtx.destination);
 
+        // 6. Start Playback
         this.sourceNode.start();
+        console.log("AudioEngine: Signal path connected and playback started.");
     }
 
     update(): Float32Array {
@@ -129,8 +133,21 @@ export class AudioEngine {
     }
 
     getCovariance(): Float32Array {
-        if (!this.rawAnalyser) return new Float32Array(this.order * this.order); // Fallback
-        return this.rawAnalyser.getCovarianceMatrix();
+        // Always return 256 floats (16x16 matrix) for the shader
+        if (!this.rawAnalyser) return new Float32Array(256);
+
+        const rawCov = this.rawAnalyser.getCovarianceMatrix();
+        // Pad to 256 if the order is less than 3
+        if (rawCov.length >= 256) return rawCov;
+        const padded = new Float32Array(256);
+        // Map the nCh×nCh matrix into a 16×16 matrix
+        const nCh = (this.order + 1) * (this.order + 1);
+        for (let i = 0; i < nCh; i++) {
+            for (let j = 0; j < nCh; j++) {
+                padded[i * 16 + j] = rawCov[i * nCh + j];
+            }
+        }
+        return padded;
     }
 
     resume() {
