@@ -1,13 +1,29 @@
-
 /Users/vv2024/Documents/AI Projects/WebApps/ambi-viz
+├── PROJECT_CONTEXT_BUNDLE.md
 ├── PROJECT_STATE.md
+├── PRPs
+|  ├── # 0.md
+|  ├── # 1.md
+|  ├── # 10.md
+|  ├── # 11.md
+|  ├── # 12.md
+|  ├── # 2.md
+|  ├── # 3.md
+|  ├── # 4.md
+|  ├── # 5.md
+|  ├── # 6.md
+|  ├── # 7.md
+|  ├── # 8.md
+|  └── # 9.md
 ├── README.md
+├── build_error.log
 ├── convert_sofa_to_json.py
 ├── eslint.config.js
 ├── index.html
 ├── inspect_sofa.py
 ├── package-lock.json
 ├── package.json
+├── pffft.o
 ├── project_tree.txt
 ├── public
 |  ├── HRTF_default.sofa.json
@@ -15,17 +31,27 @@
 |  |  ├── MIT_KEMAR_Normal.sofa
 |  |  ├── Neumann_KU100_48k.sofa
 |  |  └── hrtf_kemar.json
-|  └── vite.svg
+|  ├── obr.js
+|  ├── obr.wasm
+|  ├── vite.svg
+|  └── worklets
+|     └── obr-processor.js
 ├── src
 |  ├── App.css
 |  ├── App.tsx
 |  ├── assets
 |  |  └── react.svg
 |  ├── audio
+|  |  ├── AudioEngine.test.ts
 |  |  ├── AudioEngine.ts
-|  |  └── RawCoefAnalyser.ts
+|  |  ├── OBRDecoder.test.ts
+|  |  ├── OBRDecoder.ts
+|  |  ├── RawCoefAnalyser.ts
+|  |  ├── obr-processor.test.ts
+|  |  └── obr_wrapper.cpp
 |  ├── components
-|  |  └── FileLoader.tsx
+|  |  ├── FileLoader.tsx
+|  |  └── HrtfSelector.tsx
 |  ├── index.css
 |  ├── main.tsx
 |  ├── types
@@ -45,12 +71,10 @@
 ├── vite.config.ts
 └── vitest.config.ts
 
-directory: 819 file: 6133
+directory: 828 file: 6166
 
-ignored: directory (81)
-
-
-[2K[1G# PROJECT_STATE (2026-02-12)
+ignored: directory (77)
+# PROJECT_STATE (2026-02-12)
 
 ## 1. Architecture
 
@@ -77,10 +101,10 @@ src
 
 ## 2. Tech Stack
 
--   **Language**: TypeScript
+-   **Language**: TypeScript / C++ (WASM)
 -   **Framework**: React (Vite)
 -   **Graphics**: Three.js (WebGL)
--   **Audio**: Web Audio API, ambisonics (JSAmbisonics)
+-   **Audio**: Web Audio API, Google Open Binaural Renderer (OBR)
 -   **Build Tool**: Vite
 
 ## 3. Status
@@ -99,6 +123,10 @@ src
 -   Fixed shader coordinate mapping for correct orientation.
 -   Added "Front", "Back", "Left", "Right" labels.
 -   Refined Gain control range (0-10).
+-   Integrated Google Open Binaural Renderer (OBR) C++ library compiled to WebAssembly.
+-   Implemented robust AudioWorklet processor (`obr-processor.js`) using Emscripten.
+-   Fixed WASM initialization, memory handoff (SOFA), and Worklet fetch polyfills.
+
 # AmbiViz - Ambisonic Visualization Application
 
 A high-performance web application for visualizing Ambisonic audio fields in real-time using Three.js and the Web Audio API.
@@ -131,7 +159,7 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 
 -   **Frontend**: React + TypeScript + Vite
 -   **3D Graphics**: Three.js + Custom GLSL Shaders
--   **Audio**: Web Audio API + JSAmbisonics
+-   **Audio**: Web Audio API + Google Open Binaural Renderer (OBR) via WebAssembly
 -   **Styling**: CSS (Vanilla)
 
 ## Project Structure
@@ -140,3 +168,4 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 -   `src/visualizer`: Three.js scene management and shader code.
 -   `src/components`: React UI components (FileLoader).
 -   `src/types`: TypeScript definitions.
+
