@@ -25,7 +25,6 @@
 |  ├── hrtf
 |  ├── obr.js
 |  ├── obr.wasm
-|  ├── vite.svg
 |  └── worklets
 ├── src
 |  ├── App.css
@@ -69,14 +68,14 @@
     -   Fixed OBR rotation gating (Enabled `head_tracking_enabled_` in C++).
     -   Resolved SAB/Worklet memory mapping issues (`HEAPU8` fix).
     -   Corrected rotation direction by conjugating quaternions in the Worklet.
+    -   **feat(audio): Synchronized UI camera rotation (OrbitControls) with the binaural renderer using expanded SAB schema.**
 
 ## 4. Recent Changes
 
--   [Current] - feat(audio): resolve head tracking rotation by enabling C++ engine gating and fixing worklet memory mapping
--   79d4973 - docs: generate updated project context bundle (21 hours ago)
--   a093263 - docs: update stack to reflect OBR WASM integration (21 hours ago)
--   917bfe8 - feat(net): sanitize network configuration and fix worklet environment (22 hours ago)
--   27d6939 - chore(git): ignore PRPs folder (12 days ago)
--   0608fd5 - chore(init): project genesis and documentation sync (12 days ago)
--   Resolved `ModuleFactory not set` and `self.import is not a function` blocking MediaPipe WASM inside Vite ES Worklet environment.
--   Created SAB connection between MediaPipe VisionWorker and OBR AudioWorklet.
+-   [Current] - feat(audio): synchronize UI camera rotation with binaural renderer via SAB bridge
+-   6839767 - feat(audio): resolve head tracking audio rotation and sync documentation (1 hour ago)
+-   79d4973 - docs: generate updated project context bundle (22 hours ago)
+-   a093263 - docs: update stack to reflect OBR WASM integration (22 hours ago)
+-   917bfe8 - feat(net): sanitize network configuration and fix worklet environment (23 hours ago)
+-   27d6939 - chore(git): ignore PRPs folder (13 days ago)
+-   0608fd5 - chore(init): project genesis and documentation sync (13 days ago)

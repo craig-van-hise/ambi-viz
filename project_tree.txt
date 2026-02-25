@@ -1,4 +1,6 @@
+
 /Users/vv2024/Documents/AI Projects/WebApps/ambi-viz
+├── FAILURE_REPORT_13.md
 ├── PROJECT_CONTEXT_BUNDLE.md
 ├── PROJECT_STATE.md
 ├── PRPs
@@ -7,6 +9,8 @@
 |  ├── # 10.md
 |  ├── # 11.md
 |  ├── # 12.md
+|  ├── # 13.md
+|  ├── # 14.md
 |  ├── # 2.md
 |  ├── # 3.md
 |  ├── # 4.md
@@ -14,13 +18,17 @@
 |  ├── # 6.md
 |  ├── # 7.md
 |  ├── # 8.md
-|  └── # 9.md
+|  ├── # 9.md
+|  └── DEBUG_PLAN.md
 ├── README.md
+├── REMOTE_LOGGING.md
+├── browser.log
 ├── build_error.log
 ├── convert_sofa_to_json.py
 ├── eslint.config.js
 ├── index.html
 ├── inspect_sofa.py
+├── llms.txt
 ├── package-lock.json
 ├── package.json
 ├── pffft.o
@@ -33,12 +41,16 @@
 |  |  └── hrtf_kemar.json
 |  ├── obr.js
 |  ├── obr.wasm
+|  ├── test.wav
 |  ├── vite.svg
 |  └── worklets
 |     └── obr-processor.js
+├── scripts
+|  └── remote-logger-server.js
 ├── src
 |  ├── App.css
 |  ├── App.tsx
+|  ├── HeadTrackingService.ts
 |  ├── assets
 |  |  └── react.svg
 |  ├── audio
@@ -55,22 +67,30 @@
 |  ├── index.css
 |  ├── main.tsx
 |  ├── types
+|  |  ├── HeadTracking.ts
 |  |  └── ambisonics.d.ts
 |  ├── utils
 |  |  ├── Throttle.test.ts
-|  |  └── Throttle.ts
-|  └── visualizer
-|     ├── AmbiScene.ts
-|     ├── shaderMath.test.ts
-|     ├── shaderMath.ts
-|     └── shaders
-|        └── ambisonic.ts
+|  |  ├── Throttle.ts
+|  |  ├── debug.ts
+|  |  └── remoteLogger.ts
+|  ├── visualizer
+|  |  ├── AmbiScene.ts
+|  |  ├── shaderMath.test.ts
+|  |  ├── shaderMath.ts
+|  |  └── shaders
+|  |     └── ambisonic.ts
+|  └── workers
+|     └── VisionWorker.ts
 ├── tsconfig.app.json
 ├── tsconfig.json
 ├── tsconfig.node.json
 ├── vite.config.ts
 └── vitest.config.ts
 
-directory: 828 file: 6166
+directory: 623 file: 2621
 
 ignored: directory (77)
+
+
+[2K[1G

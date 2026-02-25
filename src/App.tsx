@@ -87,6 +87,8 @@ function App() {
         const cov = audioEngine.getCovariance();
         if (sceneRef.current) {
           sceneRef.current.updateCovariance(cov, audioEngine.order, gain);
+          // Sync UI rotation to Audio Engine
+          headTracking.setUIRotation(sceneRef.current.camera.quaternion);
         }
       }
 

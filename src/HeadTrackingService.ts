@@ -1,6 +1,7 @@
 import { SAB_SCHEMA } from './types/HeadTracking';
 import Worker from './workers/VisionWorker?worker';
 import { OBRDecoder } from './audio/OBRDecoder';
+import * as THREE from 'three';
 
 export class HeadTrackingService {
     private videoElement: HTMLVideoElement | null = null;
@@ -9,6 +10,9 @@ export class HeadTrackingService {
     private isTracking: boolean = false;
     private animationFrameId: number = 0;
     private obrDecoder: OBRDecoder | null = null;
+    private sabFloat32: Float32Array | null = null;
+    private sabInt32: Int32Array | null = null;
+    private sequenceNumber: number = 0;
 
     constructor() { }
 
@@ -18,6 +22,14 @@ export class HeadTrackingService {
 
         // 1. Define SAB Schema memory allocation
         this.sab = new SharedArrayBuffer(SAB_SCHEMA.BYTE_LENGTH);
+        this.sabInt32 = new Int32Array(this.sab);
+        this.sabFloat32 = new Float32Array(this.sab);
+
+        // Initialize with identity quaternions
+        this.sabFloat32[SAB_SCHEMA.QUAT_RAW_W] = 1.0;
+        this.sabFloat32[SAB_SCHEMA.QUAT_PRED_W] = 1.0;
+        this.sabFloat32[SAB_SCHEMA.QUAT_UI_W] = 1.0;
+
         console.log("[Main] Allocated SAB:", this.sab.byteLength, "bytes");
 
         // 2. Instantiate Vision Worker
@@ -49,6 +61,24 @@ export class HeadTrackingService {
         } else {
             console.error("[Main] Cannot attach SAB: sab or workletNode is missing", { sab: !!this.sab, node: !!this.obrDecoder?.['workletNode'] });
         }
+    }
+
+    /**
+     * Updates the UI-driven rotation (Manual camera interaction)
+     * Writes directly to the SharedArrayBuffer for low-latency delivery to AudioWorklet
+     */
+    public setUIRotation(q: THREE.Quaternion) {
+        if (!this.sabFloat32 || !this.sabInt32) return;
+
+        // Write UI Quaternion
+        this.sabFloat32[SAB_SCHEMA.QUAT_UI_X] = q.x;
+        this.sabFloat32[SAB_SCHEMA.QUAT_UI_Y] = q.y;
+        this.sabFloat32[SAB_SCHEMA.QUAT_UI_Z] = q.z;
+        this.sabFloat32[SAB_SCHEMA.QUAT_UI_W] = q.w;
+
+        // Increment sequence and store atomically to signal update to the worklet
+        this.sequenceNumber++;
+        Atomics.store(this.sabInt32, SAB_SCHEMA.SEQ_NUM, this.sequenceNumber);
     }
 
     public async startCamera(): Promise<void> {

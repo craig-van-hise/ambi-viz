@@ -5,6 +5,7 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 ## Features
 
 -   **Head-Tracking Spatial Audio**: Real-time 6DOF audio rotation via MediaPipe FaceLandmarker and Google OBR (WASM).
+-   **UI Rotation Sync**: Synchronizes visual camera manipulation (OrbitControls) with the binaural audio renderer.
 -   **Ambisonic Decoding**: Supports Order 1-3 Ambisonics (ACN/SN3D).
 -   **Real-time Visualization**:
     -   **Spherical Harmonics**: Deforms a 3D sphere based on the directional energy of the sound field.
@@ -38,12 +39,18 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 
 ```text
 /Users/vv2024/Documents/AI Projects/WebApps/ambi-viz
+├── FAILURE_REPORT_13.md
+├── PROJECT_CONTEXT_BUNDLE.md
+├── PROJECT_STATE.md
+├── PRPs
+├── README.md
+├── REMOTE_LOGGING.md
 ├── public
 |  ├── HRTF_default.sofa.json
 |  ├── hrtf
 |  ├── obr.js
 |  ├── obr.wasm
-|  ├── worklets
+|  └── worklets
 ├── src
 |  ├── App.tsx
 |  ├── HeadTrackingService.ts

@@ -13,9 +13,15 @@ export const SAB_SCHEMA = {
     QUAT_PRED_Z: 7,
     QUAT_PRED_W: 8,
 
+    // UI Camera Rotation (Manual)
+    QUAT_UI_X: 9,
+    QUAT_UI_Y: 10,
+    QUAT_UI_Z: 11,
+    QUAT_UI_W: 12,
+
     // Total size in bytes:
-    // 1 * 4 (Int32) + 8 * 4 (Float32) = 36 bytes. We'll round up to 64 bytes for cache line safety.
-    BYTE_LENGTH: 64
+    // 1 * 4 (Int32) + 12 * 4 (Float32) = 52 bytes. We'll round up to 128 bytes for future-proofing and cache line safety.
+    BYTE_LENGTH: 128
 };
 
 export interface HeadTrackingMessage {

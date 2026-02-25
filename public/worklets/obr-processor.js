@@ -119,13 +119,32 @@ class OBRProcessor extends AudioWorkletProcessor {
             const seqNum = Atomics.load(this.sabInt32, 0);
             if (seqNum !== this.lastSeqNum && seqNum > 0) {
                 this.lastSeqNum = seqNum;
-                // Index 1, 2, 3, 4 are x, y, z, w as defined by SAB_SCHEMA in HeadTracking.ts
-                const qx = this.sabFloat32[1];
-                const qy = this.sabFloat32[2];
-                const qz = this.sabFloat32[3];
-                const qw = this.sabFloat32[4];
-                // Conjugate: negate x,y,z to counter-rotate the soundfield
-                this.wasm._obr_set_rotation(qw, -qx, -qy, -qz);
+
+                // 1. Get Tracking Quaternion (RAW or PRED)
+                // Use indices 1,2,3,4 (RAW) or 5,6,7,8 (PRED) as defined in SAB_SCHEMA
+                // For now, let's use RAW (tracking service writes to RAW)
+                const tx = this.sabFloat32[1];
+                const ty = this.sabFloat32[2];
+                const tz = this.sabFloat32[3];
+                const tw = this.sabFloat32[4];
+
+                // 2. Get UI Quaternion (Manual camera)
+                // Indices 9,10,11,12 as defined in SAB_SCHEMA
+                const ux = this.sabFloat32[9];
+                const uy = this.sabFloat32[10];
+                const uz = this.sabFloat32[11];
+                const uw = this.sabFloat32[12];
+
+                // 3. Quaternion Multiplication: Total = UI * Tracking
+                // (uw, ux, uy, uz) * (tw, tx, ty, tz)
+                const rx = uw * tx + ux * tw + uy * tz - uz * ty;
+                const ry = uw * ty - ux * tz + uy * tw + uz * tx;
+                const rz = uw * tz + ux * ty - uy * tx + uz * tw;
+                const rw = uw * tw - ux * tx - uy * ty - uz * tz;
+
+                // 4. Set Rotation to WASM
+                // Conjugate: negate x,y,z to counter-rotate the soundfield relative to listener
+                this.wasm._obr_set_rotation(rw, -rx, -ry, -rz);
             }
         }
 
