@@ -144,11 +144,13 @@ describe('OBRProcessor Registration', () => {
             // Send SAB to worklet
             instance.handleMessage({ data: { type: 'SET_SAB', payload: sab } });
 
-            // Write mock quat data into the SAB with sequence number update
-            float32View[1] = 0.1; // x
-            float32View[2] = 0.2; // y
-            float32View[3] = 0.3; // z
-            float32View[4] = 0.4; // w
+            // Write mock predicted quat data into the SAB QUAT_PRED slots with sequence number update
+            float32View[5] = 0.1; // QUAT_PRED_X
+            float32View[6] = 0.2; // QUAT_PRED_Y
+            float32View[7] = 0.3; // QUAT_PRED_Z
+            float32View[8] = 0.4; // QUAT_PRED_W
+            // Initialize UI quaternion to identity so Hamilton product is just the tracking quat
+            float32View[12] = 1.0; // QUAT_UI_W
             Atomics.store(int32View, 0, 1); // latest seq num = 1
 
             // Mock the set rotation method we expect to be in WASM
@@ -162,10 +164,11 @@ describe('OBRProcessor Registration', () => {
 
             expect(mockSetRotation).toHaveBeenCalled()
             const args = mockSetRotation.mock.calls[0];
-            expect(args[0]).toBeCloseTo(0.4, 5);
-            expect(args[1]).toBeCloseTo(0.1, 5);
-            expect(args[2]).toBeCloseTo(0.2, 5);
-            expect(args[3]).toBeCloseTo(0.3, 5);
+            // The worklet conjugates the combined quaternion: (rw, -rx, -ry, -rz)
+            expect(args[0]).toBeCloseTo(0.4, 5);   // w (unchanged)
+            expect(args[1]).toBeCloseTo(-0.1, 5);   // -x (conjugated)
+            expect(args[2]).toBeCloseTo(-0.2, 5);   // -y (conjugated)
+            expect(args[3]).toBeCloseTo(-0.3, 5);   // -z (conjugated)
 
         } else {
             throw new Error('processorClass is null');

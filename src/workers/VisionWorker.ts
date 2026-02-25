@@ -1,6 +1,7 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 import { SAB_SCHEMA, type HeadTrackingMessage } from '../types/HeadTracking';
 import { mat3, quat } from 'gl-matrix';
+import { ESKF, type Quat } from '../tracking/ESKF';
 
 let faceLandmarker: FaceLandmarker | null = null;
 let sabInt32: Int32Array | null = null;
@@ -13,12 +14,23 @@ const m3 = mat3.create();
 const q = quat.create();
 
 let processedFramesCount = 0;
+let eskf: ESKF | null = null;
+let lastTimestamp: number = -1;
 
 async function initWorker(payload: any) {
     console.log("[Worker] initWorker() called");
     const { sab } = payload;
     sabInt32 = new Int32Array(sab);
     sabFloat32 = new Float32Array(sab);
+
+    // Initialize the ESKF prediction pipeline (Phase 3)
+    eskf = new ESKF({
+        sigmaGyro: 0.5,
+        sigmaAccel: 5.0,
+        sigmaMeas: 0.05,
+        predictionHorizon: 0.045, // 45ms look-ahead
+    });
+    lastTimestamp = -1;
 
     console.log("[Worker] Loading MediaPipe Vision Tasks...");
 
@@ -103,18 +115,39 @@ self.onmessage = async (e: MessageEvent<HeadTrackingMessage>) => {
                     quat.fromMat3(q, m3);
                     quat.normalize(q, q);
 
-                    // Write to SAB
+                    // Write RAW quaternion to SAB (for debugging / fallback)
                     sabFloat32[SAB_SCHEMA.QUAT_RAW_X] = q[0];
                     sabFloat32[SAB_SCHEMA.QUAT_RAW_Y] = q[1];
                     sabFloat32[SAB_SCHEMA.QUAT_RAW_Z] = q[2];
                     sabFloat32[SAB_SCHEMA.QUAT_RAW_W] = q[3];
+
+                    // Run ESKF prediction pipeline (Phase 3)
+                    if (eskf) {
+                        const tSec = timestamp / 1000; // ms → s
+                        if (lastTimestamp > 0) {
+                            const dt = tSec - lastTimestamp;
+                            if (dt > 0 && dt < 1.0) { // sanity: skip if >1s gap
+                                eskf.predict(dt);
+                            }
+                        }
+                        lastTimestamp = tSec;
+
+                        const rawQuat: Quat = [q[0], q[1], q[2], q[3]];
+                        eskf.correct(rawQuat);
+
+                        const predicted = eskf.getPredicted();
+                        sabFloat32[SAB_SCHEMA.QUAT_PRED_X] = predicted[0];
+                        sabFloat32[SAB_SCHEMA.QUAT_PRED_Y] = predicted[1];
+                        sabFloat32[SAB_SCHEMA.QUAT_PRED_Z] = predicted[2];
+                        sabFloat32[SAB_SCHEMA.QUAT_PRED_W] = predicted[3];
+                    }
 
                     // Increment sequence number and store atomically
                     sequenceNumber++;
                     Atomics.store(sabInt32, SAB_SCHEMA.SEQ_NUM, sequenceNumber);
 
                     if (processedFramesCount < 5) {
-                        console.log(`[Worker] Wrote seqNum ${sequenceNumber}: quat(w=${q[3].toFixed(3)}, x=${q[0].toFixed(3)}, y=${q[1].toFixed(3)}, z=${q[2].toFixed(3)})`);
+                        console.log(`[Worker] Wrote seqNum ${sequenceNumber}: raw(w=${q[3].toFixed(3)}, x=${q[0].toFixed(3)}), pred(w=${sabFloat32[SAB_SCHEMA.QUAT_PRED_W].toFixed(3)}, x=${sabFloat32[SAB_SCHEMA.QUAT_PRED_X].toFixed(3)})`);
                     }
                     processedFramesCount++;
                 }

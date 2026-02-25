@@ -4,7 +4,7 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 
 ## Features
 
--   **Head-Tracking Spatial Audio**: Real-time 6DOF audio rotation via MediaPipe FaceLandmarker and Google OBR (WASM).
+-   **Predictive Head-Tracking (ESKF)**: Low-latency 6DOF audio rotation using an Error-State Kalman Filter in tangent space (PRP #13 Phase 3).
 -   **UI Rotation Sync**: Synchronizes visual camera manipulation (OrbitControls) with the binaural audio renderer.
 -   **Ambisonic Decoding**: Supports Order 1-3 Ambisonics (ACN/SN3D).
 -   **Real-time Visualization**:
@@ -39,25 +39,23 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 
 ```text
 /Users/vv2024/Documents/AI Projects/WebApps/ambi-viz
-├── FAILURE_REPORT_13.md
-├── PROJECT_CONTEXT_BUNDLE.md
 ├── PROJECT_STATE.md
 ├── PRPs
 ├── README.md
-├── REMOTE_LOGGING.md
 ├── public
 |  ├── HRTF_default.sofa.json
-|  ├── hrtf
 |  ├── obr.js
 |  ├── obr.wasm
 |  └── worklets
 ├── src
-|  ├── App.tsx
-|  ├── HeadTrackingService.ts
 |  ├── audio
 |  ├── components
+|  ├── tracking
+|  |  ├── ESKF.ts
+|  |  └── OneEuroFilter.ts
 |  ├── types
 |  ├── utils
 |  ├── visualizer
 |  └── workers
+|     └── VisionWorker.ts
 ```

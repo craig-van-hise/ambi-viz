@@ -120,13 +120,12 @@ class OBRProcessor extends AudioWorkletProcessor {
             if (seqNum !== this.lastSeqNum && seqNum > 0) {
                 this.lastSeqNum = seqNum;
 
-                // 1. Get Tracking Quaternion (RAW or PRED)
-                // Use indices 1,2,3,4 (RAW) or 5,6,7,8 (PRED) as defined in SAB_SCHEMA
-                // For now, let's use RAW (tracking service writes to RAW)
-                const tx = this.sabFloat32[1];
-                const ty = this.sabFloat32[2];
-                const tz = this.sabFloat32[3];
-                const tw = this.sabFloat32[4];
+                // 1. Get Tracking Quaternion (PREDICTED — smoothed + extrapolated)
+                // Uses QUAT_PRED indices 5,6,7,8 as written by the VisionWorker prediction pipeline
+                const tx = this.sabFloat32[5];
+                const ty = this.sabFloat32[6];
+                const tz = this.sabFloat32[7];
+                const tw = this.sabFloat32[8];
 
                 // 2. Get UI Quaternion (Manual camera)
                 // Indices 9,10,11,12 as defined in SAB_SCHEMA
