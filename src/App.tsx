@@ -2,48 +2,91 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
 import { FileLoader } from './components/FileLoader';
 import { HrtfSelector } from './components/HrtfSelector';
+import { ESKFTuningPanel } from './components/ESKFTuningPanel';
+import { TransportControls } from './components/TransportControls';
+import { TrackQueue } from './components/TrackQueue';
 import { AudioEngine } from './audio/AudioEngine';
+import type { PlaybackState, QueueTrack } from './audio/AudioEngine';
 import { AmbiScene } from './visualizer/AmbiScene';
 import type { ViewMode } from './visualizer/AmbiScene';
 import { Throttle } from './utils/Throttle';
 import { HeadTrackingService } from './HeadTrackingService';
+import { loadState, debouncedSave } from './utils/persistence';
+import type { PersistedState } from './utils/persistence';
 
 function App() {
+  // Load persisted state on mount
+  const [persisted] = useState(() => loadState());
+
   const [audioEngine] = useState(() => new AudioEngine());
   const [headTracking] = useState(() => new HeadTrackingService());
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isTrackingCam, setIsTrackingCam] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<AmbiScene | null>(null);
-  const [gain, setGain] = useState(2.0);
+  const [gain, setGain] = useState(persisted.gain);
   const [viewMode, setViewMode] = useState<ViewMode>('inside');
+
+  // Transport state
+  const [playbackState, setPlaybackState] = useState<PlaybackState>('stopped');
+  const [isLooping, setIsLooping] = useState(true);
+
+  // Queue state
+  const [queue, setQueue] = useState<QueueTrack[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+
+  // ESKF params (persisted)
+  const [eskfParams, setEskfParams] = useState(persisted.eskf);
+  const [hrtfUrl, setHrtfUrl] = useState(persisted.hrtfUrl);
 
   // Throttle covariance updates to ~24fps (render stays at 60fps)
   const throttleRef = useRef(new Throttle(24));
+
+  // Persist state on any change
+  const persistRef = useRef<PersistedState>(persisted);
+
+  const persistState = useCallback((partial: Partial<PersistedState>) => {
+    persistRef.current = { ...persistRef.current, ...partial };
+    debouncedSave(persistRef.current);
+  }, []);
 
   useEffect(() => {
     headTracking.init();
   }, [headTracking]);
 
-  const handleFileLoaded = async (file: File) => {
-    try {
-      console.log('Loading file:', file.name);
-      await audioEngine.loadFile(file);
-      setIsPlaying(true);
+  // Apply persisted HRTF on first load
+  useEffect(() => {
+    if (audioEngine.obrDecoder && hrtfUrl !== '/hrtf/MIT_KEMAR_Normal.sofa') {
+      audioEngine.obrDecoder.loadSofa(hrtfUrl).catch(console.error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioEngine.obrDecoder]);
+
+  // ── File Queue Handler ──
+  const handleFilesQueued = useCallback(async (files: File[]) => {
+    const indices = await audioEngine.queueFiles(files);
+    setQueue([...audioEngine.queue]);
+
+    // Auto-load first track if nothing is loaded yet (but do NOT play)
+    if (audioEngine.currentIndex === -1 && indices.length > 0) {
+      await audioEngine.loadTrack(indices[0]);
+      setCurrentIndex(indices[0]);
+      setPlaybackState('stopped');
       if (audioEngine.obrDecoder) {
         headTracking.attachDecoder(audioEngine.obrDecoder);
       }
-      throttleRef.current.reset();
-      if (audioEngine.audioCtx.state === 'suspended') {
-        audioEngine.resume();
-      }
-    } catch (e) {
-      console.error('Error loading file:', e);
-      alert('Error loading file. Check console.');
     }
-  };
+  }, [audioEngine, headTracking]);
 
-  const handleHrtfSelect = async (url: string) => {
+  const handleTrackSelect = useCallback(async (index: number) => {
+    await audioEngine.loadTrack(index);
+    audioEngine.play();
+    setCurrentIndex(index);
+    setPlaybackState('playing');
+  }, [audioEngine]);
+
+  const handleHrtfSelect = useCallback(async (url: string) => {
+    setHrtfUrl(url);
+    persistState({ hrtfUrl: url });
     if (audioEngine.obrDecoder) {
       try {
         await audioEngine.obrDecoder.loadSofa(url);
@@ -51,7 +94,21 @@ function App() {
         console.error('Error changing HRTF:', e);
       }
     }
-  };
+  }, [audioEngine, persistState]);
+
+  const handleESKFParams = useCallback((params: { tau?: number; R_scalar?: number; Q_scalar?: number }) => {
+    headTracking.updateESKFParams(params);
+    setEskfParams(prev => {
+      const updated = { ...prev, ...params };
+      persistState({ eskf: updated });
+      return updated;
+    });
+  }, [headTracking, persistState]);
+
+  const handleGainChange = useCallback((newGain: number) => {
+    setGain(newGain);
+    persistState({ gain: newGain });
+  }, [persistState]);
 
   const toggleViewMode = useCallback(() => {
     const newMode: ViewMode = viewMode === 'inside' ? 'outside' : 'inside';
@@ -60,6 +117,56 @@ function App() {
       sceneRef.current.setViewMode(newMode);
     }
   }, [viewMode]);
+
+  // ── Transport Handlers ──
+  const handlePlay = useCallback(() => {
+    audioEngine.play();
+    setPlaybackState('playing');
+  }, [audioEngine]);
+
+  const handlePause = useCallback(() => {
+    audioEngine.pause();
+    setPlaybackState('paused');
+  }, [audioEngine]);
+
+  const handleStop = useCallback(() => {
+    audioEngine.stop();
+    setPlaybackState('stopped');
+  }, [audioEngine]);
+
+  const handlePrev = useCallback(async () => {
+    await audioEngine.prev();
+    setCurrentIndex(audioEngine.currentIndex);
+    setPlaybackState('playing');
+  }, [audioEngine]);
+
+  const handleNext = useCallback(async () => {
+    await audioEngine.next();
+    setCurrentIndex(audioEngine.currentIndex);
+    setPlaybackState('playing');
+  }, [audioEngine]);
+
+  const handleLoopToggle = useCallback(() => {
+    const newLoop = !isLooping;
+    audioEngine.setLoop(newLoop);
+    setIsLooping(newLoop);
+  }, [audioEngine, isLooping]);
+
+  // ── Spacebar Play/Pause ──
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && e.target === document.body) {
+        e.preventDefault();
+        if (audioEngine.playbackState === 'playing') {
+          handlePause();
+        } else {
+          handlePlay();
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [audioEngine, handlePlay, handlePause]);
 
   // Initialize 3D Scene
   useEffect(() => {
@@ -73,6 +180,13 @@ function App() {
     };
   }, []);
 
+  // Toggle tracking indicators when tracking state changes
+  useEffect(() => {
+    if (sceneRef.current) {
+      sceneRef.current.setTrackingIndicatorsVisible(isTrackingCam);
+    }
+  }, [isTrackingCam]);
+
   // Update Loop — render at 60fps, data at ~24fps
   useEffect(() => {
     let outputAnimationFrameId: number;
@@ -80,20 +194,23 @@ function App() {
     const loop = () => {
       const now = performance.now();
 
-      // Only update audio data at throttled rate
       if (throttleRef.current.shouldUpdate(now)) {
         audioEngine.update();
 
         const cov = audioEngine.getCovariance();
         if (sceneRef.current) {
           sceneRef.current.updateCovariance(cov, audioEngine.order, gain);
-          // Sync UI rotation to Audio Engine
           headTracking.setUIRotation(sceneRef.current.camera.quaternion);
         }
       }
 
-      // Scene renders at full 60fps (orbit controls stay smooth)
-      // The AmbiScene.animate() handles its own rAF loop — we just update data here
+      if (isTrackingCam && sceneRef.current) {
+        const rawQ = headTracking.getRawQuaternion();
+        const predQ = headTracking.getPredictedQuaternion();
+        if (rawQ && predQ) {
+          sceneRef.current.updateTrackingIndicators(rawQ, predQ);
+        }
+      }
 
       outputAnimationFrameId = requestAnimationFrame(loop);
     };
@@ -101,15 +218,38 @@ function App() {
     loop();
 
     return () => cancelAnimationFrame(outputAnimationFrameId);
-  }, [audioEngine, gain]);
+  }, [audioEngine, gain, isTrackingCam, headTracking]);
+
+  const hasQueue = queue.length > 0;
 
   return (
     <div className="container">
       <h1>AmbiViz</h1>
       <div style={{ marginBottom: '20px' }}>
-        <FileLoader onFileLoaded={handleFileLoaded} />
+        <FileLoader onFilesQueued={handleFilesQueued} />
         <HrtfSelector onSelect={handleHrtfSelect} />
       </div>
+
+      {hasQueue && (
+        <>
+          <TrackQueue
+            tracks={queue}
+            currentIndex={currentIndex}
+            onTrackSelect={handleTrackSelect}
+          />
+          <TransportControls
+            playbackState={playbackState}
+            isLooping={isLooping}
+            queueSize={queue.length}
+            onPlay={handlePlay}
+            onPause={handlePause}
+            onStop={handleStop}
+            onLoopToggle={handleLoopToggle}
+            onPrev={handlePrev}
+            onNext={handleNext}
+          />
+        </>
+      )}
 
       <div className="viz-container">
         <h3>Spherical Harmonics Visualization (Order 3)</h3>
@@ -126,7 +266,7 @@ function App() {
           }}
         />
         <div style={{ marginTop: '10px', display: 'flex', gap: '20px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
-          <span>Status: {isPlaying ? 'Playing' : 'Idle'} | Order: {audioEngine.order}</span>
+          <span>Status: {playbackState === 'playing' ? 'Playing' : playbackState === 'paused' ? 'Paused' : 'Stopped'} | Order: {audioEngine.order}</span>
           <label>
             Gain:
             <input
@@ -135,7 +275,7 @@ function App() {
               max="10"
               step="0.1"
               value={gain}
-              onChange={(e) => setGain(parseFloat(e.target.value))}
+              onChange={(e) => handleGainChange(parseFloat(e.target.value))}
               style={{ marginLeft: '10px', verticalAlign: 'middle' }}
             />
             <span style={{ marginLeft: '5px' }}>{gain.toFixed(1)}</span>
@@ -180,8 +320,15 @@ function App() {
         </div>
       </div>
 
+      {isTrackingCam && (
+        <ESKFTuningPanel
+          onParamsChange={handleESKFParams}
+          initialParams={eskfParams}
+        />
+      )}
+
       <div style={{ marginTop: '20px', fontSize: '0.9em', color: '#666' }}>
-        <p><strong>Instructions:</strong> Drag and drop a 4, 9, or 16 channel Ambisonic file.</p>
+        <p><strong>Instructions:</strong> Drag and drop audio files or folders. Press <kbd>Space</kbd> to play/pause.</p>
         <p><strong>Controls:</strong> {viewMode === 'inside'
           ? 'Click and drag to look around (3DoF head rotation).'
           : 'Click and drag to orbit. Scroll to zoom. Right-click to pan.'

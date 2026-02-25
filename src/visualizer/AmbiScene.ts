@@ -26,6 +26,10 @@ export class AmbiScene {
     // Animation state
     rafId: number | null = null;
 
+    // Head tracking visual indicators
+    private ghostArrow: THREE.ArrowHelper | null = null;      // Raw MediaPipe (cyan, semi-transparent)
+    private predictedArrow: THREE.ArrowHelper | null = null;   // ESKF predicted (green, solid)
+
     constructor(container: HTMLElement, resolutionScale: number = 0.6) {
         this.container = container;
         this.resolutionScale = Math.max(0.25, Math.min(1.0, resolutionScale));
@@ -85,7 +89,10 @@ export class AmbiScene {
 
         this.addOrientationLabels();
 
-        // 7. Events
+        // 7. Head tracking indicators (hidden by default)
+        this.initTrackingIndicators();
+
+        // 8. Events
         window.addEventListener('resize', this.onResize.bind(this));
 
         // Start Loop
@@ -184,11 +191,16 @@ export class AmbiScene {
         context.fillText(text, 128, 32);
 
         const texture = new THREE.CanvasTexture(canvas);
-        const material = new THREE.SpriteMaterial({ map: texture });
+        const material = new THREE.SpriteMaterial({
+            map: texture,
+            depthWrite: false,
+            transparent: true,
+        });
         const sprite = new THREE.Sprite(material);
 
         sprite.position.copy(position);
         sprite.scale.set(2, 0.5, 1);
+        sprite.renderOrder = -1;
 
         this.scene.add(sprite);
     }
@@ -200,6 +212,60 @@ export class AmbiScene {
         this.createLabel("LEFT", new THREE.Vector3(-dist, 0, 0));
         this.createLabel("RIGHT", new THREE.Vector3(dist, 0, 0));
         this.createLabel("UP", new THREE.Vector3(0, dist, 0));
+    }
+
+    /** Create ghost (raw) and predicted arrow helpers, hidden by default */
+    private initTrackingIndicators() {
+        const origin = new THREE.Vector3(0, 0, 0);
+        const defaultDir = new THREE.Vector3(0, 0, -1);
+        const arrowLength = 1.8;
+        const headLength = 0.3;
+        const headWidth = 0.15;
+
+        // Ghost arrow — semi-transparent cyan (raw MediaPipe data)
+        this.ghostArrow = new THREE.ArrowHelper(
+            defaultDir, origin, arrowLength, 0x00e5ff, headLength, headWidth
+        );
+        this.ghostArrow.line.material = new THREE.LineBasicMaterial({
+            color: 0x00e5ff,
+            transparent: true,
+            opacity: 0.35,
+        });
+        (this.ghostArrow.cone.material as THREE.MeshBasicMaterial).transparent = true;
+        (this.ghostArrow.cone.material as THREE.MeshBasicMaterial).opacity = 0.35;
+        this.ghostArrow.visible = false;
+        this.scene.add(this.ghostArrow);
+
+        // Predicted arrow — solid green (ESKF output)
+        this.predictedArrow = new THREE.ArrowHelper(
+            defaultDir, origin, arrowLength, 0x00e676, headLength, headWidth
+        );
+        this.predictedArrow.visible = false;
+        this.scene.add(this.predictedArrow);
+    }
+
+    /**
+     * Update the tracking indicator arrows with fresh quaternions from the SAB.
+     * Called each frame from the main thread when tracking is active.
+     */
+    updateTrackingIndicators(rawQuat: THREE.Quaternion, predQuat: THREE.Quaternion) {
+        const forward = new THREE.Vector3(0, 0, -1);
+
+        if (this.ghostArrow) {
+            const rawDir = forward.clone().applyQuaternion(rawQuat);
+            this.ghostArrow.setDirection(rawDir);
+        }
+
+        if (this.predictedArrow) {
+            const predDir = forward.clone().applyQuaternion(predQuat);
+            this.predictedArrow.setDirection(predDir);
+        }
+    }
+
+    /** Show or hide the tracking indicator arrows */
+    setTrackingIndicatorsVisible(visible: boolean) {
+        if (this.ghostArrow) this.ghostArrow.visible = visible;
+        if (this.predictedArrow) this.predictedArrow.visible = visible;
     }
 
     updateCovariance(cov: Float32Array, order: number, gain: number = 1.0) {

@@ -29,6 +29,16 @@ export interface ESKFOptions {
     predictionHorizon?: number;
 }
 
+/** Parameters accepted by setParams() for real-time ESKF tuning */
+export interface ESKFTuningParams {
+    /** Forward prediction horizon in seconds */
+    tau?: number;
+    /** Measurement noise covariance scalar (R = R_scalar · I₃) */
+    R_scalar?: number;
+    /** Process noise covariance scalar (Q_θ = Q_scalar · dt · I₃) */
+    Q_scalar?: number;
+}
+
 export class ESKF {
     // Nominal state
     private q: Quat = [0, 0, 0, 1];       // orientation
@@ -290,6 +300,24 @@ export class ESKF {
         this.P.fill(0);
         this.P[0] = 0.1; this.P[7] = 0.1; this.P[14] = 0.1;
         this.P[21] = 1.0; this.P[28] = 1.0; this.P[35] = 1.0;
+    }
+
+    /**
+     * Dynamically update noise parameters and prediction horizon at runtime.
+     * Safe because Q and R are rebuilt fresh on each predict()/correct() call.
+     */
+    setParams(params: ESKFTuningParams): void {
+        if (params.tau !== undefined) {
+            this.predictionHorizon = params.tau;
+        }
+        if (params.R_scalar !== undefined) {
+            // R = R_scalar · I₃, and code uses sigmaMeas² = R_scalar
+            this.sigmaMeas = Math.sqrt(params.R_scalar);
+        }
+        if (params.Q_scalar !== undefined) {
+            // Q_θ = sigmaGyro² · dt · I₃, so sigmaGyro = √Q_scalar
+            this.sigmaGyro = Math.sqrt(params.Q_scalar);
+        }
     }
 }
 

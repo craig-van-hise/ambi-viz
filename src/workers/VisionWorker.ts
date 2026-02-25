@@ -165,5 +165,11 @@ self.onmessage = async (e: MessageEvent<HeadTrackingMessage>) => {
             console.log("[Worker] STOP_TRACKING received");
             isTracking = false;
             break;
+        case 'UPDATE_ESKF_PARAMS':
+            if (eskf && payload) {
+                eskf.setParams(payload);
+                console.log("[Worker] ESKF params updated:", payload);
+            }
+            break;
     }
 };

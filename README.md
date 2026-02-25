@@ -4,19 +4,19 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 
 ## Features
 
--   **Predictive Head-Tracking (ESKF)**: Low-latency 6DOF audio rotation using an Error-State Kalman Filter in tangent space (PRP #13 Phase 3).
--   **UI Rotation Sync**: Synchronizes visual camera manipulation (OrbitControls) with the binaural audio renderer.
--   **Ambisonic Decoding**: Supports Order 1-3 Ambisonics (ACN/SN3D).
+-   **Predictive Head-Tracking (ESKF)**: Low-latency 6DOF audio rotation using an Error-State Kalman Filter in tangent space with visual debugging (ghost/predicted arrows).
+-   **Dynamic Tuning**: Real-time ESKF parameter adjustment (τ, R, Q) with descriptive tooltips for latency and jitter management.
+-   **Audio Transport & Queue**:
+    -   Full playback controls: Play, Pause, Stop, and Loop.
+    -   **Track Queue**: Previous/Next navigation with a scrollable track list.
+    -   **Advanced Ingestion**: Drag-and-drop individual files or entire folders (recursive scanning).
+    -   Keyboard shortcuts: Spacebar for Play/Pause.
+-   **State Persistence**: Automatic `localStorage` persistence for Gain, HRTF profile, and ESKF tuning parameters.
+-   **Ambisonic Decoding**: Supports Order 1-3 Ambisonics (ACN/SN3D) via Google Open Binaural Renderer (OBR) WASM.
 -   **Real-time Visualization**:
     -   **Spherical Harmonics**: Deforms a 3D sphere based on the directional energy of the sound field.
     -   **Covariance Matrix**: Uses Quadratic Form ($Y^T C Y$) for accurate energy estimation.
-    -   **Energy Heatmap**: Color-coded visualization of sound intensity.
--   **Interactive Controls**:
-    -   **Orbit Controls**: Rotate, Zoom, and Pan the 3D view.
-    -   **Gain Slider**: Adjust visualization sensitivity (0.0 - 10.0).
--   **Audio Engine**:
-    -   Drag-and-drop file support (`.wav`, `.ambix`).
-    -   Binaural monitoring via HRTF.
+    -   **Interactive Controls**: Gain slider, View Mode toggle (Inside/Outside), and Camera Tracking toggle.
 
 ## Usage
 
@@ -25,15 +25,16 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
     npm run dev
     ```
 2.  **Open in Browser**: Navigate to `http://localhost:5173`.
-3.  **Load Audio**: Drag and drop a valid Ambisonic file (4, 9, or 16 channels).
-4.  **Interact**: Use the mouse to explore the 3D visualization.
+3.  **Load Audio**: Drag and drop Ambisonic files or a folder containing audio (.wav, .ambix, .ogg, .iamf).
+4.  **Transport**: Use the transport bar or press `Space` to control playback.
+5.  **Tuning**: Enable "Tracking" to reveal the ESKF Tuning Panel and visual tracking indicators.
 
 ## Technical Stack
 
 -   **Frontend**: React + TypeScript + Vite
 -   **3D Graphics**: Three.js + Custom GLSL Shaders
--   **Audio**: Web Audio API + Google Open Binaural Renderer (OBR) via WebAssembly
--   **Styling**: CSS (Vanilla)
+-   **Audio**: Web Audio API + OBR WASM + AudioWorklet
+-   **Tracking**: MediaPipe Face Landmarker + 6DOF ESKF
 
 ## Project Structure
 
@@ -43,19 +44,13 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 ├── PRPs
 ├── README.md
 ├── public
-|  ├── HRTF_default.sofa.json
-|  ├── obr.js
-|  ├── obr.wasm
-|  └── worklets
+|  ├── hrtf (SOFA files)
+|  ├── worklets (Audio processor)
+|  └── obr.wasm
 ├── src
-|  ├── audio
-|  ├── components
-|  ├── tracking
-|  |  ├── ESKF.ts
-|  |  └── OneEuroFilter.ts
-|  ├── types
-|  ├── utils
-|  ├── visualizer
-|  └── workers
-|     └── VisionWorker.ts
+|  ├── audio (Engine, OBR, Analyser)
+|  ├── components (UI, Transport, Queue, Tuning)
+|  ├── tracking (Filters, Predictors, Service)
+|  ├── utils (Persistence, Throttle)
+|  └── visualizer (Three.js Scene, Shaders)
 ```

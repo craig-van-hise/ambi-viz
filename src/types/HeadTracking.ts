@@ -25,6 +25,6 @@ export const SAB_SCHEMA = {
 };
 
 export interface HeadTrackingMessage {
-    type: 'START_TRACKING' | 'STOP_TRACKING' | 'INIT_WORKER' | 'PROCESS_FRAME';
+    type: 'START_TRACKING' | 'STOP_TRACKING' | 'INIT_WORKER' | 'PROCESS_FRAME' | 'UPDATE_ESKF_PARAMS';
     payload?: any;
 }

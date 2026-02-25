@@ -8,9 +8,11 @@
 |  ├── # 1.md
 |  ├── # 10.md
 |  ├── # 11.md
+|  ├── # 12-1.md
 |  ├── # 12.md
+|  ├── # 13
+|  |  └── # 1.md
 |  ├── # 13.md
-|  ├── # 14.md
 |  ├── # 2.md
 |  ├── # 3.md
 |  ├── # 4.md
@@ -62,10 +64,20 @@
 |  |  ├── obr-processor.test.ts
 |  |  └── obr_wrapper.cpp
 |  ├── components
+|  |  ├── ESKFTuningPanel.tsx
 |  |  ├── FileLoader.tsx
-|  |  └── HrtfSelector.tsx
+|  |  ├── HrtfSelector.tsx
+|  |  ├── TrackQueue.tsx
+|  |  └── TransportControls.tsx
 |  ├── index.css
 |  ├── main.tsx
+|  ├── tracking
+|  |  ├── ESKF.test.ts
+|  |  ├── ESKF.ts
+|  |  ├── OneEuroFilter.test.ts
+|  |  ├── OneEuroFilter.ts
+|  |  ├── QuatPredictor.test.ts
+|  |  └── QuatPredictor.ts
 |  ├── types
 |  |  ├── HeadTracking.ts
 |  |  └── ambisonics.d.ts
@@ -73,13 +85,13 @@
 |  |  ├── Throttle.test.ts
 |  |  ├── Throttle.ts
 |  |  ├── debug.ts
+|  |  ├── persistence.ts
 |  |  └── remoteLogger.ts
 |  ├── visualizer
 |  |  ├── AmbiScene.ts
 |  |  ├── shaderMath.test.ts
 |  |  ├── shaderMath.ts
 |  |  └── shaders
-|  |     └── ambisonic.ts
 |  └── workers
 |     └── VisionWorker.ts
 ├── tsconfig.app.json
@@ -88,9 +100,9 @@
 ├── vite.config.ts
 └── vitest.config.ts
 
-directory: 623 file: 2621
+directory: 415 file: 882
 
-ignored: directory (77)
+ignored: directory (36)
 
 
 [2K[1G# PROJECT_STATE (2026-02-25)
@@ -99,58 +111,36 @@ ignored: directory (77)
 
 ```text
 /Users/vv2024/Documents/AI Projects/WebApps/ambi-viz
-├── FAILURE_REPORT_13.md
-├── PROJECT_CONTEXT_BUNDLE.md
 ├── PROJECT_STATE.md
-├── PRPs
 ├── README.md
-├── REMOTE_LOGGING.md
-├── browser.log
-├── build_error.log
-├── convert_sofa_to_json.py
-├── eslint.config.js
-├── index.html
-├── inspect_sofa.py
-├── package-lock.json
-├── package.json
-├── pffft.o
-├── project_tree.txt
+├── PRPs
 ├── public
-|  ├── HRTF_default.sofa.json
-|  ├── hrtf
-|  ├── obr.js
-|  ├── obr.wasm
-|  ├── vite.svg
-|  └── worklets
+|  ├── hrtf (SOFA files)
+|  ├── worklets (Audio processor)
+|  └── obr.wasm
 ├── src
-|  ├── App.css
 |  ├── App.tsx
 |  ├── HeadTrackingService.ts
-|  ├── assets
 |  ├── audio
+|  |  ├── AudioEngine.ts
+|  |  └── OBRDecoder.ts
 |  ├── components
-|  ├── index.css
-|  ├── main.tsx
-|  ├── types
-|  |  ├── HeadTracking.ts
-|  |  └── ambisonics.d.ts
+|  |  ├── ESKFTuningPanel.tsx
+|  |  ├── FileLoader.tsx
+|  |  ├── TrackQueue.tsx
+|  |  └── TransportControls.tsx
 |  ├── tracking
-|  |  ├── ESKF.test.ts
 |  |  ├── ESKF.ts
-|  |  ├── OneEuroFilter.test.ts
-|  |  ├── OneEuroFilter.ts
-|  |  ├── QuatPredictor.test.ts
-|  |  └── QuatPredictor.ts
+|  |  └── OneEuroFilter.ts
 |  ├── utils
+|  |  ├── persistence.ts
+|  |  └── Throttle.ts
 |  ├── visualizer
+|  |  └── AmbiScene.ts
 |  └── workers
 |     └── VisionWorker.ts
-├── tsconfig.app.json
-├── tsconfig.json
-├── tsconfig.node.json
-├── vite.config.ts
-└── vitest.config.ts
 ```
+
 
 ## 2. Tech Stack
 
@@ -165,46 +155,43 @@ ignored: directory (77)
 
 -   **Phase 1 (Signal Chain)**: Complete. Audio decoding and analysis functional.
 -   **Phase 2 (Shader Core)**: Complete.
-    -   Spherical Harmonics visualization implemented in GLSL.
-    -   Covariance Matrix energy calculation ($P = Y^T C Y$).
-    -   OrbitControls and Orientation Labels added.
-    -   Gain control refined.
--   **Phase 3 (Raymarching)**: Pending.
--   **Phase 5 (Debugging Infrastructure)**: Completed. Remote logger implemented for browser-to-terminal debugging.
--   **Phase 4 (Head Tracking)**: **Complete**. 
-    -   Fixed OBR rotation gating and memory mapping.
-    -   **PRP #13 Phase 2 (Lightweight Predictive Tracking)**: Complete. Implemented 1 Euro Filter and naive velocity extrapolation.
-    -   **PRP #13 Phase 3 (Advanced Predictive Tracking)**: Complete. Implemented 6D Error-State Kalman Filter (ESKF) in tangent space to eliminate overshoot and model inertia.
-    -   **feat(audio): Synchronized UI camera rotation (OrbitControls) with the binaural renderer using expanded SAB schema.**
+-   **Phase 4 (Head Tracking - PRP #13)**: **Complete**. 
+    -   **Phases 1-3**: Implemented MediaPipe integration, 1 Euro Filter, and 6D Error-State Kalman Filter (ESKF).
+    -   **Phase 4 (Tuning & Visual Debug)**: Runtime ESKF parameter modification and ghost/predicted orientation arrows.
+    -   **Phase 5 (UX Telemetry)**: Tooltips on tuning sliders for empirical guidance.
+    -   **Phase 6 (Queue & Persistence)**: Audio track queue, folder drops, and localStorage state persistence.
+-   **feat(audio): Synchronized UI camera rotation (OrbitControls) with the binaural renderer.**
 
 ## 4. Recent Changes
 
--   [Current] - feat(tracking): implement 6D Error-State Kalman Filter (PRP #13 Phase 3) for smooth predictive head tracking
--   adbb8e9 - feat(audio): synchronize UI camera rotation with binaural renderer via SAB bridge (2 hours ago)
--   79d4973 - docs: generate updated project context bundle (22 hours ago)
--   a093263 - docs: update stack to reflect OBR WASM integration (22 hours ago)
--   917bfe8 - feat(net): sanitize network configuration and fix worklet environment (23 hours ago)
--   27d6939 - chore(git): ignore PRPs folder (13 days ago)
--   0608fd5 - chore(init): project genesis and documentation sync (13 days ago)
+-   [Current] - feat(ux): implement audio track queue, folder drops, and localStorage persistence (PRP #13 Phase 6)
+-   cd7b787 - feat(tracking): implement predictive head tracking (PRP #13 Phases 2 & 3) using 1 Euro Filter and 6D ESKF
+-   adbb8e9 - feat(audio): synchronize UI camera rotation with binaural renderer via SAB bridge
+-   6839767 - feat(audio): resolve head tracking audio rotation and sync documentation
+-   79d4973 - docs: generate updated project context bundle
+-   a093263 - docs: update stack to reflect OBR WASM integration
+-   917bfe8 - feat(net): sanitize network configuration and fix worklet environment
+-   27d6939 - chore(git): ignore PRPs folder
+-   0608fd5 - chore(init): project genesis and documentation sync
 # AmbiViz - Ambisonic Visualization Application
 
 A high-performance web application for visualizing Ambisonic audio fields in real-time using Three.js and the Web Audio API.
 
 ## Features
 
--   **Predictive Head-Tracking (ESKF)**: Low-latency 6DOF audio rotation using an Error-State Kalman Filter in tangent space (PRP #13 Phase 3).
--   **UI Rotation Sync**: Synchronizes visual camera manipulation (OrbitControls) with the binaural audio renderer.
--   **Ambisonic Decoding**: Supports Order 1-3 Ambisonics (ACN/SN3D).
+-   **Predictive Head-Tracking (ESKF)**: Low-latency 6DOF audio rotation using an Error-State Kalman Filter in tangent space with visual debugging (ghost/predicted arrows).
+-   **Dynamic Tuning**: Real-time ESKF parameter adjustment (τ, R, Q) with descriptive tooltips for latency and jitter management.
+-   **Audio Transport & Queue**:
+    -   Full playback controls: Play, Pause, Stop, and Loop.
+    -   **Track Queue**: Previous/Next navigation with a scrollable track list.
+    -   **Advanced Ingestion**: Drag-and-drop individual files or entire folders (recursive scanning).
+    -   Keyboard shortcuts: Spacebar for Play/Pause.
+-   **State Persistence**: Automatic `localStorage` persistence for Gain, HRTF profile, and ESKF tuning parameters.
+-   **Ambisonic Decoding**: Supports Order 1-3 Ambisonics (ACN/SN3D) via Google Open Binaural Renderer (OBR) WASM.
 -   **Real-time Visualization**:
     -   **Spherical Harmonics**: Deforms a 3D sphere based on the directional energy of the sound field.
     -   **Covariance Matrix**: Uses Quadratic Form ($Y^T C Y$) for accurate energy estimation.
-    -   **Energy Heatmap**: Color-coded visualization of sound intensity.
--   **Interactive Controls**:
-    -   **Orbit Controls**: Rotate, Zoom, and Pan the 3D view.
-    -   **Gain Slider**: Adjust visualization sensitivity (0.0 - 10.0).
--   **Audio Engine**:
-    -   Drag-and-drop file support (`.wav`, `.ambix`).
-    -   Binaural monitoring via HRTF.
+    -   **Interactive Controls**: Gain slider, View Mode toggle (Inside/Outside), and Camera Tracking toggle.
 
 ## Usage
 
@@ -213,15 +200,16 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
     npm run dev
     ```
 2.  **Open in Browser**: Navigate to `http://localhost:5173`.
-3.  **Load Audio**: Drag and drop a valid Ambisonic file (4, 9, or 16 channels).
-4.  **Interact**: Use the mouse to explore the 3D visualization.
+3.  **Load Audio**: Drag and drop Ambisonic files or a folder containing audio (.wav, .ambix, .ogg, .iamf).
+4.  **Transport**: Use the transport bar or press `Space` to control playback.
+5.  **Tuning**: Enable "Tracking" to reveal the ESKF Tuning Panel and visual tracking indicators.
 
 ## Technical Stack
 
 -   **Frontend**: React + TypeScript + Vite
 -   **3D Graphics**: Three.js + Custom GLSL Shaders
--   **Audio**: Web Audio API + Google Open Binaural Renderer (OBR) via WebAssembly
--   **Styling**: CSS (Vanilla)
+-   **Audio**: Web Audio API + OBR WASM + AudioWorklet
+-   **Tracking**: MediaPipe Face Landmarker + 6DOF ESKF
 
 ## Project Structure
 
@@ -231,19 +219,13 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 ├── PRPs
 ├── README.md
 ├── public
-|  ├── HRTF_default.sofa.json
-|  ├── obr.js
-|  ├── obr.wasm
-|  └── worklets
+|  ├── hrtf (SOFA files)
+|  ├── worklets (Audio processor)
+|  └── obr.wasm
 ├── src
-|  ├── audio
-|  ├── components
-|  ├── tracking
-|  |  ├── ESKF.ts
-|  |  └── OneEuroFilter.ts
-|  ├── types
-|  ├── utils
-|  ├── visualizer
-|  └── workers
-|     └── VisionWorker.ts
+|  ├── audio (Engine, OBR, Analyser)
+|  ├── components (UI, Transport, Queue, Tuning)
+|  ├── tracking (Filters, Predictors, Service)
+|  ├── utils (Persistence, Throttle)
+|  └── visualizer (Three.js Scene, Shaders)
 ```

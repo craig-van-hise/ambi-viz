@@ -79,7 +79,7 @@ describe('AudioEngine Integration', () => {
         expect(mockDecoderInstance.out.connect).toHaveBeenCalledWith(mockCtx.destination);
     });
 
-    it('should await loadSofa before starting playback (Phase 10 Gate)', async () => {
+    it('should await loadSofa before enabling playback (Phase 10 Gate)', async () => {
         const mockBuffer = {
             numberOfChannels: 4,
             length: 1000,
@@ -91,6 +91,7 @@ describe('AudioEngine Integration', () => {
             connect: vi.fn(),
             start: vi.fn(() => { startCalled = true; }),
             stop: vi.fn(),
+            disconnect: vi.fn(),
             buffer: null,
             loop: false
         };
@@ -99,13 +100,19 @@ describe('AudioEngine Integration', () => {
         // Mock a slow loadSofa to verify the gate works
         mockDecoderInstance.loadSofa.mockImplementation(async () => {
             await new Promise(resolve => setTimeout(resolve, 50));
-            // Ensure start hasn't been called yet
+            // Ensure start hasn't been called yet during graph setup
             expect(startCalled).toBe(false);
         });
 
         await engine.setupGraph(mockBuffer);
 
+        // After setupGraph, SOFA should be loaded but start() should NOT have been called
         expect(mockDecoderInstance.loadSofa).toHaveBeenCalled();
+        expect(mockSource.start).not.toHaveBeenCalled();
+        expect(startCalled).toBe(false);
+
+        // Only after explicit play() should start() be called
+        engine.play();
         expect(mockSource.start).toHaveBeenCalled();
         expect(startCalled).toBe(true);
     });

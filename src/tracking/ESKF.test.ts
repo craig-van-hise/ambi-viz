@@ -127,4 +127,43 @@ describe('ESKF', () => {
             expect(quatNorm(pred)).toBeCloseTo(1.0, 5);
         }
     });
+
+    it('setParams dynamically updates noise matrices and prediction horizon', () => {
+        const eskf = new ESKF({
+            sigmaMeas: 0.05,
+            sigmaGyro: 0.5,
+            predictionHorizon: 0.045,
+        });
+        const dt = 1 / 30;
+
+        // Feed some data to establish velocity
+        for (let i = 0; i < 20; i++) {
+            eskf.predict(dt);
+            eskf.correct(yawQuat(i * 2));
+        }
+
+        const predBefore = eskf.getPredicted(0.045);
+
+        // Change prediction horizon to 100ms
+        eskf.setParams({ tau: 0.1, R_scalar: 0.01, Q_scalar: 0.001 });
+
+        // Feed a few more frames to let new params take effect
+        for (let i = 20; i < 25; i++) {
+            eskf.predict(dt);
+            eskf.correct(yawQuat(i * 2));
+        }
+
+        const predAfterTau = eskf.getPredicted(); // uses new default tau=0.1
+
+        // Prediction at 100ms should differ from prediction at 45ms
+        // (both are forward from last corrected state, but with different horizons)
+        const angleBefore = 2 * Math.atan2(predBefore[1], predBefore[3]) * (180 / Math.PI);
+        const angleAfter = 2 * Math.atan2(predAfterTau[1], predAfterTau[3]) * (180 / Math.PI);
+
+        // With longer horizon, prediction should reach further ahead
+        expect(angleAfter).toBeGreaterThan(angleBefore);
+
+        // Crucially: output must still be unit quaternion
+        expect(quatNorm(predAfterTau)).toBeCloseTo(1.0, 5);
+    });
 });

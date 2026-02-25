@@ -142,4 +142,36 @@ export class HeadTrackingService {
             this.worker.postMessage({ type: 'STOP_TRACKING' });
         }
     }
+
+    /**
+     * Send updated ESKF tuning parameters to the Vision Worker.
+     * Non-blocking — the worker applies them on its next message loop iteration.
+     */
+    public updateESKFParams(params: { tau?: number; R_scalar?: number; Q_scalar?: number }) {
+        if (this.worker) {
+            this.worker.postMessage({ type: 'UPDATE_ESKF_PARAMS', payload: params });
+        }
+    }
+
+    /** Read the raw MediaPipe quaternion from the SAB (for ghost rendering) */
+    public getRawQuaternion(): THREE.Quaternion | null {
+        if (!this.sabFloat32) return null;
+        return new THREE.Quaternion(
+            this.sabFloat32[SAB_SCHEMA.QUAT_RAW_X],
+            this.sabFloat32[SAB_SCHEMA.QUAT_RAW_Y],
+            this.sabFloat32[SAB_SCHEMA.QUAT_RAW_Z],
+            this.sabFloat32[SAB_SCHEMA.QUAT_RAW_W],
+        );
+    }
+
+    /** Read the ESKF predicted quaternion from the SAB */
+    public getPredictedQuaternion(): THREE.Quaternion | null {
+        if (!this.sabFloat32) return null;
+        return new THREE.Quaternion(
+            this.sabFloat32[SAB_SCHEMA.QUAT_PRED_X],
+            this.sabFloat32[SAB_SCHEMA.QUAT_PRED_Y],
+            this.sabFloat32[SAB_SCHEMA.QUAT_PRED_Z],
+            this.sabFloat32[SAB_SCHEMA.QUAT_PRED_W],
+        );
+    }
 }

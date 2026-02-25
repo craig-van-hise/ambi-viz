@@ -1,6 +1,14 @@
 import { OBRDecoder } from './OBRDecoder';
 import { RawCoefAnalyser } from './RawCoefAnalyser';
 
+export type PlaybackState = 'playing' | 'paused' | 'stopped';
+
+export interface QueueTrack {
+    name: string;
+    file: File;
+    buffer: AudioBuffer | null;
+}
+
 export class AudioEngine {
     audioCtx: AudioContext;
     sourceNode: AudioBufferSourceNode | null = null;
@@ -11,22 +19,66 @@ export class AudioEngine {
     // Smoothing state
     smoothedCoeffs: Float32Array;
 
+    // Transport state
+    private audioBuffer: AudioBuffer | null = null;
+    private _isLooping: boolean = true;
+    playbackState: PlaybackState = 'stopped';
+
+    // Queue state
+    queue: QueueTrack[] = [];
+    currentIndex: number = -1;
+    private _graphReady: boolean = false;
+
     constructor() {
         const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         this.audioCtx = new AudioContextClass();
         this.smoothedCoeffs = new Float32Array(16); // Max order 3 (16 channels)
     }
 
-    async loadFile(file: File): Promise<void> {
-        const arrayBuffer = await file.arrayBuffer();
-        const audioBuffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+    /**
+     * Queue one or more files without starting playback.
+     * Returns the indices of the added tracks.
+     */
+    async queueFiles(files: File[]): Promise<number[]> {
+        const startIdx = this.queue.length;
+        for (const file of files) {
+            this.queue.push({ name: file.name, file, buffer: null });
+        }
+        return Array.from({ length: files.length }, (_, i) => startIdx + i);
+    }
 
-        await this.setupGraph(audioBuffer);
+    /**
+     * Decode and load a specific track from the queue.
+     * Does NOT auto-play — call play() explicitly.
+     */
+    async loadTrack(index: number): Promise<void> {
+        if (index < 0 || index >= this.queue.length) return;
+
+        const track = this.queue[index];
+        this.currentIndex = index;
+
+        // Decode buffer if not already cached
+        if (!track.buffer) {
+            const arrayBuffer = await track.file.arrayBuffer();
+            track.buffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+        }
+
+        await this.setupGraph(track.buffer);
+    }
+
+    /** Legacy single-file load (queues + loads + plays for backward compat) */
+    async loadFile(file: File): Promise<void> {
+        const indices = await this.queueFiles([file]);
+        await this.loadTrack(indices[0]);
+        this.play();
     }
 
     async setupGraph(buffer: AudioBuffer) {
         // 0. Resume context (Modern browser policy)
         await this.audioCtx.resume();
+
+        // Store buffer for stop-and-restart
+        this.audioBuffer = buffer;
 
         // 1. Detect Order
         const nCh = buffer.numberOfChannels;
@@ -36,37 +88,55 @@ export class AudioEngine {
         else {
             console.warn(`Unsupported channel count: ${nCh}. Defaulting to Order 1 (4ch).`);
             this.order = 1;
-            // In a real app we might handle mismatch or error out
         }
 
-        // 2. Prepare Source Node
-        if (this.sourceNode) this.sourceNode.stop();
+        // 2. Tear down previous source
+        if (this.sourceNode) {
+            try { this.sourceNode.stop(); } catch (_) { /* already stopped */ }
+            this.sourceNode.disconnect();
+        }
+
+        // 3. Create new source (NOT started)
         this.sourceNode = this.audioCtx.createBufferSource();
         this.sourceNode.buffer = buffer;
-        this.sourceNode.loop = true;
+        this.sourceNode.loop = this._isLooping;
 
-        // 3. Raw Data Extraction
-        this.rawAnalyser = new RawCoefAnalyser(this.audioCtx, this.order);
+        // 4. Initialize OBR graph only once
+        if (!this._graphReady) {
+            this.rawAnalyser = new RawCoefAnalyser(this.audioCtx, this.order);
+            this.obrDecoder = new OBRDecoder(this.audioCtx, this.order);
+            await this.obrDecoder.init();
+            // We use absolute path/relative to public root as handled by vite
+            await this.obrDecoder.loadSofa('/hrtf/MIT_KEMAR_Normal.sofa');
 
-        // 4. Binaural Decoder (OBR)
-        this.obrDecoder = new OBRDecoder(this.audioCtx, this.order);
+            // Connect RawAnalyser -> BinDecoder -> Destination
+            this.rawAnalyser.out.connect(this.obrDecoder.in);
+            this.obrDecoder.out.connect(this.audioCtx.destination);
+            this._graphReady = true;
+        }
 
-        // --- INITIALIZATION GATE ---
-        // Await full setup before connecting signal path
-        await this.obrDecoder.init();
-        // We use absolute path/relative to public root as handled by vite
-        await this.obrDecoder.loadSofa('/hrtf/MIT_KEMAR_Normal.sofa');
+        // 5. Connect source to graph
+        // Source -> RawAnalyser
+        this.sourceNode.connect(this.rawAnalyser!.in);
 
-        // 5. Connect Graph
-        // Source -> RawAnalyser -> BinDecoder -> Destination
-        // RawAnalyser has .in and .out (pass-through)
+        // Source is ready but NOT playing — caller must call play()
+        this.playbackState = 'stopped';
+        console.log(`AudioEngine: Track "${this.queue[this.currentIndex]?.name ?? 'unknown'}" loaded (not playing).`);
+    }
+
+    /**
+     * Reconnect a fresh source node to the existing graph and start playback.
+     * Used by stop() to reset playback cursor to 0.
+     */
+    private startFreshSource() {
+        if (!this.audioBuffer || !this.rawAnalyser) return;
+
+        this.sourceNode = this.audioCtx.createBufferSource();
+        this.sourceNode.buffer = this.audioBuffer;
+        this.sourceNode.loop = this._isLooping;
+
         this.sourceNode.connect(this.rawAnalyser.in);
-        this.rawAnalyser.out.connect(this.obrDecoder.in);
-        this.obrDecoder.out.connect(this.audioCtx.destination);
-
-        // 6. Start Playback
         this.sourceNode.start();
-        console.log("AudioEngine: Signal path connected and playback started.");
     }
 
     update(): Float32Array {
@@ -77,54 +147,15 @@ export class AudioEngine {
 
         // 2. Apply Ballistics
         const attack = 0.1;
-        const release = 0.9; // 0.9 means slower decay? Formula: y = y_prev * release ... 
-        // PRP: "Use the attack coefficient if (rising), and release if falling."
-        // Standard digital LPF: y[n] = x[n]*alpha + y[n-1]*(1-alpha)
-        // Ballistics usually:
-        // if x > y_prev: y = y_prev + (x - y_prev) * attack
-        // else:          y = y_prev + (x - y_prev) * release
-        // Check logic: if release is 0.9 (slow), it might mean coeff=0.1? 
-        // PRP says: "Define attack = 0.1 and release = 0.9."
-        // Usually release is slow, so we want to keep 90% of old value? 
-        // Let's assume the standard: val = prev * coeff + target * (1-coeff)
-        // Rising: use attack. Falling: use release.
+        const release = 0.9;
 
         for (let i = 0; i < raw.length; i++) {
             const current = raw[i];
             const prev = this.smoothedCoeffs[i];
 
             if (current > prev) {
-                // Rising
                 this.smoothedCoeffs[i] = prev * (1 - attack) + current * attack;
-                // Or typically: val = val + (target - val) * coef
-                // val += (current - prev) * attack
             } else {
-                // Falling
-                // If release is 0.9, maybe it means retention? "Simple infinite impulse response (IIR) filter"
-                // Often release time is defined as time to drop X dB.
-                // Let's interpret "release = 0.9" as "retain 90% of previous value", i.e. decay by 10%.
-                // val = prev * 0.9 + current * 0.1 ?? 
-                // Or just independent decay?
-                // Let's stick to linear interpolation logic for now:
-                // val += (current - prev) * (1 - release) ?? No that's confusing.
-                // Let's assume the PRP implies coefficients for the *new* value contribution?
-                // No, attack 0.1 is fast? No, 0.1 is slow if it's "add 10% of difference".
-                // Wait, "release = 0.9". If I use 0.9 as the weight for the PREVIOUS value, it decays slowly.
-                // y = prev * 0.9 + curr * 0.1.
-                // If attack is 0.1, it's also slow?
-                // Maybe attack should be 0.9 (fast)?
-                // PRP: "attack = 0.1 and release = 0.9".
-                // "Use attack... if rising".
-                // If I process audio at 60fps, 0.1 means valid reaches target in ~20 frames.
-
-                // Let's implement:
-                // if rising: y = prev + (curr - prev) * attack
-                // if falling: y = prev + (curr - prev) * (1 - release) ??
-
-                // Let's try:
-                // coeff = (curr > prev) ? attack : (1 - release) 
-                // We'll tune this.
-
                 this.smoothedCoeffs[i] = prev + (current - prev) * (current > prev ? attack : (1 - release));
             }
         }
@@ -150,9 +181,74 @@ export class AudioEngine {
         return padded;
     }
 
-    resume() {
+    // ── Transport Controls ──
+
+    /** Start or resume playback */
+    play() {
+        if (this.playbackState === 'stopped' && this.sourceNode) {
+            // Source was prepared but never started — start it now
+            try { this.sourceNode.start(); } catch (_) { /* already started */ }
+        }
         if (this.audioCtx.state === 'suspended') {
             this.audioCtx.resume();
         }
+        this.playbackState = 'playing';
+    }
+
+    /** Alias for backward compat */
+    resume() {
+        this.play();
+    }
+
+    /** Pause playback (suspend AudioContext — saves CPU) */
+    pause() {
+        if (this.audioCtx.state === 'running') {
+            this.audioCtx.suspend();
+        }
+        this.playbackState = 'paused';
+    }
+
+    /** Stop playback, reset cursor to 0 (recreates source node) */
+    stop() {
+        if (this.sourceNode) {
+            try { this.sourceNode.stop(); } catch (_) { /* already stopped */ }
+            this.sourceNode.disconnect();
+            this.sourceNode = null;
+        }
+        if (this.audioCtx.state === 'running') {
+            this.audioCtx.suspend();
+        }
+        // Recreate source so next play() starts from 0
+        this.startFreshSource();
+        this.playbackState = 'stopped';
+    }
+
+    /** Load and play previous track in queue */
+    async prev() {
+        if (this.queue.length === 0) return;
+        const newIdx = this.currentIndex > 0 ? this.currentIndex - 1 : this.queue.length - 1;
+        await this.loadTrack(newIdx);
+        this.play();
+    }
+
+    /** Load and play next track in queue */
+    async next() {
+        if (this.queue.length === 0) return;
+        const newIdx = this.currentIndex < this.queue.length - 1 ? this.currentIndex + 1 : 0;
+        await this.loadTrack(newIdx);
+        this.play();
+    }
+
+    /** Set loop state on the source node */
+    setLoop(loop: boolean) {
+        this._isLooping = loop;
+        if (this.sourceNode) {
+            this.sourceNode.loop = loop;
+        }
+    }
+
+    /** Get current loop state */
+    getLoop(): boolean {
+        return this._isLooping;
     }
 }

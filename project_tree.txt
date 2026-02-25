@@ -8,9 +8,11 @@
 |  ├── # 1.md
 |  ├── # 10.md
 |  ├── # 11.md
+|  ├── # 12-1.md
 |  ├── # 12.md
+|  ├── # 13
+|  |  └── # 1.md
 |  ├── # 13.md
-|  ├── # 14.md
 |  ├── # 2.md
 |  ├── # 3.md
 |  ├── # 4.md
@@ -62,10 +64,20 @@
 |  |  ├── obr-processor.test.ts
 |  |  └── obr_wrapper.cpp
 |  ├── components
+|  |  ├── ESKFTuningPanel.tsx
 |  |  ├── FileLoader.tsx
-|  |  └── HrtfSelector.tsx
+|  |  ├── HrtfSelector.tsx
+|  |  ├── TrackQueue.tsx
+|  |  └── TransportControls.tsx
 |  ├── index.css
 |  ├── main.tsx
+|  ├── tracking
+|  |  ├── ESKF.test.ts
+|  |  ├── ESKF.ts
+|  |  ├── OneEuroFilter.test.ts
+|  |  ├── OneEuroFilter.ts
+|  |  ├── QuatPredictor.test.ts
+|  |  └── QuatPredictor.ts
 |  ├── types
 |  |  ├── HeadTracking.ts
 |  |  └── ambisonics.d.ts
@@ -73,13 +85,13 @@
 |  |  ├── Throttle.test.ts
 |  |  ├── Throttle.ts
 |  |  ├── debug.ts
+|  |  ├── persistence.ts
 |  |  └── remoteLogger.ts
 |  ├── visualizer
 |  |  ├── AmbiScene.ts
 |  |  ├── shaderMath.test.ts
 |  |  ├── shaderMath.ts
 |  |  └── shaders
-|  |     └── ambisonic.ts
 |  └── workers
 |     └── VisionWorker.ts
 ├── tsconfig.app.json
@@ -88,9 +100,9 @@
 ├── vite.config.ts
 └── vitest.config.ts
 
-directory: 623 file: 2621
+directory: 415 file: 882
 
-ignored: directory (77)
+ignored: directory (36)
 
 
 [2K[1G
