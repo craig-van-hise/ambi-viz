@@ -55,11 +55,12 @@ describe('OBRDecoder', () => {
         await decoder.init();
 
         expect(globalThis.fetch).toHaveBeenCalledWith('/obr.wasm');
-        expect(WebAssembly.compile).toHaveBeenCalledWith(mockWasmBuffer);
-        expect(mockCtx.audioWorklet.addModule).toHaveBeenCalledWith('/worklets/obr-processor.js');
+        expect(mockCtx.audioWorklet.addModule).toHaveBeenCalledWith('/worklets/obr-processor.js', expect.objectContaining({ type: 'module' }));
         expect((globalThis as unknown as { AudioWorkletNode: unknown }).AudioWorkletNode).toHaveBeenCalledWith(mockCtx, 'obr-processor', expect.objectContaining({
+            numberOfInputs: 1,
+            numberOfOutputs: 1,
             processorOptions: {
-                wasmModule: mockModule,
+                wasmBinary: mockWasmBuffer,
                 order,
                 sampleRate
             },

@@ -6,10 +6,13 @@ import { AudioEngine } from './audio/AudioEngine';
 import { AmbiScene } from './visualizer/AmbiScene';
 import type { ViewMode } from './visualizer/AmbiScene';
 import { Throttle } from './utils/Throttle';
+import { HeadTrackingService } from './HeadTrackingService';
 
 function App() {
   const [audioEngine] = useState(() => new AudioEngine());
+  const [headTracking] = useState(() => new HeadTrackingService());
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isTrackingCam, setIsTrackingCam] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<AmbiScene | null>(null);
   const [gain, setGain] = useState(2.0);
@@ -18,11 +21,18 @@ function App() {
   // Throttle covariance updates to ~24fps (render stays at 60fps)
   const throttleRef = useRef(new Throttle(24));
 
+  useEffect(() => {
+    headTracking.init();
+  }, [headTracking]);
+
   const handleFileLoaded = async (file: File) => {
     try {
       console.log('Loading file:', file.name);
       await audioEngine.loadFile(file);
       setIsPlaying(true);
+      if (audioEngine.obrDecoder) {
+        headTracking.attachDecoder(audioEngine.obrDecoder);
+      }
       throttleRef.current.reset();
       if (audioEngine.audioCtx.state === 'suspended') {
         audioEngine.resume();
@@ -142,6 +152,28 @@ function App() {
             }}
           >
             {viewMode === 'inside' ? '👁 Inside View' : '🔭 Outside View'}
+          </button>
+          <button
+            onClick={() => {
+              if (isTrackingCam) {
+                headTracking.stopCamera();
+                setIsTrackingCam(false);
+              } else {
+                headTracking.startCamera().then(() => setIsTrackingCam(true));
+              }
+            }}
+            style={{
+              padding: '6px 16px',
+              background: isTrackingCam ? '#4CAF50' : '#444',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '0.85em',
+              fontWeight: 'bold',
+            }}
+          >
+            {isTrackingCam ? '📹 Tracking ON' : '📹 Start Tracking'}
           </button>
         </div>
       </div>

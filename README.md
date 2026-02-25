@@ -4,6 +4,7 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 
 ## Features
 
+-   **Head-Tracking Spatial Audio**: Real-time 6DOF audio rotation via MediaPipe FaceLandmarker and Google OBR (WASM).
 -   **Ambisonic Decoding**: Supports Order 1-3 Ambisonics (ACN/SN3D).
 -   **Real-time Visualization**:
     -   **Spherical Harmonics**: Deforms a 3D sphere based on the directional energy of the sound field.
@@ -35,7 +36,21 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 
 ## Project Structure
 
--   `src/audio`: Audio processing logic (Engine, Analyser, Decoder).
--   `src/visualizer`: Three.js scene management and shader code.
--   `src/components`: React UI components (FileLoader).
--   `src/types`: TypeScript definitions.
+```text
+/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz
+├── public
+|  ├── HRTF_default.sofa.json
+|  ├── hrtf
+|  ├── obr.js
+|  ├── obr.wasm
+|  ├── worklets
+├── src
+|  ├── App.tsx
+|  ├── HeadTrackingService.ts
+|  ├── audio
+|  ├── components
+|  ├── types
+|  ├── utils
+|  ├── visualizer
+|  └── workers
+```

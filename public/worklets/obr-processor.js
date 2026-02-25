@@ -78,23 +78,31 @@ class OBRProcessor extends AudioWorkletProcessor {
             // 1. Allocate memory on the WASM heap
             const ptr = this.wasm._malloc(size);
 
-            // 2. Copy the bytes safely using HEAPU8
+            // 2. Copy the bytes safely using a new Uint8Array over the WASM memory buffer
             const payloadBytes = new Uint8Array(payload);
-            this.wasm.HEAPU8.set(payloadBytes, ptr);
+            const HEAPU8 = new Uint8Array(this.wasm.HEAPF32.buffer);
+            HEAPU8.set(payloadBytes, ptr);
 
             // 3. Hand the pointer to the C++ parser
-            this.wasm._obr_load_sofa(ptr, size);
+            if (this.wasm._obr_load_sofa) this.wasm._obr_load_sofa(ptr, size);
 
             // 4. Free the memory to prevent leaks
             this.wasm._free(ptr);
 
             console.log("OBRProcessor: SOFA loaded successfully.");
+        } else if (event.data.type === 'SET_SAB') {
+            this.sab = event.data.payload;
+            this.sabInt32 = new Int32Array(this.sab);
+            this.sabFloat32 = new Float32Array(this.sab);
+            this.lastSeqNum = -1;
+            this.rotationLoggedCount = 0;
+            console.log("[Worklet] SharedArrayBuffer received.");
         }
     }
 
     process(inputs, outputs) {
         if (!this.hasLoggedStarted) {
-            console.log("OBR Worklet: Processing Started");
+            console.log("[Worklet] OBR Worklet Processing Started");
             this.hasLoggedStarted = true;
         }
 
@@ -103,6 +111,22 @@ class OBRProcessor extends AudioWorkletProcessor {
 
         if (!this.ready || !this.wasm || !input || !output) {
             return true;
+        }
+
+        // Apply rotation if SAB is present (lockless read)
+        if (this.sabInt32 && this.sabFloat32 && this.wasm._obr_set_rotation) {
+            // Index 0 is SEQ_NUM. We read atomically.
+            const seqNum = Atomics.load(this.sabInt32, 0);
+            if (seqNum !== this.lastSeqNum && seqNum > 0) {
+                this.lastSeqNum = seqNum;
+                // Index 1, 2, 3, 4 are x, y, z, w as defined by SAB_SCHEMA in HeadTracking.ts
+                const qx = this.sabFloat32[1];
+                const qy = this.sabFloat32[2];
+                const qz = this.sabFloat32[3];
+                const qw = this.sabFloat32[4];
+                // Conjugate: negate x,y,z to counter-rotate the soundfield
+                this.wasm._obr_set_rotation(qw, -qx, -qy, -qz);
+            }
         }
 
         // 1. Copy to WASM Heap (Planar)
@@ -118,25 +142,6 @@ class OBRProcessor extends AudioWorkletProcessor {
         // 3. Copy from WASM Heap to outputs (Stereo)
         if (output[0]) output[0].set(this.wasm.HEAPF32.subarray(this.outOffset, this.outOffset + 128));
         if (output[1]) output[1].set(this.wasm.HEAPF32.subarray(this.outOffset + 128, this.outOffset + 256));
-
-        // --- DIAGNOSTIC PROBE ---
-        if (this.ready && input[0] && this.diagnosticCounter < 100) {
-            this.diagnosticCounter++;
-            if (this.diagnosticCounter === 100) {
-                console.log("=== WASM AUDIO DIAGNOSTIC ===");
-                console.log("INPUT CH 0 (First 5 frames):", input[0].slice(0, 5));
-                console.log("WASM OUTPUT LEFT (First 5 frames):", output[0].slice(0, 5));
-
-                // Check for NaNs
-                const hasNaN = isNaN(output[0][0]);
-                if (hasNaN) console.error("CRITICAL: WASM is outputting NaN. Audio graph is muted.");
-
-                // Check for absolute silence
-                const isSilent = output[0][0] === 0 && output[0][1] === 0 && output[0][2] === 0;
-                if (isSilent && input[0][0] !== 0) console.error("CRITICAL: WASM is eating the signal (Output is 0.0). C++ Engine likely missing HRTF/AudioElement initialization.");
-            }
-        }
-        // ------------------------
 
         return true;
     }

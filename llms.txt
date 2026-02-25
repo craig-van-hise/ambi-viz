@@ -1,0 +1,6 @@
+# Documentation Map
+This is the knowledge base for AmbiViz.
+
+- [README.md](./README.md): High-level project description, tech stack, and usage instructions.
+- [PROJECT_STATE.md](./PROJECT_STATE.md): Current architecture, tech stack, phase status, and recent Git changes.
+- [FAILURE_REPORT_13.md](./FAILURE_REPORT_13.md): Debugging history and current status of Head Tracking implementation.

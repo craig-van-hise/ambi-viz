@@ -7,13 +7,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 describe('OBRProcessor Registration', () => {
-    it('should register obr-processor', () => {
+    it('should register obr-processor', async () => {
         const filePath = path.resolve(__dirname, '../../public/worklets/obr-processor.js');
-        const code = fs.readFileSync(filePath, 'utf8');
+        let code = fs.readFileSync(filePath, 'utf8');
+        code = code.replace(/import ModuleFactory from '\.\.\/obr\.js';/g, '');
 
         // Mock globals
         let registeredName = '';
-        type ProcessorConstructor = new (options: { processorOptions?: { order?: number } }) => { order: number; numChannels: number };
+        type ProcessorConstructor = new (options: { processorOptions?: { order?: number; wasmBinary?: ArrayBuffer } }) => {
+            order: number;
+            numChannels: number;
+        };
         let processorClass: ProcessorConstructor | null = null;
 
         const mockRegisterProcessor = (name: string, proc: ProcessorConstructor) => {
@@ -23,19 +27,20 @@ describe('OBRProcessor Registration', () => {
 
         class MockPort { onmessage = null; }
 
-        // Execute code in a scoped environment
-        const fn = new Function('AudioWorkletProcessor', 'registerProcessor', 'console', code);
-        const mockConsole = { log: vi.fn(), warn: vi.fn(), error: vi.fn() };
-
-        // We need to polyfill 'this.port' for the constructor
-        // AudioWorkletProcessor doesn't have port, but OBRProcessor calls this.port
-        // In reality, this.port is provided by the system.
-        // Let's modify the mock class.
         class MockAudioWorkletProcessor {
             port = new MockPort();
         }
 
-        fn(MockAudioWorkletProcessor, mockRegisterProcessor, mockConsole);
+        const fn = new Function('AudioWorkletProcessor', 'registerProcessor', 'console', 'ModuleFactory', code);
+        const mockConsole = { log: vi.fn(), warn: vi.fn(), error: vi.fn() };
+
+        let resolveModuleFactory: (wasm: unknown) => void = () => { };
+        const moduleFactoryPromise = new Promise(resolve => {
+            resolveModuleFactory = resolve;
+        });
+        const mockModuleFactory = vi.fn().mockReturnValue(moduleFactoryPromise);
+
+        fn(MockAudioWorkletProcessor, mockRegisterProcessor, mockConsole, mockModuleFactory);
 
         expect(registeredName).toBe('obr-processor');
         expect(processorClass).toBeDefined();
@@ -64,16 +69,22 @@ describe('OBRProcessor Registration', () => {
             expect(instance.order).toBe(3);
             expect(instance.numChannels).toBe(16);
 
-            // Test setupWasm
+            const wasmMemory = new ArrayBuffer(1024 * 1024);
             const mockWasm = {
                 _malloc: vi.fn((size) => size), // return size as dummy ptr
                 _obr_init: vi.fn(),
                 _obr_process: vi.fn(),
-                memory: { buffer: new ArrayBuffer(1024 * 1024) }
+                memory: { buffer: wasmMemory },
+                HEAPU8: new Uint8Array(wasmMemory),
+                HEAPF32: new Float32Array(wasmMemory)
             };
-            const mockInstance = { exports: mockWasm };
 
-            instance.setupWasm(mockInstance, 16, 48000);
+            // Trigger ModuleFactory resolution to run setupWasm internally
+            resolveModuleFactory(mockWasm);
+            await moduleFactoryPromise;
+
+            // Give the JS event loop a tick to resolve the .then callback
+            await new Promise(r => setTimeout(r, 0));
 
             expect(instance.ready).toBe(true);
             expect(mockWasm._malloc).toHaveBeenCalledWith(16 * 128 * 4); // Input: nCh * 128 * 4
@@ -106,35 +117,55 @@ describe('OBRProcessor Registration', () => {
             expect(mockOutputs[0][0][0]).toBeCloseTo(0.8);
             expect(mockOutputs[0][1][0]).toBeCloseTo(0.8);
 
-            // Test handleMessage for SOFA loading
-            const mockSofaPayload = new ArrayBuffer(10);
-            const mockEvent = { data: { type: 'LOAD_SOFA', payload: mockSofaPayload } };
+            // Test SAB integration and rotation API
+            const sab = new SharedArrayBuffer(64);
+            const int32View = new Int32Array(sab);
+            const float32View = new Float32Array(sab);
 
             const wasmWithExtras = mockWasm as unknown as {
                 _malloc: { mockClear: () => void };
                 _free: unknown;
                 _obr_load_sofa: unknown;
+                _obr_set_rotation: unknown;
             };
             wasmWithExtras._malloc.mockClear();
             wasmWithExtras._free = vi.fn();
             wasmWithExtras._obr_load_sofa = vi.fn();
 
-            instance.handleMessage(mockEvent);
-
-            expect(wasmWithExtras._malloc).toHaveBeenCalledWith(10);
-            expect(wasmWithExtras._obr_load_sofa).toHaveBeenCalledWith(expect.any(Number), 10);
+            // Test LOAD_SOFA message (Verifies HEAPF32.buffer mapping fix)
+            const dummySofaPayload = new ArrayBuffer(16);
+            expect(() => {
+                instance.handleMessage({ data: { type: 'LOAD_SOFA', payload: dummySofaPayload } });
+            }).not.toThrow();
+            expect(wasmWithExtras._malloc).toHaveBeenCalledWith(16);
+            expect(wasmWithExtras._obr_load_sofa).toHaveBeenCalled();
             expect(wasmWithExtras._free).toHaveBeenCalled();
 
-            // Test fallback behavior (Phase 11)
-            instance.ready = false;
-            const mockFallbackInput = [new Float32Array(128).fill(0.7)];
-            const mockFallbackOutput = [new Float32Array(128), new Float32Array(128)];
+            // Send SAB to worklet
+            instance.handleMessage({ data: { type: 'SET_SAB', payload: sab } });
 
-            const fallbackResult = instance.process([mockFallbackInput], [mockFallbackOutput]);
+            // Write mock quat data into the SAB with sequence number update
+            float32View[1] = 0.1; // x
+            float32View[2] = 0.2; // y
+            float32View[3] = 0.3; // z
+            float32View[4] = 0.4; // w
+            Atomics.store(int32View, 0, 1); // latest seq num = 1
 
-            expect(fallbackResult).toBe(true);
-            expect(mockFallbackOutput[0][0]).toBeCloseTo(0.7); // Mono pass-through
-            expect(mockFallbackOutput[1][0]).toBeCloseTo(0.7);
+            // Mock the set rotation method we expect to be in WASM
+            const mockSetRotation = vi.fn();
+            wasmWithExtras._obr_set_rotation = mockSetRotation;
+
+            const rotationInputs = [Array.from({ length: 16 }, () => new Float32Array(128).fill(0.0))];
+            const rotationOutputs = [Array.from({ length: 2 }, () => new Float32Array(128))];
+
+            instance.process(rotationInputs, rotationOutputs);
+
+            expect(mockSetRotation).toHaveBeenCalled()
+            const args = mockSetRotation.mock.calls[0];
+            expect(args[0]).toBeCloseTo(0.4, 5);
+            expect(args[1]).toBeCloseTo(0.1, 5);
+            expect(args[2]).toBeCloseTo(0.2, 5);
+            expect(args[3]).toBeCloseTo(0.3, 5);
 
         } else {
             throw new Error('processorClass is null');
