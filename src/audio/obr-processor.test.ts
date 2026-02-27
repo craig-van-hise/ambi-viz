@@ -162,13 +162,15 @@ describe('OBRProcessor Registration', () => {
 
             instance.process(rotationInputs, rotationOutputs);
 
-            expect(mockSetRotation).toHaveBeenCalled()
+            expect(mockSetRotation).toHaveBeenCalled();
             const args = mockSetRotation.mock.calls[0];
-            // The worklet conjugates the combined quaternion: (rw, -rx, -ry, -rz)
-            expect(args[0]).toBeCloseTo(0.4, 5);   // w (unchanged)
-            expect(args[1]).toBeCloseTo(-0.1, 5);   // -x (conjugated)
-            expect(args[2]).toBeCloseTo(-0.2, 5);   // -y (conjugated)
-            expect(args[3]).toBeCloseTo(-0.3, 5);   // -z (conjugated)
+            // Phase 2 Pitch Inversion: the worklet now inverts pitch before compositing.
+            // Input: tx=0.1, ty=0.2, tz=0.3, tw=0.4 (unnormalized, uses as-is for math path)
+            // Output is (rw, -rx, -ry, -rz) — pitch-corrected conjugate for OBR counter-rotation.
+            expect(args[0]).toBeCloseTo(0.9789950615833903, 5);   // rw after pitch inversion
+            expect(args[1]).toBeCloseTo(-0.03961134692219472, 5); // -rx (conjugated)
+            expect(args[2]).toBeCloseTo(-0.11454323680394267, 5); // -ry (conjugated)
+            expect(args[3]).toBeCloseTo(-0.1639495577695136, 5);  // -rz (conjugated)
 
         } else {
             throw new Error('processorClass is null');

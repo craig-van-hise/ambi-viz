@@ -112,22 +112,23 @@ describe('AmbiScene Camera Control & Persistence', () => {
         expect(scene.controls.target.z).not.toBe(0);
     });
 
-    it('should clamp pitch to prevent gimbal lock singularities', () => {
+    it('should clamp pitch to prevent gimbal lock singularities (with inversion)', () => {
         const container = document.createElement('div');
         const scene = new AmbiScene(container);
         scene.setViewMode('inside');
 
         const MAX_PITCH_EXPECTED = (Math.PI / 2) - 0.01;
 
-        // Try setting pitch to 90 degrees (PI/2)
+        // Phase 2: UI pitch is INVERTED before being applied to camera.rotation.x
+        // So UI pitch +90° → camera.rotation.x = clamp(-MAX_PITCH, MAX_PITCH, -PI/2) = -MAX_PITCH
         scene.updateFromUI('pitch', 90);
-        expect(scene.camera.rotation.x).toBeLessThan(Math.PI / 2);
-        expect(scene.camera.rotation.x).toBeCloseTo(MAX_PITCH_EXPECTED, 5);
-
-        // Try setting pitch to -120 degrees
-        scene.updateFromUI('pitch', -120);
         expect(scene.camera.rotation.x).toBeGreaterThan(-Math.PI / 2);
         expect(scene.camera.rotation.x).toBeCloseTo(-MAX_PITCH_EXPECTED, 5);
+
+        // UI pitch -120° → correctedRad = +120 * PI/180 (above MAX_PITCH) → clamped to +MAX_PITCH
+        scene.updateFromUI('pitch', -120);
+        expect(scene.camera.rotation.x).toBeLessThan(Math.PI / 2);
+        expect(scene.camera.rotation.x).toBeCloseTo(MAX_PITCH_EXPECTED, 5);
     });
 
     it('should update camera rotation and fire onCameraStateChange from headTrackingQuat', async () => {
@@ -163,5 +164,26 @@ describe('AmbiScene Camera Control & Persistence', () => {
         // Callback should have been fired with degrees
         expect(receivedState).not.toBeNull();
         expect(receivedState.yaw).toBeCloseTo(yawDeg, 5);
+    });
+
+    it('should strictly lock camera to origin in inside mode even after controls.update', () => {
+        const container = document.createElement('div');
+        const scene = new AmbiScene(container);
+        scene.setViewMode('inside');
+
+        // Force a displacement
+        scene.camera.position.set(10, 10, 10);
+
+        // Mock controls.update to simulate movement if pan was enabled
+        // In our mock, update doesn't do anything, but we want to ensure animate() fixes it
+
+        const originalRAF = window.requestAnimationFrame;
+        window.requestAnimationFrame = (() => 0) as any;
+        scene.animate();
+        window.requestAnimationFrame = originalRAF;
+
+        expect(scene.camera.position.x).toBe(0);
+        expect(scene.camera.position.y).toBe(0);
+        expect(scene.camera.position.z).toBe(0);
     });
 });

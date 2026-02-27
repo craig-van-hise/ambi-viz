@@ -75,3 +75,45 @@ describe('AmbiScene FOV Logic', () => {
         expect(updateProjectionSpy).toHaveBeenCalledTimes(2);
     });
 });
+
+describe('AmbiScene Roll Visualization Math (Phase 3)', () => {
+    it('should set camera.up to (-1, 0) when roll is 90 degrees (π/2 radians)', () => {
+        const container = document.createElement('div');
+        const scene = new AmbiScene(container);
+        scene.setViewMode('inside');
+
+        // Roll = 90° = π/2 radians
+        scene.updateFromUI('roll', 90);
+
+        // Math: up.x = -sin(π/2) = -1, up.y = cos(π/2) = 0
+        expect(scene.camera.up.x).toBeCloseTo(-1, 5);
+        expect(scene.camera.up.y).toBeCloseTo(0, 5);
+    });
+
+    it('should set camera.up to (0, 1) when roll is 0 degrees', () => {
+        const container = document.createElement('div');
+        const scene = new AmbiScene(container);
+        scene.setViewMode('inside');
+
+        scene.updateFromUI('roll', 0);
+
+        // Math: up.x = -sin(0) = 0, up.y = cos(0) = 1
+        expect(scene.camera.up.x).toBeCloseTo(0, 5);
+        expect(scene.camera.up.y).toBeCloseTo(1, 5);
+    });
+
+    it('should reset camera.up to (0,1) when switching to inside mode', () => {
+        const container = document.createElement('div');
+        const scene = new AmbiScene(container);
+
+        // First go outside
+        scene.setViewMode('outside');
+
+        // Go to inside
+        scene.setViewMode('inside');
+
+        // camera.up should be default (0, 1, 0)
+        expect(scene.camera.up.x).toBeCloseTo(0, 5);
+        expect(scene.camera.up.y).toBeCloseTo(1, 5);
+    });
+});

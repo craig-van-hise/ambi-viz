@@ -9,12 +9,16 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 -   **Bidirectional Camera Controls**: 
     -   Integrated **Yaw/Pitch/Roll** sliders that move in real-time to mirror head tracking or manual canvas dragging.
     -   Universal polling system in the render loop ensures smooth, lag-free UI synchronization.
+-   **3DOF Orientation Matrix (PRP #25)**:
+    -   **Pitch Inversion**: Corrected pitch axis so tilting head up moves the 3D horizon down (non-VR cockpit-view convention).
+    -   **Live Roll**: `camera.up.set(-sin(r), cos(r), 0)` applied per-frame to both the visual renderer and OBR worklet, delivering true 3-axis spatial audio.
+    -   **Hard Origin Lock**: Inside camera position clamped to `(0,0,0)` every frame to eliminate OrbitControls drift.
 -   **Singularity Protection**: 
     -   Aggressive mathematical hardening: Pitch is hard-clamped to prevent WebGL "Black Screen" context crashes.
     -   Origin locking and safe target projection prevent radius explosions and environmental drift in the Inside View.
 -   **Audio Transport & Queue**:
     -   Full playback controls: Play, Pause, Stop, and Loop.
-    -   **Track Queue**: Previous/Next navigation with a scrollable track list.
+    -   **Track Queue**: Previous/Next navigation with a scrollable track list. Double-click a track to switch instantly (strict stop→load→play teardown prevents collision glitches).
     -   **Advanced Ingestion**: Drag-and-drop individual files or entire folders (recursive scanning).
     -   Keyboard shortcuts: Spacebar for Play/Pause.
 -   **State Persistence**: Automatic `localStorage` persistence for Gain, HRTF profile, and ESKF tuning parameters.
@@ -54,9 +58,14 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 |  ├── worklets (Audio processor)
 |  └── obr.wasm
 ├── src
-|  ├── audio (Engine, OBR, Analyser)
-|  ├── components (UI, Transport, Queue, Tuning)
-|  ├── tracking (Filters, Predictors, Service)
+|  ├── App.tsx / App.css
+|  ├── HeadTrackingService.ts
+|  ├── audio (Engine, OBR, Analyser, processor)
+|  ├── components (UI, Transport, Queue, Tuning, File, HRTF)
+|  ├── tracking (ESKF, Filters, Predictors, Service)
 |  ├── utils (Persistence, Throttle)
-|  └── visualizer (Three.js Scene, Shaders)
+|  ├── visualizer (AmbiScene, Shaders, Tests)
+|  └── workers (VisionWorker)
+├── scripts
+└── vite.config.ts / vitest.config.ts
 ```

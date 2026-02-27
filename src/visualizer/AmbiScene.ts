@@ -41,6 +41,8 @@ export class AmbiScene {
     private ghostArrow: THREE.ArrowHelper | null = null;      // Raw MediaPipe (cyan, semi-transparent)
     private predictedArrow: THREE.ArrowHelper | null = null;   // ESKF predicted (green, solid)
 
+    private currentRoll: number = 0;
+
     constructor(container: HTMLElement, resolutionScale: number = 0.6) {
         this.container = container;
         this.resolutionScale = Math.max(0.25, Math.min(1.0, resolutionScale));
@@ -181,6 +183,8 @@ export class AmbiScene {
             this.controls.enableZoom = false;
             this.controls.minDistance = 0;
             this.controls.maxDistance = 10; // Allow target projection
+            this.currentRoll = 0;
+            this.camera.up.set(0, 1, 0);
         } else {
             // Force standard perspective for outside view
             this.camera.fov = this.DEFAULT_OUTSIDE_FOV;
@@ -361,12 +365,19 @@ export class AmbiScene {
 
             if (axis === 'yaw') this.camera.rotation.y = rad;
             if (axis === 'pitch') {
-                this.camera.rotation.x = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, rad));
+                // Phase 2: Pitch Inversion (Invert UI input before storing in camera)
+                const correctedRad = rad * -1;
+                this.camera.rotation.x = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, correctedRad));
             }
-            // Force Roll to 0 for OrbitControls stability in inside mode
-            if (axis === 'roll') this.camera.rotation.z = 0;
+            if (axis === 'roll') {
+                this.currentRoll = rad;
+                // We don't set camera.rotation.z directly as OrbitControls uses camera.up
+            }
 
             if (this.viewMode === 'inside') {
+                // Apply dynamic camera.up for visual Roll
+                this.camera.up.set(-Math.sin(this.currentRoll), Math.cos(this.currentRoll), 0).normalize();
+
                 // Keep camera locked at origin before update
                 this.camera.position.set(0, 0, 0);
 
@@ -379,6 +390,9 @@ export class AmbiScene {
 
                 // Force OrbitControls to recalculate
                 this.controls.update();
+
+                // Final lookAt to ensure camera.up is respected
+                this.camera.lookAt(this.controls.target);
 
                 // Aggressively reset position to origin to prevent OrbitControls drift
                 this.camera.position.set(0, 0, 0);
@@ -411,8 +425,11 @@ export class AmbiScene {
         // 1. Head Tracking Drive (Phase 1)
         // Apply webcam rotation to camera if in inside mode and not manually dragging
         if (this.viewMode === 'inside' && this.headTrackingQuat && !this.isUserDraggingSlider) {
-            // Apply the webcam quaternion to the camera
-            this.camera.quaternion.copy(this.headTrackingQuat);
+            // Phase 2: Pitch Inversion (Tracker -> Camera)
+            const euler = new THREE.Euler().setFromQuaternion(this.headTrackingQuat, 'YXZ');
+            euler.x *= -1; // Invert Pitch
+            this.currentRoll = euler.z; // Store Roll for camera.up
+            this.camera.quaternion.setFromEuler(euler);
 
             // Project the forward vector for OrbitControls to follow
             const forward = new THREE.Vector3(0, 0, -1);
@@ -421,10 +438,23 @@ export class AmbiScene {
 
             // Aggressively lock position to origin
             this.camera.position.set(0, 0, 0);
+
+            // Apply dynamic camera.up for visual Roll
+            this.camera.up.set(-Math.sin(this.currentRoll), Math.cos(this.currentRoll), 0).normalize();
         }
 
         if (this.controls) {
             this.controls.update();
+
+            // Final lookAt to ensure camera.up is respected in inside mode
+            if (this.viewMode === 'inside') {
+                this.camera.lookAt(this.controls.target);
+            }
+        }
+
+        // Hard lock for inside view to prevent drift
+        if (this.viewMode === 'inside') {
+            this.camera.position.set(0, 0, 0);
         }
 
         // 2. Render Loop UI Synchronization (Phase 2)
@@ -432,8 +462,8 @@ export class AmbiScene {
         if (this.onCameraStateChange && !this.isUserDraggingSlider && this.uiSyncThrottle.shouldUpdate(now)) {
             this.onCameraStateChange({
                 yaw: this.camera.rotation.y * (180 / Math.PI),
-                pitch: this.camera.rotation.x * (180 / Math.PI),
-                roll: this.camera.rotation.z * (180 / Math.PI),
+                pitch: (this.camera.rotation.x * (180 / Math.PI)) * -1, // Invert back for UI
+                roll: this.currentRoll * (180 / Math.PI),
                 x: this.camera.position.x,
                 y: this.camera.position.y,
                 z: this.camera.position.z

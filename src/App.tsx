@@ -101,11 +101,27 @@ function App() {
   }, [audioEngine, headTracking]);
 
   const handleTrackSelect = useCallback(async (index: number) => {
-    await audioEngine.loadTrack(index);
-    if (audioEngine.playbackState !== 'error') {
-      audioEngine.play();
+    // 1. Guard against rapid-click spam
+    if (audioEngine.playbackState === 'loading') return;
+
+    // 2. Prevent redundant loads if clicking the already playing track
+    if (index === audioEngine.currentIndex && audioEngine.playbackState === 'playing') return;
+
+    try {
+      // 3. Forcefully stop the current track (destroys the source node)
+      audioEngine.stop();
+
+      // 4. Await the decoding and loading of the new track
+      await audioEngine.loadTrack(index);
+
+      // 5. Explicitly start playback
+      if (audioEngine.playbackState !== 'error') {
+        audioEngine.play();
+      }
+      setCurrentIndex(index);
+    } catch (error) {
+      console.error("Failed to play selected track:", error);
     }
-    setCurrentIndex(index);
   }, [audioEngine]);
 
   const handleHrtfSelect = useCallback(async (url: string) => {
@@ -300,6 +316,7 @@ function App() {
           <TrackQueue
             tracks={queue}
             currentIndex={currentIndex}
+            playbackState={playbackState}
             onTrackSelect={handleTrackSelect}
           />
           <TransportControls

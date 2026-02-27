@@ -186,4 +186,49 @@ describe('AudioEngine Integration', () => {
         expect(engine.sourceNode).not.toBeNull();
         expect(engine.playbackState).toBe('playing');
     });
+
+    it('should halt current track before loading a new one (Selection Logic fix)', async () => {
+        const mockBuffer1 = { numberOfChannels: 4 } as unknown as AudioBuffer;
+        const mockBuffer2 = { numberOfChannels: 4 } as unknown as AudioBuffer;
+        const file1 = new File([''], '1.mp3');
+        const file2 = new File([''], '2.mp3');
+
+        engine.queue = [
+            { name: '1.mp3', file: file1, buffer: mockBuffer1 },
+            { name: '2.mp3', file: file2, buffer: mockBuffer2 }
+        ];
+
+        // Setup initial playing state
+        await engine.loadTrack(0);
+        await engine.play();
+        const firstSource = engine.sourceNode;
+        expect(engine.playbackState).toBe('playing');
+
+        // Spy on methods
+        const stopSpy = vi.spyOn(engine, 'stop');
+        const loadTrackSpy = vi.spyOn(engine, 'loadTrack');
+        const playSpy = vi.spyOn(engine, 'play');
+
+        // Simulation of App.tsx:handleTrackSelect
+        const handleTrackSelect = async (index: number) => {
+            if (engine.playbackState === 'loading') return;
+            engine.stop();
+            await engine.loadTrack(index);
+            if (engine.playbackState !== 'error') engine.play();
+        };
+
+        await handleTrackSelect(1);
+
+        expect(stopSpy).toHaveBeenCalled();
+        expect(loadTrackSpy).toHaveBeenCalledWith(1);
+        expect(playSpy).toHaveBeenCalled();
+
+        // Check call order: stop MUST be before loadTrack
+        const stopOrder = stopSpy.mock.invocationCallOrder[0];
+        const loadOrder = loadTrackSpy.mock.invocationCallOrder[0];
+        expect(stopOrder).toBeLessThan(loadOrder);
+
+        expect(firstSource?.stop).toHaveBeenCalled();
+        expect(engine.currentIndex).toBe(1);
+    });
 });

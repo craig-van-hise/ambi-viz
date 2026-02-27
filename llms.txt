@@ -3,5 +3,9 @@ This is the knowledge base for AmbiViz.
 
 - [README.md](./README.md): High-level project description, tech stack, and usage instructions.
 - [PROJECT_STATE.md](./PROJECT_STATE.md): Current architecture, tech stack, phase status, and recent Git changes.
-- [PRP Tracking](./PRPs/): Chronological record of technical requirements and implementation phases.
-- [AmbiScene Logic](./src/visualizer/AmbiScene.ts): Core 3D engine logic including FOV decoupling and zoom mechanics.
+- [PRP Tracking](./PRPs/): Chronological record of technical requirements and implementation phases (#0–#26).
+- [AmbiScene Logic](./src/visualizer/AmbiScene.ts): Core 3D engine — FOV decoupling, origin lock, pitch inversion, roll via camera.up, head-tracking drive loop.
+- [OBR Worklet](./public/worklets/obr-processor.js): AudioWorklet processor — SAB lockless read, pitch inversion, quaternion composition, WASM rotation dispatch.
+- [HeadTrackingService](./src/HeadTrackingService.ts): Main-thread tracking coordinator — SAB allocation, Vision Worker bridge, camera quaternion delivery.
+- [Orientation Tests](./src/Orientation.test.ts): Pitch inversion and Roll math regression tests.
+- [Camera Tests](./src/visualizer/CameraControl.test.ts): Camera persistence, origin lock, and gimbal singularity tests.

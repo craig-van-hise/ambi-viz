@@ -134,12 +134,37 @@ class OBRProcessor extends AudioWorkletProcessor {
                 const uz = this.sabFloat32[11];
                 const uw = this.sabFloat32[12];
 
-                // 3. Quaternion Multiplication: Total = UI * Tracking
-                // (uw, ux, uy, uz) * (tw, tx, ty, tz)
-                const rx = uw * tx + ux * tw + uy * tz - uz * ty;
-                const ry = uw * ty - ux * tz + uy * tw + uz * tx;
-                const rz = uw * tz + ux * ty - uy * tx + uz * tw;
-                const rw = uw * tw - ux * tx - uy * ty - uz * tz;
+                // --- Phase 2: Pitch Inversion (Tracker Only) ---
+                // We extract Euler (YXZ), negate pitch, and re-pack.
+                // 3DOF YXZ Euler from Quat:
+                // pitch = asin(2 * (w * x - y * z))
+                // yaw = atan2(2 * (w * y + z * x), 1 - 2 * (x * x + y * y))
+                // roll = atan2(2 * (w * z + x * y), 1 - 2 * (z * z + x * x))
+                const t_pitch = Math.asin(Math.max(-1, Math.min(1, 2 * (tw * tx - ty * tz))));
+                const t_yaw = Math.atan2(2 * (tw * ty + tz * tx), 1 - 2 * (tx * tx + ty * ty));
+                const t_roll = Math.atan2(2 * (tw * tz + tx * ty), 1 - 2 * (tz * tz + tx * tx));
+
+                const correctedPitch = t_pitch * -1;
+
+                // Convert back to Quat (YXZ)
+                const cy = Math.cos(t_yaw * 0.5);
+                const sy = Math.sin(t_yaw * 0.5);
+                const cp = Math.cos(correctedPitch * 0.5);
+                const sp = Math.sin(correctedPitch * 0.5);
+                const cr = Math.cos(t_roll * 0.5);
+                const sr = Math.sin(t_roll * 0.5);
+
+                const ctx = cy * sp * cr + sy * cp * sr;
+                const cty = sy * cp * cr - cy * sp * sr;
+                const ctz = cy * cp * sr - sy * sp * cr;
+                const ctw = cy * cp * cr + sy * sp * sr;
+
+                // 3. Quaternion Multiplication: Total = UI * CorrectedTracking
+                // (uw, ux, uy, uz) * (ctw, ctx, cty, ctz)
+                const rx = uw * ctx + ux * ctw + uy * ctz - uz * cty;
+                const ry = uw * cty - ux * ctz + uy * ctw + uz * ctx;
+                const rz = uw * ctz + ux * cty - uy * ctx + uz * ctw;
+                const rw = uw * ctw - ux * ctx - uy * cty - uz * ctz;
 
                 // 4. Set Rotation to WASM
                 // Conjugate: negate x,y,z to counter-rotate the soundfield relative to listener
