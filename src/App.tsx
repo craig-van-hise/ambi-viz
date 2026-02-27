@@ -13,6 +13,8 @@ import { Throttle } from './utils/Throttle';
 import { HeadTrackingService } from './HeadTrackingService';
 import { loadState, debouncedSave } from './utils/persistence';
 import type { PersistedState } from './utils/persistence';
+import { CameraControlPanel } from './components/CameraControlPanel';
+import type { CameraUIState } from './components/CameraControlPanel';
 
 function App() {
   // Load persisted state on mount
@@ -25,11 +27,21 @@ function App() {
   const sceneRef = useRef<AmbiScene | null>(null);
   const [gain, setGain] = useState(persisted.gain);
   const [viewMode, setViewMode] = useState<ViewMode>('inside');
+  const [isDraggingSlider, setIsDraggingSlider] = useState(false);
 
   // Transport state
   const [playbackState, setPlaybackState] = useState<PlaybackState>('stopped');
   const [isLooping, setIsLooping] = useState(true);
   const [zoomFov, setZoomFov] = useState(75); // Default FOV
+
+  const [cameraUIState, setCameraUIState] = useState<CameraUIState>({
+    yaw: 0,
+    pitch: 0,
+    roll: 0,
+    x: 0,
+    y: 0,
+    z: 2.5,
+  });
 
   // Queue state
   const [queue, setQueue] = useState<QueueTrack[]>([]);
@@ -129,6 +141,13 @@ function App() {
     }
   }, []);
 
+  const handleCameraUIChange = useCallback((axis: keyof CameraUIState, value: number) => {
+    setCameraUIState(prev => ({ ...prev, [axis]: value }));
+    if (sceneRef.current) {
+      sceneRef.current.updateFromUI(axis, value);
+    }
+  }, []);
+
 
 
   // ── Transport Handlers ──
@@ -183,6 +202,24 @@ function App() {
     const scene = new AmbiScene(containerRef.current, 0.6);
     sceneRef.current = scene;
 
+    // Phase 3: Link AmbiScene state changes back to React UI
+    scene.onCameraStateChange = (state) => {
+      setCameraUIState(prev => {
+        // Precision-based dirty check to prevent unnecessary re-renders
+        if (
+          Math.abs(prev.yaw - state.yaw) < 0.01 &&
+          Math.abs(prev.pitch - state.pitch) < 0.01 &&
+          Math.abs(prev.roll - state.roll) < 0.01 &&
+          Math.abs(prev.x - state.x) < 0.001 &&
+          Math.abs(prev.y - state.y) < 0.001 &&
+          Math.abs(prev.z - state.z) < 0.001
+        ) {
+          return prev;
+        }
+        return state;
+      });
+    };
+
     // Sync FOV state from visualizer to React
     scene.onFovChange = (fov) => {
       setZoomFov(fov);
@@ -192,6 +229,13 @@ function App() {
       scene.destroy();
     };
   }, []);
+
+  // Sync manual dragging flag to AmbiScene to prevent state fighting
+  useEffect(() => {
+    if (sceneRef.current) {
+      sceneRef.current.isUserDraggingSlider = isDraggingSlider;
+    }
+  }, [isDraggingSlider]);
 
   // Toggle tracking indicators when tracking state changes
   useEffect(() => {
@@ -213,7 +257,10 @@ function App() {
         const cov = audioEngine.getCovariance();
         if (sceneRef.current) {
           sceneRef.current.updateCovariance(cov, audioEngine.order, gain);
-          headTracking.setUIRotation(sceneRef.current.camera.quaternion);
+          // Only send manual rotation to engine if NOT tracking
+          if (!isTrackingCam) {
+            headTracking.setUIRotation(sceneRef.current.camera.quaternion);
+          }
         }
       }
 
@@ -222,7 +269,12 @@ function App() {
         const predQ = headTracking.getPredictedQuaternion();
         if (rawQ && predQ) {
           sceneRef.current.updateTrackingIndicators(rawQ, predQ);
+          // Phase 3: Feed the predicted quaternion to AmbiScene's hub
+          sceneRef.current.headTrackingQuat = predQ;
         }
+      } else if (sceneRef.current) {
+        // Reset tracking data if disabled
+        sceneRef.current.headTrackingQuat = null;
       }
 
       outputAnimationFrameId = requestAnimationFrame(loop);
@@ -327,6 +379,13 @@ function App() {
               🔭 Outside
             </button>
           </div>
+          <CameraControlPanel
+            viewMode={viewMode}
+            state={cameraUIState}
+            onChange={handleCameraUIChange}
+            onDragStart={() => setIsDraggingSlider(true)}
+            onDragEnd={() => setIsDraggingSlider(false)}
+          />
           <button
             onClick={() => {
               if (isTrackingCam) {

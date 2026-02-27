@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { ambisonicVertexShader, ambisonicFragmentShader } from './shaders/ambisonic';
+import { Throttle } from '../utils/Throttle';
 
 export type ViewMode = 'inside' | 'outside';
 
@@ -28,6 +29,13 @@ export class AmbiScene {
     rafId: number | null = null;
     private readonly DEFAULT_OUTSIDE_FOV = 50;
     private insideFov = 75;
+    private outsidePositionCache = new THREE.Vector3(0, 0, 2.5);
+
+    // Head tracking & UI Sync State
+    public headTrackingQuat: THREE.Quaternion | null = null;
+    public isUserDraggingSlider: boolean = false;
+    public onCameraStateChange?: (state: any) => void;
+    private uiSyncThrottle = new Throttle(20); // Sync at 20 FPS
 
     // Head tracking visual indicators
     private ghostArrow: THREE.ArrowHelper | null = null;      // Raw MediaPipe (cyan, semi-transparent)
@@ -44,6 +52,7 @@ export class AmbiScene {
         const width = container.clientWidth;
         const height = container.clientHeight;
         this.camera = new THREE.PerspectiveCamera(75, width / height, 0.01, 1000);
+        this.camera.rotation.order = 'YXZ'; // Yaw, then Pitch, then Roll
 
         // 2. Renderer — pixel ratio capped at 1.0 for M1 performance
         const canvas = document.createElement('canvas');
@@ -153,26 +162,32 @@ export class AmbiScene {
     }
 
     setViewMode(mode: ViewMode) {
+        // Cache current position if leaving outside mode
+        if (this.viewMode === 'outside') {
+            this.outsidePositionCache.copy(this.camera.position);
+        }
+
         this.viewMode = mode;
 
         if (mode === 'inside') {
             // Restore inside FOV
             this.camera.fov = this.insideFov;
-            // Camera at origin (tiny offset for OrbitControls stability)
-            this.camera.position.set(0, 0, 0.001);
-            this.controls.target.set(0, 0, 0);
+            // Camera exactly at origin
+            this.camera.position.set(0, 0, 0);
+            // Push target forward to prevent distance=0 singularity
+            this.controls.target.set(0, 0, -1);
             // 3DoF rotation only — no pan or zoom
             this.controls.enablePan = false;
             this.controls.enableZoom = false;
             this.controls.minDistance = 0;
-            this.controls.maxDistance = 0.01;
+            this.controls.maxDistance = 10; // Allow target projection
         } else {
             // Force standard perspective for outside view
             this.camera.fov = this.DEFAULT_OUTSIDE_FOV;
-            // Outside view
-            this.camera.position.set(0, 0, 2.5);
+            // Restore from cache
+            this.camera.position.copy(this.outsidePositionCache);
             this.controls.target.set(0, 0, 0);
-            this.controls.enablePan = true;
+            this.controls.enablePan = false; // Permanently disabled
             this.controls.enableZoom = true;
             this.controls.minDistance = 1;
             this.controls.maxDistance = 10;
@@ -333,6 +348,50 @@ export class AmbiScene {
         this.setFov(Math.max(minFovV, Math.min(maxFovV, targetFov)));
     }
 
+    updateFromUI(axis: string, value: number) {
+        // 1. Strict Number Coercion (Value is already a number from React, but we ensure it's safe)
+        if (isNaN(value)) return;
+
+        if (axis === 'yaw' || axis === 'pitch' || axis === 'roll') {
+            const rad = value * (Math.PI / 180);
+
+            // 2. Singularity Prevention: Clamp pitch to avoid OrbitControls matrix collapse
+            // Max pitch slightly less than 90 degrees (~1.56 radians)
+            const MAX_PITCH = (Math.PI / 2) - 0.01;
+
+            if (axis === 'yaw') this.camera.rotation.y = rad;
+            if (axis === 'pitch') {
+                this.camera.rotation.x = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, rad));
+            }
+            // Force Roll to 0 for OrbitControls stability in inside mode
+            if (axis === 'roll') this.camera.rotation.z = 0;
+
+            if (this.viewMode === 'inside') {
+                // Keep camera locked at origin before update
+                this.camera.position.set(0, 0, 0);
+
+                // Project a forward vector based on the new rotation
+                const forward = new THREE.Vector3(0, 0, -1);
+                forward.applyEuler(this.camera.rotation);
+
+                // Move the OrbitControls target to this new forward position (exactly 1 unit away)
+                this.controls.target.copy(forward);
+
+                // Force OrbitControls to recalculate
+                this.controls.update();
+
+                // Aggressively reset position to origin to prevent OrbitControls drift
+                this.camera.position.set(0, 0, 0);
+            }
+        } else {
+            if (axis === 'x') this.camera.position.x = value;
+            if (axis === 'y') this.camera.position.y = value;
+            if (axis === 'z') this.camera.position.z = value;
+            // Target is already (0,0,0) from setViewMode
+            this.controls.update();
+        }
+    }
+
     setFov(fov: number) {
         this.insideFov = fov;
         if (this.viewMode === 'inside') {
@@ -347,8 +406,38 @@ export class AmbiScene {
     animate() {
         this.rafId = requestAnimationFrame(this.animate.bind(this));
 
+        const now = performance.now();
+
+        // 1. Head Tracking Drive (Phase 1)
+        // Apply webcam rotation to camera if in inside mode and not manually dragging
+        if (this.viewMode === 'inside' && this.headTrackingQuat && !this.isUserDraggingSlider) {
+            // Apply the webcam quaternion to the camera
+            this.camera.quaternion.copy(this.headTrackingQuat);
+
+            // Project the forward vector for OrbitControls to follow
+            const forward = new THREE.Vector3(0, 0, -1);
+            forward.applyQuaternion(this.camera.quaternion);
+            this.controls.target.copy(forward);
+
+            // Aggressively lock position to origin
+            this.camera.position.set(0, 0, 0);
+        }
+
         if (this.controls) {
             this.controls.update();
+        }
+
+        // 2. Render Loop UI Synchronization (Phase 2)
+        // Extract Eulers and send back to React UI for slider feedback
+        if (this.onCameraStateChange && !this.isUserDraggingSlider && this.uiSyncThrottle.shouldUpdate(now)) {
+            this.onCameraStateChange({
+                yaw: this.camera.rotation.y * (180 / Math.PI),
+                pitch: this.camera.rotation.x * (180 / Math.PI),
+                roll: this.camera.rotation.z * (180 / Math.PI),
+                x: this.camera.position.x,
+                y: this.camera.position.y,
+                z: this.camera.position.z
+            });
         }
 
         if (this.renderTarget && this.compositeScene && this.compositeCamera) {

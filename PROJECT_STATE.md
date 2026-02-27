@@ -4,30 +4,38 @@
 
 ```text
 /Users/vv2024/Documents/AI Projects/WebApps/ambi-viz
+├── FAILURE_REPORT_13.md
+├── PROJECT_CONTEXT_BUNDLE.md
+├── PROJECT_STATE.md
 ├── PRPs
+├── README.md
+├── index.html
+├── llms.txt
+├── package.json
 ├── public
-|  ├── hrtf (SOFA files)
-|  ├── worklets (Audio processor)
-|  └── obr.wasm
+|  ├── HRTF_default.sofa.json
+|  ├── hrtf
+|  ├── obr.js
+|  ├── obr.wasm
+|  └── worklets
 ├── src
+|  ├── App.css
+|  ├── App.tsx
+|  ├── HeadTrackingService.ts
 |  ├── audio
-|  |  ├── AudioEngine.ts
-|  |  └── OBRDecoder.ts
 |  ├── components
+|  |  ├── CameraControlPanel.tsx
 |  |  ├── ESKFTuningPanel.tsx
-|  |  ├── FileLoader.tsx
 |  |  ├── TrackQueue.tsx
 |  |  └── TransportControls.tsx
 |  ├── tracking
-|  |  ├── ESKF.ts
-|  |  └── OneEuroFilter.ts
+|  ├── types
 |  ├── utils
-|  |  ├── persistence.ts
-|  |  └── Throttle.ts
 |  ├── visualizer
 |  |  ├── AmbiScene.ts
-|  |  └── shaders
+|  |  └── CameraControl.test.ts
 |  └── workers
+└── vitest.config.ts
 ```
 
 
@@ -42,27 +50,32 @@
 
 ## 3. Status
 
--   **PRP #13 (Head Tracking & Transport)**: **Complete**. Implemented predictive logic, track queue, and drag-and-drop.
--   **PRP #14 (Hotfix: Asset Initialization)**: **Complete**. Fixed race conditions in WASM/AudioContext startup.
--   **PRP #15 (UI/UX Refinement)**: **Complete**. 
-    - Combined Play/Pause toggle.
-    - Segmented View Mode control (Inside/Outside).
-    - Interior Zoom (Cmd/Ctrl + Scroll) with safe FOV clamping.
-    - Double-click track selection.
--   **PRP #16 (Transport & UI Hotfix)**: **Complete**.
-    - Fixed auto-play regression on Prev/Next navigation.
-    - Fixed button contrast in light/dark modes.
-    - Added Zoom Slider for visible FOV control.
--   **PRP #17 (FOV Decoupling)**: **Complete**.
-    - Isolated FOV states between Inside and Outside modes to prevent perspective distortion.
-    - Implemented TDD verification for camera transitions.
+-   **PRP #13 (Head Tracking & Transport)**: **Complete**.
+-   **PRP #14-17 (UI/FOV Refinement)**: **Complete**.
+-   **PRP #18-19 (Bidirectional Control)**: **Complete**.
+    - Implemented Forward Vector Target Projection for `OrbitControls`.
+    - Enabled Roll support by dynamically updating `camera.up`.
+    - Synced 3D canvas manipulation back to React UI sliders.
+-   **PRP #20 (Singularity Prevention)**: **Complete**.
+    - Hard-clamped Pitch to $\pm 89.4^\circ$ to prevent WebGL matrix collapse/Black Screen.
+    - Added strict type coercion for slider inputs.
+-   **PRP #21 (Warp Zone Hardening)**: **Complete**.
+    - Enforced strict origin lock `(0,0,0)` for Inside View.
+    - Projected target exactly 1 unit away to prevent distance=0 singularities.
+-   **PRP #22 (Universal UI Sync)**: **Complete**.
+    - Moved UI state polling to the main render loop for universal capture (Mouse + Head).
+    - Implemented `isDraggingSlider` flag to prevent state-fighting during manual interaction.
+-   **PRP #23 (Camera Data Bridge)**: **Complete**.
+    - Closed the loop: Webcam -> SAB -> 3D Camera -> UI Sliders.
+    - Head tracking now drives both the audio rotation and the visual camera orientation.
 
 ## 4. Recent Changes (Summary)
 
--   **Hotfix (PRP #17)**: Decoupled camera FOV between view modes; added TDD suite for `AmbiScene`.
--   **Feature (PRP #16)**: Added visible Zoom Slider; synced Cmd+Scroll with UI; fixed transport auto-play logic.
--   **Refactor (PRP #15)**: Unified transport buttons; implemented interior zooming and segmented view controls.
+-   **Feature (PRP #23)**: Integrated webcam orientation directly into the 3D camera and synced UI feedback.
+-   **Improvement (PRP #22)**: Decoupled UI sync from events; implemented throttled polling in render loop.
+-   **Fix (PRP #20-21)**: Resolved "Black Screen" and "Warp Zone" crashes via pitch clamping and origin locking.
+-   **Feature (PRP #18-19)**: Achieved full bidirectional synchronization between YPR sliders and OrbitControls.
+-   c456801 - feat(viz): decouple FOV states, implement zoom slider, and fix transport logic (PRPs #14-17)
 -   221fa46 - feat(audio): implement track queue, transport controls, and ESKF tuning (PRP #13 Phase 6)
 -   cd7b787 - feat(tracking): implement predictive head tracking (PRP #13 Phases 2 & 3)
 -   adbb8e9 - feat(audio): synchronize UI camera rotation with binaural renderer via SAB bridge
--   6839767 - feat(audio): resolve head tracking audio rotation and sync documentation

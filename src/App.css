@@ -345,3 +345,73 @@
   border-color: #646cff;
   background: rgba(100, 108, 255, 0.05);
 }
+/* ── Camera Control Panel ── */
+.camera-control-panel {
+  padding: 16px 20px;
+  background: rgba(30, 30, 40, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(100, 108, 255, 0.2);
+  border-radius: 10px;
+  color: #fff;
+  text-align: left;
+  min-width: 280px;
+  margin-top: 10px;
+}
+
+.camera-control-panel h4 {
+  margin: 0 0 12px 0;
+  font-size: 0.85em;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
+}
+
+.camera-control-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 50px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.camera-control-row:last-child {
+  margin-bottom: 0;
+}
+
+.camera-control-label {
+  font-size: 0.8em;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.camera-control-slider {
+  height: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.camera-control-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #646cff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.camera-control-value {
+  font-size: 0.75em;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  color: #00e5ff;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

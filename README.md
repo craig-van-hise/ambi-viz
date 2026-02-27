@@ -6,6 +6,12 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 
 -   **Predictive Head-Tracking (ESKF)**: Low-latency 6DOF audio rotation using an Error-State Kalman Filter in tangent space with visual debugging (ghost/predicted arrows).
 -   **Dynamic Tuning**: Real-time ESKF parameter adjustment (τ, R, Q) with descriptive tooltips for latency and jitter management.
+-   **Bidirectional Camera Controls**: 
+    -   Integrated **Yaw/Pitch/Roll** sliders that move in real-time to mirror head tracking or manual canvas dragging.
+    -   Universal polling system in the render loop ensures smooth, lag-free UI synchronization.
+-   **Singularity Protection**: 
+    -   Aggressive mathematical hardening: Pitch is hard-clamped to prevent WebGL "Black Screen" context crashes.
+    -   Origin locking and safe target projection prevent radius explosions and environmental drift in the Inside View.
 -   **Audio Transport & Queue**:
     -   Full playback controls: Play, Pause, Stop, and Loop.
     -   **Track Queue**: Previous/Next navigation with a scrollable track list.
