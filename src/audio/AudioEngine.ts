@@ -1,7 +1,7 @@
 import { OBRDecoder } from './OBRDecoder';
 import { RawCoefAnalyser } from './RawCoefAnalyser';
 
-export type PlaybackState = 'playing' | 'paused' | 'stopped';
+export type PlaybackState = 'stopped' | 'playing' | 'paused' | 'loading' | 'error';
 
 export interface QueueTrack {
     name: string;
@@ -14,6 +14,7 @@ export class AudioEngine {
     sourceNode: AudioBufferSourceNode | null = null;
     rawAnalyser: RawCoefAnalyser | null = null;
     obrDecoder: OBRDecoder | null = null;
+    onStateChange?: (state: PlaybackState) => void;
     order: number = 1;
 
     // Smoothing state
@@ -35,6 +36,11 @@ export class AudioEngine {
         this.smoothedCoeffs = new Float32Array(16); // Max order 3 (16 channels)
     }
 
+    private setState(state: PlaybackState) {
+        this.playbackState = state;
+        this.onStateChange?.(state);
+    }
+
     /**
      * Queue one or more files without starting playback.
      * Returns the indices of the added tracks.
@@ -54,16 +60,23 @@ export class AudioEngine {
     async loadTrack(index: number): Promise<void> {
         if (index < 0 || index >= this.queue.length) return;
 
+        this.setState('loading');
         const track = this.queue[index];
         this.currentIndex = index;
 
-        // Decode buffer if not already cached
-        if (!track.buffer) {
-            const arrayBuffer = await track.file.arrayBuffer();
-            track.buffer = await this.audioCtx.decodeAudioData(arrayBuffer);
-        }
+        try {
+            // Decode buffer if not already cached
+            if (!track.buffer) {
+                const arrayBuffer = await track.file.arrayBuffer();
+                track.buffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+            }
 
-        await this.setupGraph(track.buffer);
+            await this.setupGraph(track.buffer);
+            this.setState('stopped');
+        } catch (error) {
+            console.error('AudioEngine: Error loading track:', error);
+            this.setState('error');
+        }
     }
 
     /** Legacy single-file load (queues + loads + plays for backward compat) */
@@ -77,7 +90,7 @@ export class AudioEngine {
         // 0. Resume context (Modern browser policy)
         await this.audioCtx.resume();
 
-        // Store buffer for stop-and-restart
+        // Store buffer for JIT source creation
         this.audioBuffer = buffer;
 
         // 1. Detect Order
@@ -90,18 +103,7 @@ export class AudioEngine {
             this.order = 1;
         }
 
-        // 2. Tear down previous source
-        if (this.sourceNode) {
-            try { this.sourceNode.stop(); } catch (_) { /* already stopped */ }
-            this.sourceNode.disconnect();
-        }
-
-        // 3. Create new source (NOT started)
-        this.sourceNode = this.audioCtx.createBufferSource();
-        this.sourceNode.buffer = buffer;
-        this.sourceNode.loop = this._isLooping;
-
-        // 4. Initialize OBR graph only once
+        // 2. Initialize OBR graph only once
         if (!this._graphReady) {
             this.rawAnalyser = new RawCoefAnalyser(this.audioCtx, this.order);
             this.obrDecoder = new OBRDecoder(this.audioCtx, this.order);
@@ -115,29 +117,11 @@ export class AudioEngine {
             this._graphReady = true;
         }
 
-        // 5. Connect source to graph
-        // Source -> RawAnalyser
-        this.sourceNode.connect(this.rawAnalyser!.in);
-
-        // Source is ready but NOT playing — caller must call play()
-        this.playbackState = 'stopped';
-        console.log(`AudioEngine: Track "${this.queue[this.currentIndex]?.name ?? 'unknown'}" loaded (not playing).`);
+        console.log(`AudioEngine: Track "${this.queue[this.currentIndex]?.name ?? 'unknown'}" loaded (graph ready).`);
     }
 
-    /**
-     * Reconnect a fresh source node to the existing graph and start playback.
-     * Used by stop() to reset playback cursor to 0.
-     */
-    private startFreshSource() {
-        if (!this.audioBuffer || !this.rawAnalyser) return;
+    // Removed startFreshSource() strategy for JIT patterns
 
-        this.sourceNode = this.audioCtx.createBufferSource();
-        this.sourceNode.buffer = this.audioBuffer;
-        this.sourceNode.loop = this._isLooping;
-
-        this.sourceNode.connect(this.rawAnalyser.in);
-        this.sourceNode.start();
-    }
 
     update(): Float32Array {
         if (!this.rawAnalyser) return new Float32Array(16);
@@ -184,15 +168,25 @@ export class AudioEngine {
     // ── Transport Controls ──
 
     /** Start or resume playback */
-    play() {
-        if (this.playbackState === 'stopped' && this.sourceNode) {
-            // Source was prepared but never started — start it now
-            try { this.sourceNode.start(); } catch (_) { /* already started */ }
-        }
+    async play() {
+        if (this.playbackState === 'playing' || this.playbackState === 'error') return;
+
         if (this.audioCtx.state === 'suspended') {
-            this.audioCtx.resume();
+            await this.audioCtx.resume();
         }
-        this.playbackState = 'playing';
+
+        if (!this.sourceNode && this.audioBuffer && this.rawAnalyser) {
+            // JIT Source Creation
+            this.sourceNode = this.audioCtx.createBufferSource();
+            this.sourceNode.buffer = this.audioBuffer;
+            this.sourceNode.loop = this._isLooping;
+            this.sourceNode.connect(this.rawAnalyser.in);
+            this.sourceNode.start();
+        }
+
+        if (this.sourceNode) {
+            this.setState('playing');
+        }
     }
 
     /** Alias for backward compat */
@@ -205,7 +199,7 @@ export class AudioEngine {
         if (this.audioCtx.state === 'running') {
             this.audioCtx.suspend();
         }
-        this.playbackState = 'paused';
+        this.setState('paused');
     }
 
     /** Stop playback, reset cursor to 0 (recreates source node) */
@@ -215,17 +209,13 @@ export class AudioEngine {
             this.sourceNode.disconnect();
             this.sourceNode = null;
         }
-        if (this.audioCtx.state === 'running') {
-            this.audioCtx.suspend();
-        }
-        // Recreate source so next play() starts from 0
-        this.startFreshSource();
-        this.playbackState = 'stopped';
+        this.setState('stopped');
     }
 
     /** Load and play previous track in queue */
     async prev() {
         if (this.queue.length === 0) return;
+        this.stop();
         const newIdx = this.currentIndex > 0 ? this.currentIndex - 1 : this.queue.length - 1;
         await this.loadTrack(newIdx);
         this.play();
@@ -234,6 +224,7 @@ export class AudioEngine {
     /** Load and play next track in queue */
     async next() {
         if (this.queue.length === 0) return;
+        this.stop();
         const newIdx = this.currentIndex < this.queue.length - 1 ? this.currentIndex + 1 : 0;
         await this.loadTrack(newIdx);
         this.play();

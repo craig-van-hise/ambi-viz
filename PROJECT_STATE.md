@@ -1,19 +1,15 @@
-# PROJECT_STATE (2026-02-25)
+# PROJECT_STATE (2026-02-27)
 
 ## 1. Architecture
 
 ```text
 /Users/vv2024/Documents/AI Projects/WebApps/ambi-viz
-├── PROJECT_STATE.md
-├── README.md
 ├── PRPs
 ├── public
 |  ├── hrtf (SOFA files)
 |  ├── worklets (Audio processor)
 |  └── obr.wasm
 ├── src
-|  ├── App.tsx
-|  ├── HeadTrackingService.ts
 |  ├── audio
 |  |  ├── AudioEngine.ts
 |  |  └── OBRDecoder.ts
@@ -29,9 +25,9 @@
 |  |  ├── persistence.ts
 |  |  └── Throttle.ts
 |  ├── visualizer
-|  |  └── AmbiScene.ts
+|  |  ├── AmbiScene.ts
+|  |  └── shaders
 |  └── workers
-|     └── VisionWorker.ts
 ```
 
 
@@ -41,28 +37,32 @@
 -   **Framework**: React (Vite)
 -   **Graphics**: Three.js (WebGL)
 -   **Audio/Tracking**: Web Audio API, Google Open Binaural Renderer (OBR), MediaPipe Tasks Vision (FaceLandmarker)
--   **Predictive Tracking**: Error-State Kalman Filter (ESKF) implementation (PRP #13 Phase 3)
--   **Build Tool**: Vite
+-   **Predictive Tracking**: Error-State Kalman Filter (ESKF) implementation
+-   **State Persistence**: LocalStorage for UI settings and filters.
 
 ## 3. Status
 
--   **Phase 1 (Signal Chain)**: Complete. Audio decoding and analysis functional.
--   **Phase 2 (Shader Core)**: Complete.
--   **Phase 4 (Head Tracking - PRP #13)**: **Complete**. 
-    -   **Phases 1-3**: Implemented MediaPipe integration, 1 Euro Filter, and 6D Error-State Kalman Filter (ESKF).
-    -   **Phase 4 (Tuning & Visual Debug)**: Runtime ESKF parameter modification and ghost/predicted orientation arrows.
-    -   **Phase 5 (UX Telemetry)**: Tooltips on tuning sliders for empirical guidance.
-    -   **Phase 6 (Queue & Persistence)**: Audio track queue, folder drops, and localStorage state persistence.
--   **feat(audio): Synchronized UI camera rotation (OrbitControls) with the binaural renderer.**
+-   **PRP #13 (Head Tracking & Transport)**: **Complete**. Implemented predictive logic, track queue, and drag-and-drop.
+-   **PRP #14 (Hotfix: Asset Initialization)**: **Complete**. Fixed race conditions in WASM/AudioContext startup.
+-   **PRP #15 (UI/UX Refinement)**: **Complete**. 
+    - Combined Play/Pause toggle.
+    - Segmented View Mode control (Inside/Outside).
+    - Interior Zoom (Cmd/Ctrl + Scroll) with safe FOV clamping.
+    - Double-click track selection.
+-   **PRP #16 (Transport & UI Hotfix)**: **Complete**.
+    - Fixed auto-play regression on Prev/Next navigation.
+    - Fixed button contrast in light/dark modes.
+    - Added Zoom Slider for visible FOV control.
+-   **PRP #17 (FOV Decoupling)**: **Complete**.
+    - Isolated FOV states between Inside and Outside modes to prevent perspective distortion.
+    - Implemented TDD verification for camera transitions.
 
-## 4. Recent Changes
+## 4. Recent Changes (Summary)
 
--   [Current] - feat(ux): implement audio track queue, folder drops, and localStorage persistence (PRP #13 Phase 6)
--   cd7b787 - feat(tracking): implement predictive head tracking (PRP #13 Phases 2 & 3) using 1 Euro Filter and 6D ESKF
+-   **Hotfix (PRP #17)**: Decoupled camera FOV between view modes; added TDD suite for `AmbiScene`.
+-   **Feature (PRP #16)**: Added visible Zoom Slider; synced Cmd+Scroll with UI; fixed transport auto-play logic.
+-   **Refactor (PRP #15)**: Unified transport buttons; implemented interior zooming and segmented view controls.
+-   221fa46 - feat(audio): implement track queue, transport controls, and ESKF tuning (PRP #13 Phase 6)
+-   cd7b787 - feat(tracking): implement predictive head tracking (PRP #13 Phases 2 & 3)
 -   adbb8e9 - feat(audio): synchronize UI camera rotation with binaural renderer via SAB bridge
 -   6839767 - feat(audio): resolve head tracking audio rotation and sync documentation
--   79d4973 - docs: generate updated project context bundle
--   a093263 - docs: update stack to reflect OBR WASM integration
--   917bfe8 - feat(net): sanitize network configuration and fix worklet environment
--   27d6939 - chore(git): ignore PRPs folder
--   0608fd5 - chore(init): project genesis and documentation sync

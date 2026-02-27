@@ -13,3 +13,5 @@ id_rsa
 # Logs
 browser.log
 terminal.log
+*.log
+project_tree.txt

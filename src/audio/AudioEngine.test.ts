@@ -34,6 +34,7 @@ describe('AudioEngine Integration', () => {
         mockCtx = {
             createBufferSource: vi.fn(() => ({
                 connect: vi.fn(),
+                disconnect: vi.fn(),
                 start: vi.fn(),
                 stop: vi.fn(),
                 buffer: null,
@@ -54,6 +55,8 @@ describe('AudioEngine Integration', () => {
 
         engine = new AudioEngine();
         vi.clearAllMocks();
+        mockDecoderInstance.loadSofa.mockReset();
+        mockDecoderInstance.loadSofa.mockResolvedValue(undefined);
     });
 
     it('should setup the graph with OBRDecoder', async () => {
@@ -70,11 +73,10 @@ describe('AudioEngine Integration', () => {
         expect(mockDecoderInstance.loadSofa).toHaveBeenCalledWith('/hrtf/MIT_KEMAR_Normal.sofa');
 
         // Check connections
-        // source -> rawAnalyser.in
         // rawAnalyser.out -> obrDecoder.in
         // obrDecoder.out -> destination
 
-        expect(engine.sourceNode?.connect).toHaveBeenCalledWith(engine.rawAnalyser?.in);
+        expect(engine.sourceNode).toBeNull(); // JIT pattern
         expect(engine.rawAnalyser?.out.connect).toHaveBeenCalledWith(mockDecoderInstance.in);
         expect(mockDecoderInstance.out.connect).toHaveBeenCalledWith(mockCtx.destination);
     });
@@ -115,5 +117,73 @@ describe('AudioEngine Integration', () => {
         engine.play();
         expect(mockSource.start).toHaveBeenCalled();
         expect(startCalled).toBe(true);
+    });
+
+    it('should transition to "loading" and then to "error" if decoding fails', async () => {
+        const mockFile = new File([''], 'test.mp3');
+        engine.queue = [{ name: 'test.mp3', file: mockFile, buffer: null }];
+
+        const error = new Error('Decoding failed');
+        (mockCtx.decodeAudioData as any).mockRejectedValue(error);
+
+        const states: string[] = [];
+        engine.onStateChange = (state) => states.push(state);
+
+        await engine.loadTrack(0);
+
+        expect(states).toContain('loading');
+        expect(states).toContain('error');
+        expect(engine.playbackState).toBe('error');
+    });
+
+    it('should create a new source node on play() if null, and destroy it on stop()', async () => {
+        const mockBuffer = { numberOfChannels: 4 } as AudioBuffer;
+        await engine.setupGraph(mockBuffer);
+
+        // After setupGraph in Phase 2, sourceNode should be null
+        // (Wait, I haven't implemented Phase 2 yet, so this test will fail)
+
+        expect(engine.sourceNode).toBeNull();
+
+        engine.play();
+        expect(mockCtx.createBufferSource).toHaveBeenCalled();
+        expect(engine.sourceNode).not.toBeNull();
+        expect(engine.sourceNode?.start).toHaveBeenCalled();
+
+        const oldSource = engine.sourceNode;
+        engine.stop();
+        expect(oldSource?.stop).toHaveBeenCalled();
+        expect(oldSource?.disconnect).toHaveBeenCalled();
+        expect(engine.sourceNode).toBeNull();
+    });
+
+    it('should stop current track and auto-play the next one', async () => {
+        const mockBuffer1 = { numberOfChannels: 4 } as unknown as AudioBuffer;
+        const mockBuffer2 = { numberOfChannels: 4 } as unknown as AudioBuffer;
+        const file1 = new File([''], '1.mp3');
+        const file2 = new File([''], '2.mp3');
+
+        engine.queue = [
+            { name: '1.mp3', file: file1, buffer: mockBuffer1 },
+            { name: '2.mp3', file: file2, buffer: mockBuffer2 }
+        ];
+        engine.currentIndex = 0;
+
+        // Load first track manually to setup state
+        await engine.loadTrack(0);
+        await engine.play();
+
+        const firstSource = engine.sourceNode;
+        expect(firstSource).not.toBeNull();
+        expect(engine.playbackState).toBe('playing');
+
+        // Trigger next()
+        await engine.next();
+
+        expect(firstSource?.stop).toHaveBeenCalled();
+        expect(engine.currentIndex).toBe(1);
+        expect(engine.sourceNode).not.toBe(firstSource);
+        expect(engine.sourceNode).not.toBeNull();
+        expect(engine.playbackState).toBe('playing');
     });
 });

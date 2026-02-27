@@ -22,9 +22,12 @@ export class AmbiScene {
 
     // View mode
     viewMode: ViewMode = 'inside';
+    onFovChange: ((fov: number) => void) | null = null;
 
     // Animation state
     rafId: number | null = null;
+    private readonly DEFAULT_OUTSIDE_FOV = 50;
+    private insideFov = 75;
 
     // Head tracking visual indicators
     private ghostArrow: THREE.ArrowHelper | null = null;      // Raw MediaPipe (cyan, semi-transparent)
@@ -94,6 +97,7 @@ export class AmbiScene {
 
         // 8. Events
         window.addEventListener('resize', this.onResize.bind(this));
+        this.renderer.domElement.addEventListener('wheel', this.onWheel.bind(this), { passive: false });
 
         // Start Loop
         this.animate();
@@ -152,6 +156,8 @@ export class AmbiScene {
         this.viewMode = mode;
 
         if (mode === 'inside') {
+            // Restore inside FOV
+            this.camera.fov = this.insideFov;
             // Camera at origin (tiny offset for OrbitControls stability)
             this.camera.position.set(0, 0, 0.001);
             this.controls.target.set(0, 0, 0);
@@ -161,6 +167,8 @@ export class AmbiScene {
             this.controls.minDistance = 0;
             this.controls.maxDistance = 0.01;
         } else {
+            // Force standard perspective for outside view
+            this.camera.fov = this.DEFAULT_OUTSIDE_FOV;
             // Outside view
             this.camera.position.set(0, 0, 2.5);
             this.controls.target.set(0, 0, 0);
@@ -170,6 +178,7 @@ export class AmbiScene {
             this.controls.maxDistance = 10;
         }
 
+        this.camera.updateProjectionMatrix();
         this.controls.update();
     }
 
@@ -193,6 +202,7 @@ export class AmbiScene {
         const texture = new THREE.CanvasTexture(canvas);
         const material = new THREE.SpriteMaterial({
             map: texture,
+            depthTest: false,
             depthWrite: false,
             transparent: true,
         });
@@ -200,7 +210,7 @@ export class AmbiScene {
 
         sprite.position.copy(position);
         sprite.scale.set(2, 0.5, 1);
-        sprite.renderOrder = -1;
+        sprite.renderOrder = 100;
 
         this.scene.add(sprite);
     }
@@ -305,6 +315,35 @@ export class AmbiScene {
         this.setupRenderTarget(width, height);
     }
 
+    onWheel(e: WheelEvent) {
+        if (this.viewMode !== 'inside' || (!e.metaKey && !e.ctrlKey)) return;
+
+        e.preventDefault();
+
+        // 1. Calculate target FOV change
+        const zoomSpeed = 0.05;
+        let targetFov = this.camera.fov + e.deltaY * zoomSpeed;
+
+        // 2. Bounding: Min 20 deg, Max 160 deg Horizontal FOV
+        const minFovV = 20;
+        const maxFovH = 160; // Degrees
+        const maxFovV = 2 * Math.atan(Math.tan(maxFovH * Math.PI / 360) / this.camera.aspect) * (180 / Math.PI);
+
+        // 3. Clamp and apply
+        this.setFov(Math.max(minFovV, Math.min(maxFovV, targetFov)));
+    }
+
+    setFov(fov: number) {
+        this.insideFov = fov;
+        if (this.viewMode === 'inside') {
+            this.camera.fov = fov;
+            this.camera.updateProjectionMatrix();
+        }
+        if (this.onFovChange) {
+            this.onFovChange(fov);
+        }
+    }
+
     animate() {
         this.rafId = requestAnimationFrame(this.animate.bind(this));
 
@@ -329,6 +368,7 @@ export class AmbiScene {
     destroy() {
         if (this.rafId) cancelAnimationFrame(this.rafId);
         window.removeEventListener('resize', this.onResize.bind(this));
+        this.renderer.domElement.removeEventListener('wheel', this.onWheel.bind(this));
 
         this.renderer.dispose();
         if (this.renderTarget) this.renderTarget.dispose();

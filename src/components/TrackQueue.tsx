@@ -17,7 +17,7 @@ export function TrackQueue({ tracks, currentIndex, onTrackSelect }: TrackQueuePr
                     <button
                         key={i}
                         className={`track-queue-item ${i === currentIndex ? 'track-active' : ''}`}
-                        onClick={() => onTrackSelect(i)}
+                        onDoubleClick={() => onTrackSelect(i)}
                         title={track.name}
                     >
                         <span className="track-num">{i + 1}</span>

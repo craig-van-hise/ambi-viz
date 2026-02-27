@@ -16,7 +16,7 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 -   **Real-time Visualization**:
     -   **Spherical Harmonics**: Deforms a 3D sphere based on the directional energy of the sound field.
     -   **Covariance Matrix**: Uses Quadratic Form ($Y^T C Y$) for accurate energy estimation.
-    -   **Interactive Controls**: Gain slider, View Mode toggle (Inside/Outside), and Camera Tracking toggle.
+    -   **Interactive Controls**: Gain slider, **Inside View Zoom slider**, View Mode toggle (Inside/Outside), and Camera Tracking toggle.
 
 ## Usage
 
@@ -26,7 +26,7 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
     ```
 2.  **Open in Browser**: Navigate to `http://localhost:5173`.
 3.  **Load Audio**: Drag and drop Ambisonic files or a folder containing audio (.wav, .ambix, .ogg, .iamf).
-4.  **Transport**: Use the transport bar or press `Space` to control playback.
+4.  **Transport**: Use the transport bar or press `Space` to control playback. Double-click tracks in the queue to select.
 5.  **Tuning**: Enable "Tracking" to reveal the ESKF Tuning Panel and visual tracking indicators.
 
 ## Technical Stack

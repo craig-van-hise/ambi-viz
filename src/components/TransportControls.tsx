@@ -24,56 +24,57 @@ export function TransportControls({
     onNext,
 }: TransportControlsProps) {
     const hasMultipleTracks = queueSize > 1;
+    const isLoading = playbackState === 'loading';
+    const isError = playbackState === 'error';
+    const isDisabled = isLoading || isError;
 
     return (
         <div className="transport-bar">
-            <button
-                className="transport-btn"
-                onClick={onPrev}
-                title="Previous track"
-                disabled={!hasMultipleTracks}
-            >
-                ⏮
-            </button>
-            <button
-                className={`transport-btn ${playbackState === 'playing' ? 'transport-active' : ''}`}
-                onClick={onPlay}
-                title="Play"
-                disabled={playbackState === 'playing'}
-            >
-                ▶
-            </button>
-            <button
-                className={`transport-btn ${playbackState === 'paused' ? 'transport-active' : ''}`}
-                onClick={onPause}
-                title="Pause"
-                disabled={playbackState === 'paused' || playbackState === 'stopped'}
-            >
-                ⏸
-            </button>
-            <button
-                className="transport-btn"
-                onClick={onStop}
-                title="Stop (reset to beginning)"
-                disabled={playbackState === 'stopped'}
-            >
-                ⏹
-            </button>
-            <button
-                className="transport-btn"
-                onClick={onNext}
-                title="Next track"
-                disabled={!hasMultipleTracks}
-            >
-                ⏭
-            </button>
-            <button
-                className={`transport-btn transport-loop ${isLooping ? 'transport-active' : ''}`}
-                onClick={onLoopToggle}
-                title={isLooping ? 'Loop: ON' : 'Loop: OFF'}
-            >
-                🔁
-            </button>
+            {isError && <div className="transport-error-msg">⚠️ Ingestion Error</div>}
+
+            <div className="transport-btns-row">
+                <button
+                    className="transport-btn"
+                    onClick={onPrev}
+                    title="Previous track"
+                    disabled={!hasMultipleTracks || isDisabled}
+                >
+                    {isLoading ? '...' : '⏮'}
+                </button>
+                <button
+                    className={`transport-btn ${playbackState === 'playing' ? 'transport-active' : ''}`}
+                    onClick={playbackState === 'playing' ? onPause : onPlay}
+                    title={isLoading ? 'Buffering...' : playbackState === 'playing' ? 'Pause' : 'Play'}
+                    disabled={isDisabled}
+                >
+                    {isLoading ? '⏳' : playbackState === 'playing' ? '⏸' : '▶'}
+                </button>
+                <button
+                    className="transport-btn"
+                    onClick={onStop}
+                    title="Stop (reset to beginning)"
+                    disabled={playbackState === 'stopped' || isDisabled}
+                >
+                    ⏹
+                </button>
+                <button
+                    className="transport-btn"
+                    onClick={onNext}
+                    title="Next track"
+                    disabled={!hasMultipleTracks || isDisabled}
+                >
+                    ⏭
+                </button>
+                <button
+                    className={`transport-btn transport-loop ${isLooping ? 'transport-active' : ''}`}
+                    onClick={onLoopToggle}
+                    title={isLooping ? 'Loop: ON' : 'Loop: OFF'}
+                    disabled={isDisabled}
+                >
+                    🔁
+                </button>
+            </div>
+            {isLoading && <span className="buffering-spinner">Buffering...</span>}
         </div>
     );
 }

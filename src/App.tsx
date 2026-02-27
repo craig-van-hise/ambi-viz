@@ -29,6 +29,7 @@ function App() {
   // Transport state
   const [playbackState, setPlaybackState] = useState<PlaybackState>('stopped');
   const [isLooping, setIsLooping] = useState(true);
+  const [zoomFov, setZoomFov] = useState(75); // Default FOV
 
   // Queue state
   const [queue, setQueue] = useState<QueueTrack[]>([]);
@@ -53,6 +54,17 @@ function App() {
     headTracking.init();
   }, [headTracking]);
 
+  // Sync engine state to React
+  useEffect(() => {
+    audioEngine.onStateChange = (state) => {
+      setPlaybackState(state);
+    };
+
+    return () => {
+      audioEngine.onStateChange = undefined;
+    };
+  }, [audioEngine]);
+
   // Apply persisted HRTF on first load
   useEffect(() => {
     if (audioEngine.obrDecoder && hrtfUrl !== '/hrtf/MIT_KEMAR_Normal.sofa') {
@@ -70,7 +82,6 @@ function App() {
     if (audioEngine.currentIndex === -1 && indices.length > 0) {
       await audioEngine.loadTrack(indices[0]);
       setCurrentIndex(indices[0]);
-      setPlaybackState('stopped');
       if (audioEngine.obrDecoder) {
         headTracking.attachDecoder(audioEngine.obrDecoder);
       }
@@ -79,9 +90,10 @@ function App() {
 
   const handleTrackSelect = useCallback(async (index: number) => {
     await audioEngine.loadTrack(index);
-    audioEngine.play();
+    if (audioEngine.playbackState !== 'error') {
+      audioEngine.play();
+    }
     setCurrentIndex(index);
-    setPlaybackState('playing');
   }, [audioEngine]);
 
   const handleHrtfSelect = useCallback(async (url: string) => {
@@ -110,40 +122,36 @@ function App() {
     persistState({ gain: newGain });
   }, [persistState]);
 
-  const toggleViewMode = useCallback(() => {
-    const newMode: ViewMode = viewMode === 'inside' ? 'outside' : 'inside';
-    setViewMode(newMode);
+  const handleZoomChange = useCallback((newFov: number) => {
+    setZoomFov(newFov);
     if (sceneRef.current) {
-      sceneRef.current.setViewMode(newMode);
+      sceneRef.current.setFov(newFov);
     }
-  }, [viewMode]);
+  }, []);
+
+
 
   // ── Transport Handlers ──
   const handlePlay = useCallback(() => {
     audioEngine.play();
-    setPlaybackState('playing');
   }, [audioEngine]);
 
   const handlePause = useCallback(() => {
     audioEngine.pause();
-    setPlaybackState('paused');
   }, [audioEngine]);
 
   const handleStop = useCallback(() => {
     audioEngine.stop();
-    setPlaybackState('stopped');
   }, [audioEngine]);
 
   const handlePrev = useCallback(async () => {
     await audioEngine.prev();
     setCurrentIndex(audioEngine.currentIndex);
-    setPlaybackState('playing');
   }, [audioEngine]);
 
   const handleNext = useCallback(async () => {
     await audioEngine.next();
     setCurrentIndex(audioEngine.currentIndex);
-    setPlaybackState('playing');
   }, [audioEngine]);
 
   const handleLoopToggle = useCallback(() => {
@@ -174,6 +182,11 @@ function App() {
 
     const scene = new AmbiScene(containerRef.current, 0.6);
     sceneRef.current = scene;
+
+    // Sync FOV state from visualizer to React
+    scene.onFovChange = (fov) => {
+      setZoomFov(fov);
+    };
 
     return () => {
       scene.destroy();
@@ -280,21 +293,40 @@ function App() {
             />
             <span style={{ marginLeft: '5px' }}>{gain.toFixed(1)}</span>
           </label>
-          <button
-            onClick={toggleViewMode}
-            style={{
-              padding: '6px 16px',
-              background: viewMode === 'inside' ? '#2196F3' : '#FF9800',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '0.85em',
-              fontWeight: 'bold',
-            }}
-          >
-            {viewMode === 'inside' ? '👁 Inside View' : '🔭 Outside View'}
-          </button>
+          <label style={{ display: 'flex', alignItems: 'center', fontSize: '0.9em', color: '#000' }}>
+            Zoom:
+            <input
+              type="range"
+              min="20"
+              max="160"
+              step="1"
+              value={zoomFov}
+              onChange={(e) => handleZoomChange(parseFloat(e.target.value))}
+              style={{ marginLeft: '10px', verticalAlign: 'middle' }}
+              disabled={viewMode !== 'inside'}
+            />
+            <span style={{ marginLeft: '5px', width: '3ch', color: '#000' }}>{Math.round(zoomFov)}°</span>
+          </label>
+          <div className="view-mode-toggle">
+            <button
+              className={`view-mode-btn ${viewMode === 'inside' ? 'active' : ''}`}
+              onClick={() => {
+                setViewMode('inside');
+                if (sceneRef.current) sceneRef.current.setViewMode('inside');
+              }}
+            >
+              👁 Inside
+            </button>
+            <button
+              className={`view-mode-btn outside ${viewMode === 'outside' ? 'active' : ''}`}
+              onClick={() => {
+                setViewMode('outside');
+                if (sceneRef.current) sceneRef.current.setViewMode('outside');
+              }}
+            >
+              🔭 Outside
+            </button>
+          </div>
           <button
             onClick={() => {
               if (isTrackingCam) {
