@@ -14,6 +14,6 @@ export function calculateAudioOrientation(
     tempEuler: THREE.Euler
 ): THREE.Quaternion {
     tempEuler.setFromQuaternion(q);
-    tempEuler.y *= -1; // Invert Yaw
+    // tempEuler.y *= -1; // Invert Yaw removed as it was going in the wrong direction
     return target.setFromEuler(tempEuler);
 }

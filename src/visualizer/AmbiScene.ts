@@ -273,21 +273,32 @@ export class AmbiScene {
         this.scene.add(this.predictedArrow);
     }
 
+    private visTempEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+    private visTempQuat = new THREE.Quaternion();
+    private visForward = new THREE.Vector3(0, 0, -1);
+    private visTempDir = new THREE.Vector3();
+
     /**
      * Update the tracking indicator arrows with fresh quaternions from the SAB.
      * Called each frame from the main thread when tracking is active.
      */
     updateTrackingIndicators(rawQuat: THREE.Quaternion, predQuat: THREE.Quaternion) {
-        const forward = new THREE.Vector3(0, 0, -1);
-
         if (this.ghostArrow) {
-            const rawDir = forward.clone().applyQuaternion(rawQuat);
-            this.ghostArrow.setDirection(rawDir);
+            this.visTempEuler.setFromQuaternion(rawQuat, 'YXZ');
+            this.visTempEuler.x *= -1;
+            this.visTempQuat.setFromEuler(this.visTempEuler);
+
+            this.visTempDir.copy(this.visForward).applyQuaternion(this.visTempQuat);
+            this.ghostArrow.setDirection(this.visTempDir);
         }
 
         if (this.predictedArrow) {
-            const predDir = forward.clone().applyQuaternion(predQuat);
-            this.predictedArrow.setDirection(predDir);
+            this.visTempEuler.setFromQuaternion(predQuat, 'YXZ');
+            this.visTempEuler.x *= -1;
+            this.visTempQuat.setFromEuler(this.visTempEuler);
+
+            this.visTempDir.copy(this.visForward).applyQuaternion(this.visTempQuat);
+            this.predictedArrow.setDirection(this.visTempDir);
         }
     }
 

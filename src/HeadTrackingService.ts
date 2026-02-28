@@ -124,16 +124,21 @@ export class HeadTrackingService {
         this.captureFrameLoop();
     }
 
+    private lastFrameTime = 0;
+
     private async captureFrameLoop() {
         if (!this.isTracking || !this.videoElement || !this.worker) return;
 
-        if (this.videoElement.readyState >= 2) {
+        const now = performance.now();
+        // Throttle to ~30fps (33ms) to prevent worker message queue from backing up
+        if (this.videoElement.readyState >= 2 && (now - this.lastFrameTime) >= 33) {
+            this.lastFrameTime = now;
             try {
                 // The most performant way to transfer video to a worker is via createImageBitmap
                 const bitmap = await createImageBitmap(this.videoElement);
                 this.worker.postMessage({
                     type: 'PROCESS_FRAME',
-                    payload: { bitmap, timestamp: performance.now() }
+                    payload: { bitmap, timestamp: now }
                 }, [bitmap]);
             } catch (e) {
                 console.error("[Main] Failed to capture frame:", e);

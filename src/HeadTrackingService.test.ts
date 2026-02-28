@@ -10,7 +10,7 @@ describe('HeadTracking Audio Yaw Inversion (Phase 1 TDD)', () => {
     const tempEuler = new THREE.Euler(0, 0, 0, 'YXZ');
     const outQuat = new THREE.Quaternion();
 
-    it('Test Case 1: should invert positive Yaw (rotating Left by 45 degrees)', () => {
+    it('Test Case 1: should not invert positive Yaw (rotating Left by 45 degrees)', () => {
         // Given a positive Yaw input (45 degrees Left)
         const yawDeg = 45;
         const yawRad = yawDeg * (Math.PI / 180);
@@ -20,11 +20,11 @@ describe('HeadTracking Audio Yaw Inversion (Phase 1 TDD)', () => {
         calculateAudioOrientation(trackerQuat, outQuat, tempEuler);
         const audioEuler = new THREE.Euler().setFromQuaternion(outQuat, 'YXZ');
 
-        // Then the resulting Euler Y component must be exactly -45 degrees
-        expect(audioEuler.y * (180 / Math.PI)).toBeCloseTo(-yawDeg, 5);
+        // Then the resulting Euler Y component must be exactly 45 degrees
+        expect(audioEuler.y * (180 / Math.PI)).toBeCloseTo(yawDeg, 5);
     });
 
-    it('Test Case 2: should invert Yaw in complex 3DOF rotation without mutating Pitch/Roll', () => {
+    it('Test Case 2: should not invert Yaw in complex 3DOF rotation without mutating Pitch/Roll', () => {
         // Given a complex 3DOF rotation (Pitch: 10°, Yaw: -30°, Roll: 5°)
         const pDeg = 10, yDeg = -30, rDeg = 5;
         const pRad = pDeg * (Math.PI / 180);
@@ -37,13 +37,13 @@ describe('HeadTracking Audio Yaw Inversion (Phase 1 TDD)', () => {
         calculateAudioOrientation(trackerQuat, outQuat, tempEuler);
         const audioEuler = new THREE.Euler().setFromQuaternion(outQuat, 'YXZ');
 
-        // Then the audio quaternion must accurately reflect (Pitch: 10°, Yaw: 30°, Roll: 5°)
+        // Then the audio quaternion must accurately reflect (Pitch: 10°, Yaw: -30°, Roll: 5°)
         expect(audioEuler.x * (180 / Math.PI)).toBeCloseTo(pDeg, 5);
-        expect(audioEuler.y * (180 / Math.PI)).toBeCloseTo(-yDeg, 5);
+        expect(audioEuler.y * (180 / Math.PI)).toBeCloseTo(yDeg, 5);
         expect(audioEuler.z * (180 / Math.PI)).toBeCloseTo(rDeg, 5);
     });
 
-    it('SAB Integration: should write inverted Yaw to the correct SAB indices', () => {
+    it('SAB Integration: should write correct Yaw to the correct SAB indices', () => {
         // Mock SAB and views
         const sab = new SharedArrayBuffer(128);
         const sabFloat32 = new Float32Array(sab);
@@ -69,6 +69,6 @@ describe('HeadTracking Audio Yaw Inversion (Phase 1 TDD)', () => {
         );
         const resultEuler = new THREE.Euler().setFromQuaternion(resultQuat, 'YXZ');
 
-        expect(resultEuler.y * (180 / Math.PI)).toBeCloseTo(-30, 5);
+        expect(resultEuler.y * (180 / Math.PI)).toBeCloseTo(30, 5);
     });
 });
