@@ -7,7 +7,8 @@ const STORAGE_KEY = 'ambiviz-settings';
 
 export interface PersistedState {
     hrtfUrl: string;
-    gain: number;
+    insideGain: number;
+    outsideGain: number;
     eskf: {
         tau: number;
         R_scalar: number;
@@ -17,10 +18,11 @@ export interface PersistedState {
 
 const DEFAULTS: PersistedState = {
     hrtfUrl: '/hrtf/MIT_KEMAR_Normal.sofa',
-    gain: 2.0,
+    insideGain: 2.2,
+    outsideGain: 7.2,
     eskf: {
-        tau: 0.045,
-        R_scalar: 0.0025,
+        tau: 0.125, // 125 ms
+        R_scalar: 0.000938, // 9.38e-4
         Q_scalar: 0.25,
     },
 };
@@ -31,9 +33,13 @@ export function loadState(): PersistedState {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return { ...DEFAULTS };
         const parsed = JSON.parse(raw);
+        // Handle migration from old 'gain'
+        const insideGain = parsed.insideGain ?? (parsed.gain !== undefined ? parsed.gain : DEFAULTS.insideGain);
+        const outsideGain = parsed.outsideGain ?? DEFAULTS.outsideGain;
         return {
             hrtfUrl: parsed.hrtfUrl ?? DEFAULTS.hrtfUrl,
-            gain: parsed.gain ?? DEFAULTS.gain,
+            insideGain,
+            outsideGain,
             eskf: {
                 tau: parsed.eskf?.tau ?? DEFAULTS.eskf.tau,
                 R_scalar: parsed.eskf?.R_scalar ?? DEFAULTS.eskf.R_scalar,

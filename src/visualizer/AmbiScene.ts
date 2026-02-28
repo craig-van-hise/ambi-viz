@@ -28,8 +28,8 @@ export class AmbiScene {
     // Animation state
     rafId: number | null = null;
     private readonly DEFAULT_OUTSIDE_FOV = 50;
-    private insideFov = 75;
-    private outsidePositionCache = new THREE.Vector3(0, 0, 2.5);
+    private insideFov = 115;
+    private outsidePositionCache = new THREE.Vector3(0, 3.3, 3.6);
 
     // Head tracking & UI Sync State
     public headTrackingQuat: THREE.Quaternion | null = null;
@@ -444,15 +444,8 @@ export class AmbiScene {
         // 1. Head Tracking Drive (Phase 1 & 3)
         if (this.headTrackingQuat && !this.isUserDraggingSlider) {
             if (this.viewMode === 'outside') {
-                // In Outside view, the head tracker drives the camera rotation (orbital pivot)
-                // Phase 2: Pitch Inversion (Tracker -> Camera)
-                const euler = new THREE.Euler().setFromQuaternion(this.headTrackingQuat, 'YXZ');
-                euler.x *= -1; // Invert Pitch
-                this.currentRoll = euler.z; // Store Roll for camera.up
-                this.camera.quaternion.setFromEuler(euler);
-
-                // Apply dynamic camera.up for visual Roll
-                this.camera.up.set(-Math.sin(this.currentRoll), Math.cos(this.currentRoll), 0).normalize();
+                // In Outside view, camera is unaffected by head tracking.
+                // The head movement is visualized by the arrows only.
             } else if (this.viewMode === 'inside') {
                 // In Inside view, camera is LOCKED if tracking is active.
                 // The head movement is visualized by the arrows (Phase 3).

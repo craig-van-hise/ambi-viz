@@ -49,9 +49,9 @@ describe('AmbiScene FOV Logic', () => {
 
         const scene = new AmbiScene(container);
 
-        // Initial state should be 'inside' with default 75
+        // Initial state should be 'inside' with default 115
         expect(scene.viewMode).toBe('inside');
-        expect(scene.camera.fov).toBe(75);
+        expect(scene.camera.fov).toBe(115);
 
         // Update inside FOV
         scene.setFov(120);

@@ -61,7 +61,7 @@ describe('Orientation Logic (Pitch & Roll)', () => {
         expect(scene.camera.rotation.z).toBe(0);
     });
 
-    it('should invert pitch from head tracking to camera in outside mode', () => {
+    it('should NOT update camera rotation from head tracking in outside mode', () => {
         const container = document.createElement('div');
         const scene = new AmbiScene(container);
         scene.setViewMode('outside');
@@ -79,8 +79,8 @@ describe('Orientation Logic (Pitch & Roll)', () => {
         scene.animate();
         window.requestAnimationFrame = originalRAF;
 
-        // Camera should have -30 degrees pitch internally
-        expect(scene.camera.rotation.x).toBeCloseTo(-pitchRad, 5);
+        // Camera should have 0 degrees pitch internally because head tracking does not affect outside camera
+        expect(scene.camera.rotation.x).toBeCloseTo(0, 5);
     });
 
     it('should invert pitch from camera back to UI callback', () => {
@@ -129,10 +129,14 @@ describe('Orientation Logic (Pitch & Roll)', () => {
         expect(scene.camera.up.y).toBeCloseTo(0, 5);
     });
 
-    it('should extract and apply Roll from tracker to camera.up in outside mode', () => {
+    it('should NOT apply Roll from tracker to camera.up in outside mode', () => {
         const container = document.createElement('div');
         const scene = new AmbiScene(container);
         scene.setViewMode('outside');
+
+        // Initial up vector should be [0, 1, 0]
+        expect(scene.camera.up.x).toBe(0);
+        expect(scene.camera.up.y).toBe(1);
 
         // Roll 45 degrees in tracker
         const rollRad = 45 * (Math.PI / 180);
@@ -145,11 +149,8 @@ describe('Orientation Logic (Pitch & Roll)', () => {
         scene.animate();
         window.requestAnimationFrame = originalRAF;
 
-        // Up vector should be [-sin(45), cos(45), 0]
-        const expectedX = -Math.sin(rollRad);
-        const expectedY = Math.cos(rollRad);
-
-        expect(scene.camera.up.x).toBeCloseTo(expectedX, 5);
-        expect(scene.camera.up.y).toBeCloseTo(expectedY, 5);
+        // Up vector should remain unchanged because head tracking does not affect outside camera
+        expect(scene.camera.up.x).toBe(0);
+        expect(scene.camera.up.y).toBe(1);
     });
 });

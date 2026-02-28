@@ -16,6 +16,7 @@ interface CameraControlPanelProps {
     onDragStart?: () => void;
     onDragEnd?: () => void;
     isTracking?: boolean;
+    onReset?: () => void;
 }
 
 export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
@@ -25,11 +26,20 @@ export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
     onDragStart,
     onDragEnd,
     isTracking = false,
+    onReset,
 }) => {
     const isInside = viewMode === 'inside';
 
     return (
-        <div className="camera-control-panel">
+        <div className="camera-control-panel" style={{ position: 'relative' }}>
+            {onReset && (
+                <button 
+                    onClick={onReset}
+                    style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '0.8em', padding: '2px 8px', cursor: 'pointer' }}
+                >
+                    Reset
+                </button>
+            )}
             <h4>
                 {isInside ? (isTracking ? 'Head Orientation' : 'Camera Orientation') : 'Camera Position'}
             </h4>

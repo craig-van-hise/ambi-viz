@@ -3,6 +3,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 interface ESKFTuningPanelProps {
     onParamsChange: (params: { tau?: number; R_scalar?: number; Q_scalar?: number }) => void;
     initialParams?: { tau: number; R_scalar: number; Q_scalar: number };
+    onReset?: () => void;
 }
 
 /**
@@ -34,14 +35,24 @@ const Q_MIN = 0.000001;
 const Q_MAX = 0.5;
 
 // Defaults matching ESKF constructor: sigmaMeas=0.05 → R=0.0025, sigmaGyro=0.5 → Q=0.25
-const DEFAULT_TAU_MS = 45;
-const DEFAULT_R = 0.0025;
+// Updated defaults per user request
+const DEFAULT_TAU_MS = 125;
+const DEFAULT_R = 0.000938;
 const DEFAULT_Q = 0.25;
 
-export function ESKFTuningPanel({ onParamsChange, initialParams }: ESKFTuningPanelProps) {
+export function ESKFTuningPanel({ onParamsChange, initialParams, onReset }: ESKFTuningPanelProps) {
     const [tauMs, setTauMs] = useState(initialParams ? initialParams.tau * 1000 : DEFAULT_TAU_MS);
     const [rScalar, setRScalar] = useState(initialParams?.R_scalar ?? DEFAULT_R);
     const [qScalar, setQScalar] = useState(initialParams?.Q_scalar ?? DEFAULT_Q);
+
+    // Sync state when initialParams change due to reset
+    useEffect(() => {
+        if (initialParams) {
+            setTauMs(initialParams.tau * 1000);
+            setRScalar(initialParams.R_scalar);
+            setQScalar(initialParams.Q_scalar);
+        }
+    }, [initialParams]);
 
     // Debounce worker messages — send at most every 50ms
     const pendingRef = useRef<{ tau?: number; R_scalar?: number; Q_scalar?: number } | null>(null);
@@ -91,7 +102,15 @@ export function ESKFTuningPanel({ onParamsChange, initialParams }: ESKFTuningPan
     }, [scheduleUpdate]);
 
     return (
-        <div className="eskf-tuning-panel">
+        <div className="eskf-tuning-panel" style={{ position: 'relative' }}>
+            {onReset && (
+                <button 
+                    onClick={onReset}
+                    style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '0.8em', padding: '2px 8px', cursor: 'pointer' }}
+                >
+                    Reset
+                </button>
+            )}
             <div className="eskf-tuning-title">⚙ ESKF Tuning</div>
             <div className="eskf-tuning-row" title="Offsets system delay. Increase until audio panning feels instantaneous. If the sound field 'rubber-bands' or overshoots when you abruptly stop your head, decrease this value.">
                 <label className="eskf-label">

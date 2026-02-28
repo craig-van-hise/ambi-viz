@@ -131,7 +131,7 @@ describe('AmbiScene Camera Control & Persistence', () => {
         expect(scene.camera.rotation.x).toBeCloseTo(MAX_PITCH_EXPECTED, 5);
     });
 
-    it('should update camera rotation and fire onCameraStateChange from headTrackingQuat', async () => {
+    it('should NOT update camera rotation from headTrackingQuat in outside mode', async () => {
         const container = document.createElement('div');
         const scene = new AmbiScene(container);
         scene.setViewMode('inside');
@@ -170,12 +170,12 @@ describe('AmbiScene Camera Control & Persistence', () => {
         window.requestAnimationFrame = originalRAF;
         performance.now = originalNow;
 
-        // In "outside" mode, camera rotation SHOULD match the quaternion
-        expect(scene.camera.rotation.y).toBeCloseTo(yawRad, 5);
+        // In "outside" mode, camera rotation SHOULD NOT match the quaternion anymore
+        expect(scene.camera.rotation.y).toBe(0);
 
         // Callback should have been fired
         expect(receivedState).not.toBeNull();
-        expect(receivedState.yaw).toBeCloseTo(yawDeg, 5);
+        expect(receivedState.yaw).toBeCloseTo(0, 5); // Assuming the callback reads the unchanged camera
     });
 
     it('should strictly lock camera to origin in inside mode even after controls.update', () => {

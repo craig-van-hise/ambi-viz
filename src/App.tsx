@@ -25,22 +25,23 @@ function App() {
   const [isTrackingCam, setIsTrackingCam] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<AmbiScene | null>(null);
-  const [gain, setGain] = useState(persisted.gain);
+  const [insideGain, setInsideGain] = useState(persisted.insideGain);
+  const [outsideGain, setOutsideGain] = useState(persisted.outsideGain);
   const [viewMode, setViewMode] = useState<ViewMode>('inside');
   const [isDraggingSlider, setIsDraggingSlider] = useState(false);
 
   // Transport state
   const [playbackState, setPlaybackState] = useState<PlaybackState>('stopped');
   const [isLooping, setIsLooping] = useState(true);
-  const [zoomFov, setZoomFov] = useState(75); // Default FOV
+  const [zoomFov, setZoomFov] = useState(115); // Default FOV
 
   const [cameraUIState, setCameraUIState] = useState<CameraUIState>({
     yaw: 0,
     pitch: 0,
     roll: 0,
     x: 0,
-    y: 0,
-    z: 2.5,
+    y: 3.3,
+    z: 3.6,
   });
 
   // Queue state
@@ -61,6 +62,38 @@ function App() {
     persistRef.current = { ...persistRef.current, ...partial };
     debouncedSave(persistRef.current);
   }, []);
+
+  // Handlers for Reset Buttons
+  const handleCameraReset = useCallback(() => {
+    if (viewMode === 'inside') {
+      setCameraUIState(prev => ({ ...prev, yaw: 0, pitch: 0, roll: 0 }));
+      if (sceneRef.current) {
+        sceneRef.current.updateFromUI('yaw', 0);
+        sceneRef.current.updateFromUI('pitch', 0);
+        sceneRef.current.updateFromUI('roll', 0);
+      }
+      setInsideGain(2.2);
+      persistState({ insideGain: 2.2 });
+      setZoomFov(115);
+      if (sceneRef.current) sceneRef.current.setFov(115);
+    } else {
+      setCameraUIState(prev => ({ ...prev, x: 0, y: 3.3, z: 3.6 }));
+      if (sceneRef.current) {
+        sceneRef.current.updateFromUI('x', 0);
+        sceneRef.current.updateFromUI('y', 3.3);
+        sceneRef.current.updateFromUI('z', 3.6);
+      }
+      setOutsideGain(7.2);
+      persistState({ outsideGain: 7.2 });
+    }
+  }, [viewMode, persistState]);
+
+  const handleESKFReset = useCallback(() => {
+    const defaults = { tau: 0.125, R_scalar: 0.000938, Q_scalar: 0.25 };
+    setEskfParams(defaults);
+    persistState({ eskf: defaults });
+    headTracking.updateESKFParams(defaults);
+  }, [headTracking, persistState]);
 
   useEffect(() => {
     headTracking.init();
@@ -146,9 +179,14 @@ function App() {
   }, [headTracking, persistState]);
 
   const handleGainChange = useCallback((newGain: number) => {
-    setGain(newGain);
-    persistState({ gain: newGain });
-  }, [persistState]);
+    if (viewMode === 'inside') {
+      setInsideGain(newGain);
+      persistState({ insideGain: newGain });
+    } else {
+      setOutsideGain(newGain);
+      persistState({ outsideGain: newGain });
+    }
+  }, [viewMode, persistState]);
 
   const handleZoomChange = useCallback((newFov: number) => {
     setZoomFov(newFov);
@@ -272,7 +310,8 @@ function App() {
 
         const cov = audioEngine.getCovariance();
         if (sceneRef.current) {
-          sceneRef.current.updateCovariance(cov, audioEngine.order, gain);
+          const currentGain = viewMode === 'inside' ? insideGain : outsideGain;
+          sceneRef.current.updateCovariance(cov, audioEngine.order, currentGain);
           // Only send manual rotation to engine if NOT tracking
           if (!isTrackingCam) {
             headTracking.setUIRotation(sceneRef.current.getNaturalQuaternion());
@@ -299,7 +338,7 @@ function App() {
     loop();
 
     return () => cancelAnimationFrame(outputAnimationFrameId);
-  }, [audioEngine, gain, isTrackingCam, headTracking]);
+  }, [audioEngine, insideGain, outsideGain, viewMode, isTrackingCam, headTracking]);
 
   const hasQueue = queue.length > 0;
 
@@ -356,11 +395,11 @@ function App() {
               min="0"
               max="10"
               step="0.1"
-              value={gain}
+              value={viewMode === 'inside' ? insideGain : outsideGain}
               onChange={(e) => handleGainChange(parseFloat(e.target.value))}
               style={{ marginLeft: '10px', verticalAlign: 'middle' }}
             />
-            <span style={{ marginLeft: '5px' }}>{gain.toFixed(1)}</span>
+            <span style={{ marginLeft: '5px' }}>{(viewMode === 'inside' ? insideGain : outsideGain).toFixed(1)}</span>
           </label>
           <label style={{ display: 'flex', alignItems: 'center', fontSize: '0.9em', color: '#000' }}>
             Zoom:
@@ -403,6 +442,7 @@ function App() {
             onDragStart={() => setIsDraggingSlider(true)}
             onDragEnd={() => setIsDraggingSlider(false)}
             isTracking={isTrackingCam}
+            onReset={handleCameraReset}
           />
           <button
             onClick={() => {
@@ -433,6 +473,7 @@ function App() {
         <ESKFTuningPanel
           onParamsChange={handleESKFParams}
           initialParams={eskfParams}
+          onReset={handleESKFReset}
         />
       )}
 
