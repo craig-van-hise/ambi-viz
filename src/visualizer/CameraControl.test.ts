@@ -150,18 +150,30 @@ describe('AmbiScene Camera Control & Persistence', () => {
         scene.headTrackingQuat = quat;
 
         // Manually trigger one frame logic
-        // We override requestAnimationFrame to prevent recursion in tests
         const originalRAF = window.requestAnimationFrame;
+        const originalNow = performance.now;
         window.requestAnimationFrame = (() => 0) as any;
+        performance.now = () => 1000; // Mock time to bypass throttle
 
         scene.animate();
 
-        window.requestAnimationFrame = originalRAF;
+        // In "inside" mode, camera rotation should be LOCKED to 0,0,0 even with headTrackingQuat
+        expect(scene.camera.rotation.y).toBe(0);
+        expect(scene.camera.rotation.x).toBe(0);
+        expect(scene.camera.rotation.z).toBe(0);
 
-        // Camera rotation should match the quaternion (Euler extraction)
+        // Switch to "outside" mode
+        scene.setViewMode('outside');
+        performance.now = () => 2000; // Advance time
+        scene.animate();
+
+        window.requestAnimationFrame = originalRAF;
+        performance.now = originalNow;
+
+        // In "outside" mode, camera rotation SHOULD match the quaternion
         expect(scene.camera.rotation.y).toBeCloseTo(yawRad, 5);
 
-        // Callback should have been fired with degrees
+        // Callback should have been fired
         expect(receivedState).not.toBeNull();
         expect(receivedState.yaw).toBeCloseTo(yawDeg, 5);
     });

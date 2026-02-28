@@ -1,7 +1,9 @@
-import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
+import { FaceLandmarker } from '@mediapipe/tasks-vision';
 import { SAB_SCHEMA, type HeadTrackingMessage } from '../types/HeadTracking';
 import { mat3, quat } from 'gl-matrix';
 import { ESKF, type Quat } from '../tracking/ESKF';
+import * as THREE from 'three';
+import { calculateAudioOrientation } from '../utils/OrientationUtils';
 
 let faceLandmarker: FaceLandmarker | null = null;
 let sabInt32: Int32Array | null = null;
@@ -12,6 +14,11 @@ let isTracking = false;
 // We use gl-matrix for robust matrix to quaternion conversion
 const m3 = mat3.create();
 const q = quat.create();
+
+// Temporary Three.js objects for Euler/Yaw inversion to avoid GC in loop
+const tempEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+const tempQuat = new THREE.Quaternion();
+const audioQuatResult = new THREE.Quaternion();
 
 let processedFramesCount = 0;
 let eskf: ESKF | null = null;
@@ -140,6 +147,19 @@ self.onmessage = async (e: MessageEvent<HeadTrackingMessage>) => {
                         sabFloat32[SAB_SCHEMA.QUAT_PRED_Y] = predicted[1];
                         sabFloat32[SAB_SCHEMA.QUAT_PRED_Z] = predicted[2];
                         sabFloat32[SAB_SCHEMA.QUAT_PRED_W] = predicted[3];
+
+                        // --- Audio Path Yaw Decoupling (Phase 2) ---
+                        // 1. Set temp THREE quaternion from predicted ESKF state [x, y, z, w]
+                        tempQuat.set(predicted[0], predicted[1], predicted[2], predicted[3]);
+
+                        // 2. Calculate audio orientation using utility (no new allocations)
+                        calculateAudioOrientation(tempQuat, audioQuatResult, tempEuler);
+
+                        // 3. Write to Audio SAB indices
+                        sabFloat32[SAB_SCHEMA.QUAT_ADTRK_X] = audioQuatResult.x;
+                        sabFloat32[SAB_SCHEMA.QUAT_ADTRK_Y] = audioQuatResult.y;
+                        sabFloat32[SAB_SCHEMA.QUAT_ADTRK_Z] = audioQuatResult.z;
+                        sabFloat32[SAB_SCHEMA.QUAT_ADTRK_W] = audioQuatResult.w;
                     }
 
                     // Increment sequence number and store atomically

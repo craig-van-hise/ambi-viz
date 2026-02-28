@@ -95,11 +95,17 @@
     - **Phase 2:** Pitch inversion applied end-to-end (tracker → camera, UI feedback round-trip), Roll pipeline activated via `currentRoll` state and `camera.up` math.
     - **Phase 3:** `camera.up.set(-sin(roll), cos(roll), 0)` applied in both UI slider and head-tracking paths; OBR worklet receives pitch-inverted quaternion.
     - All 60 Vitest tests passing (11 test files).
+-   **PRP #36 (Stationary World & Orientation Recovery)**: **Complete**.
+    - Decoupled Audio orientation from Visual orientation in the SAB bridge.
+    - Implemented Yaw inversion for the audio path (Stationary World model).
+    - Forked Tracking and UI orientation paths: Visual = Physical movement, Audio = Environmental stability.
+    - Optimized transformation logic via `OrientationUtils.ts` (zero-allocation loop).
 -   **PRP #26 (Visual-Cognitive Alignment)**: **Pending**.
     - Objective: Decouple audio path (raw YPR) from visual path (inverted display), align Green Pointer as gaze indicator, implement cockpit-view roll on `camera.up`.
 
 ## 4. Recent Changes (Summary)
 
+-   **Feature (PRP #36)**: Implemented "Stationary World" audio yaw inversion; decoupled audio/visual orientation paths in SAB.
 -   **Feature (PRP #25)**: Implemented 3DOF orientation matrix fix — pitch inversion end-to-end (UI, tracker, OBR worklet), Roll via `camera.up` math, and hard origin lock in animate loop.
 -   **Fix (PRP #24)**: Resolved track queue double-click playback collision with strict stop/load/play teardown sequence.
 -   **Feature (PRP #23)**: Integrated webcam orientation directly into the 3D camera and synced UI feedback.

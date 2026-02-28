@@ -417,53 +417,83 @@ export class AmbiScene {
         }
     }
 
+    /** Returns the camera quaternion with pitch UN-INVERTED (natural convention for SAB) */
+    getNaturalQuaternion(): THREE.Quaternion {
+        const q = this.camera.quaternion.clone();
+        const euler = new THREE.Euler().setFromQuaternion(q, 'YXZ');
+        euler.x *= -1; // Un-invert pitch
+        return q.setFromEuler(euler);
+    }
+
     animate() {
         this.rafId = requestAnimationFrame(this.animate.bind(this));
 
         const now = performance.now();
 
-        // 1. Head Tracking Drive (Phase 1)
-        // Apply webcam rotation to camera if in inside mode and not manually dragging
-        if (this.viewMode === 'inside' && this.headTrackingQuat && !this.isUserDraggingSlider) {
-            // Phase 2: Pitch Inversion (Tracker -> Camera)
-            const euler = new THREE.Euler().setFromQuaternion(this.headTrackingQuat, 'YXZ');
-            euler.x *= -1; // Invert Pitch
-            this.currentRoll = euler.z; // Store Roll for camera.up
-            this.camera.quaternion.setFromEuler(euler);
+        // 1. Head Tracking Drive (Phase 1 & 3)
+        if (this.headTrackingQuat && !this.isUserDraggingSlider) {
+            if (this.viewMode === 'outside') {
+                // In Outside view, the head tracker drives the camera rotation (orbital pivot)
+                // Phase 2: Pitch Inversion (Tracker -> Camera)
+                const euler = new THREE.Euler().setFromQuaternion(this.headTrackingQuat, 'YXZ');
+                euler.x *= -1; // Invert Pitch
+                this.currentRoll = euler.z; // Store Roll for camera.up
+                this.camera.quaternion.setFromEuler(euler);
 
-            // Project the forward vector for OrbitControls to follow
-            const forward = new THREE.Vector3(0, 0, -1);
-            forward.applyQuaternion(this.camera.quaternion);
-            this.controls.target.copy(forward);
-
-            // Aggressively lock position to origin
-            this.camera.position.set(0, 0, 0);
-
-            // Apply dynamic camera.up for visual Roll
-            this.camera.up.set(-Math.sin(this.currentRoll), Math.cos(this.currentRoll), 0).normalize();
+                // Apply dynamic camera.up for visual Roll
+                this.camera.up.set(-Math.sin(this.currentRoll), Math.cos(this.currentRoll), 0).normalize();
+            } else if (this.viewMode === 'inside') {
+                // In Inside view, camera is LOCKED if tracking is active.
+                // The head movement is visualized by the arrows (Phase 3).
+                this.camera.rotation.set(0, 0, 0);
+                this.camera.position.set(0, 0, 0);
+                this.camera.up.set(0, 1, 0);
+                this.controls.target.set(0, 0, -1);
+            }
         }
 
         if (this.controls) {
             this.controls.update();
 
             // Final lookAt to ensure camera.up is respected in inside mode
-            if (this.viewMode === 'inside') {
+            if (this.viewMode === 'inside' && !this.headTrackingQuat) {
                 this.camera.lookAt(this.controls.target);
             }
         }
 
-        // Hard lock for inside view to prevent drift
+        // Hard lock for inside view to prevent drift (even if not tracking, we keep it at origin)
         if (this.viewMode === 'inside') {
             this.camera.position.set(0, 0, 0);
+            if (this.headTrackingQuat) {
+                this.camera.rotation.set(0, 0, 0);
+            }
         }
 
-        // 2. Render Loop UI Synchronization (Phase 2)
+        // 2. Render Loop UI Synchronization (Phase 1 Sync)
         // Extract Eulers and send back to React UI for slider feedback
         if (this.onCameraStateChange && !this.isUserDraggingSlider && this.uiSyncThrottle.shouldUpdate(now)) {
+            let displayYaw: number;
+            let displayPitch: number;
+            let displayRoll: number;
+
+            if (this.viewMode === 'inside' && this.headTrackingQuat) {
+                // When tracking and inside, sliders reflect the tracker directly
+                const euler = new THREE.Euler().setFromQuaternion(this.headTrackingQuat, 'YXZ');
+                displayYaw = euler.y;
+                displayPitch = euler.x;
+                displayRoll = euler.z;
+            } else {
+                // Otherwise sliders reflect the camera's actual rotation
+                // Note: camera.rotation.x is inverted in this app's convention
+                displayYaw = this.camera.rotation.y;
+                displayPitch = this.camera.rotation.x * -1;
+                displayRoll = this.currentRoll;
+            }
+
             this.onCameraStateChange({
-                yaw: this.camera.rotation.y * (180 / Math.PI),
-                pitch: (this.camera.rotation.x * (180 / Math.PI)) * -1, // Invert back for UI
-                roll: this.currentRoll * (180 / Math.PI),
+                yaw: displayYaw * (180 / Math.PI),
+                pitch: displayPitch * (180 / Math.PI),
+                roll: displayRoll * (180 / Math.PI),
                 x: this.camera.position.x,
                 y: this.camera.position.y,
                 z: this.camera.position.z

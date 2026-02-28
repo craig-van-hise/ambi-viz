@@ -19,8 +19,21 @@ export const SAB_SCHEMA = {
     QUAT_UI_Z: 11,
     QUAT_UI_W: 12,
 
+    // Audio-specific orientation (Yaw inverted)
+    // ADTRK = Audio Decoupled Tracking
+    QUAT_ADTRK_X: 13,
+    QUAT_ADTRK_Y: 14,
+    QUAT_ADTRK_Z: 15,
+    QUAT_ADTRK_W: 16,
+
+    // ADUI = Audio Decoupled UI (Manual)
+    QUAT_ADUI_X: 17,
+    QUAT_ADUI_Y: 18,
+    QUAT_ADUI_Z: 19,
+    QUAT_ADUI_W: 20,
+
     // Total size in bytes:
-    // 1 * 4 (Int32) + 12 * 4 (Float32) = 52 bytes. We'll round up to 128 bytes for future-proofing and cache line safety.
+    // 1 * 4 (Int32) + 20 * 4 (Float32) = 84 bytes. We'll round up to 128 bytes.
     BYTE_LENGTH: 128
 };
 

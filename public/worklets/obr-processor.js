@@ -120,51 +120,24 @@ class OBRProcessor extends AudioWorkletProcessor {
             if (seqNum !== this.lastSeqNum && seqNum > 0) {
                 this.lastSeqNum = seqNum;
 
-                // 1. Get Tracking Quaternion (PREDICTED — smoothed + extrapolated)
-                // Uses QUAT_PRED indices 5,6,7,8 as written by the VisionWorker prediction pipeline
-                const tx = this.sabFloat32[5];
-                const ty = this.sabFloat32[6];
-                const tz = this.sabFloat32[7];
-                const tw = this.sabFloat32[8];
+                // 1. Get Decoupled Audio Tracking Quaternion (Yaw Inverted)
+                const tx = this.sabFloat32[13]; // QUAT_ADTRK_X
+                const ty = this.sabFloat32[14]; // QUAT_ADTRK_Y
+                const tz = this.sabFloat32[15]; // QUAT_ADTRK_Z
+                const tw = this.sabFloat32[16]; // QUAT_ADTRK_W
 
-                // 2. Get UI Quaternion (Manual camera)
-                // Indices 9,10,11,12 as defined in SAB_SCHEMA
-                const ux = this.sabFloat32[9];
-                const uy = this.sabFloat32[10];
-                const uz = this.sabFloat32[11];
-                const uw = this.sabFloat32[12];
+                // 2. Get Decoupled Audio UI Quaternion (Yaw Inverted)
+                const ux = this.sabFloat32[17]; // QUAT_ADUI_X
+                const uy = this.sabFloat32[18]; // QUAT_ADUI_Y
+                const uz = this.sabFloat32[19]; // QUAT_ADUI_Z
+                const uw = this.sabFloat32[20]; // QUAT_ADUI_W
 
-                // --- Phase 2: Pitch Inversion (Tracker Only) ---
-                // We extract Euler (YXZ), negate pitch, and re-pack.
-                // 3DOF YXZ Euler from Quat:
-                // pitch = asin(2 * (w * x - y * z))
-                // yaw = atan2(2 * (w * y + z * x), 1 - 2 * (x * x + y * y))
-                // roll = atan2(2 * (w * z + x * y), 1 - 2 * (z * z + x * x))
-                const t_pitch = Math.asin(Math.max(-1, Math.min(1, 2 * (tw * tx - ty * tz))));
-                const t_yaw = Math.atan2(2 * (tw * ty + tz * tx), 1 - 2 * (tx * tx + ty * ty));
-                const t_roll = Math.atan2(2 * (tw * tz + tx * ty), 1 - 2 * (tz * tz + tx * tx));
-
-                const correctedPitch = t_pitch * -1;
-
-                // Convert back to Quat (YXZ)
-                const cy = Math.cos(t_yaw * 0.5);
-                const sy = Math.sin(t_yaw * 0.5);
-                const cp = Math.cos(correctedPitch * 0.5);
-                const sp = Math.sin(correctedPitch * 0.5);
-                const cr = Math.cos(t_roll * 0.5);
-                const sr = Math.sin(t_roll * 0.5);
-
-                const ctx = cy * sp * cr + sy * cp * sr;
-                const cty = sy * cp * cr - cy * sp * sr;
-                const ctz = cy * cp * sr - sy * sp * cr;
-                const ctw = cy * cp * cr + sy * sp * sr;
-
-                // 3. Quaternion Multiplication: Total = UI * CorrectedTracking
-                // (uw, ux, uy, uz) * (ctw, ctx, cty, ctz)
-                const rx = uw * ctx + ux * ctw + uy * ctz - uz * cty;
-                const ry = uw * cty - ux * ctz + uy * ctw + uz * ctx;
-                const rz = uw * ctz + ux * cty - uy * ctx + uz * ctw;
-                const rw = uw * ctw - ux * ctx - uy * cty - uz * ctz;
+                // 3. Quaternion Multiplication: Total = UI * Tracking
+                // Formula: (w1, x1, y1, z1) * (w2, x2, y2, z2)
+                const rx = uw * tx + ux * tw + uy * tz - uz * ty;
+                const ry = uw * ty - ux * tz + uy * tw + uz * tx;
+                const rz = uw * tz + ux * ty - uy * tx + uz * tw;
+                const rw = uw * tw - ux * tx - uy * ty - uz * tz;
 
                 // 4. Set Rotation to WASM
                 // Conjugate: negate x,y,z to counter-rotate the soundfield relative to listener

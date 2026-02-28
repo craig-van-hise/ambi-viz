@@ -118,7 +118,7 @@ describe('OBRProcessor Registration', () => {
             expect(mockOutputs[0][1][0]).toBeCloseTo(0.8);
 
             // Test SAB integration and rotation API
-            const sab = new SharedArrayBuffer(64);
+            const sab = new SharedArrayBuffer(128);
             const int32View = new Int32Array(sab);
             const float32View = new Float32Array(sab);
 
@@ -144,13 +144,13 @@ describe('OBRProcessor Registration', () => {
             // Send SAB to worklet
             instance.handleMessage({ data: { type: 'SET_SAB', payload: sab } });
 
-            // Write mock predicted quat data into the SAB QUAT_PRED slots with sequence number update
-            float32View[5] = 0.1; // QUAT_PRED_X
-            float32View[6] = 0.2; // QUAT_PRED_Y
-            float32View[7] = 0.3; // QUAT_PRED_Z
-            float32View[8] = 0.4; // QUAT_PRED_W
-            // Initialize UI quaternion to identity so Hamilton product is just the tracking quat
-            float32View[12] = 1.0; // QUAT_UI_W
+            // Write mock decoupled audio tracking data (ADTRK) and UI data (ADUI)
+            float32View[13] = 0.1; // QUAT_ADTRK_X
+            float32View[14] = 0.2; // QUAT_ADTRK_Y
+            float32View[15] = 0.3; // QUAT_ADTRK_Z
+            float32View[16] = 0.4; // QUAT_ADTRK_W
+            // Initialize Audio UI quaternion (ADUI) to identity 
+            float32View[20] = 1.0; // QUAT_ADUI_W
             Atomics.store(int32View, 0, 1); // latest seq num = 1
 
             // Mock the set rotation method we expect to be in WASM
@@ -164,13 +164,11 @@ describe('OBRProcessor Registration', () => {
 
             expect(mockSetRotation).toHaveBeenCalled();
             const args = mockSetRotation.mock.calls[0];
-            // Phase 2 Pitch Inversion: the worklet now inverts pitch before compositing.
-            // Input: tx=0.1, ty=0.2, tz=0.3, tw=0.4 (unnormalized, uses as-is for math path)
-            // Output is (rw, -rx, -ry, -rz) — pitch-corrected conjugate for OBR counter-rotation.
-            expect(args[0]).toBeCloseTo(0.9789950615833903, 5);   // rw after pitch inversion
-            expect(args[1]).toBeCloseTo(-0.03961134692219472, 5); // -rx (conjugated)
-            expect(args[2]).toBeCloseTo(-0.11454323680394267, 5); // -ry (conjugated)
-            expect(args[3]).toBeCloseTo(-0.1639495577695136, 5);  // -rz (conjugated)
+            // Output is (rw, -rx, -ry, -rz)
+            expect(args[0]).toBeCloseTo(0.4, 5);   // rw
+            expect(args[1]).toBeCloseTo(-0.1, 5);  // -rx
+            expect(args[2]).toBeCloseTo(-0.2, 5);  // -ry
+            expect(args[3]).toBeCloseTo(-0.3, 5);  // -rz
 
         } else {
             throw new Error('processorClass is null');

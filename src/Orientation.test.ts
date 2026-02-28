@@ -41,10 +41,30 @@ vi.mock('three/addons/controls/OrbitControls.js', () => ({
 }));
 
 describe('Orientation Logic (Pitch & Roll)', () => {
-    it('should invert pitch from head tracking to camera', () => {
+    it('should ignore tracker rotation in inside mode', () => {
         const container = document.createElement('div');
         const scene = new AmbiScene(container);
         scene.setViewMode('inside');
+
+        const pitchRad = 30 * (Math.PI / 180);
+        const trackerQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(pitchRad, 0, 0, 'YXZ'));
+        scene.headTrackingQuat = trackerQuat;
+
+        const originalRAF = window.requestAnimationFrame;
+        window.requestAnimationFrame = (() => 0) as any;
+        scene.animate();
+        window.requestAnimationFrame = originalRAF;
+
+        // Camera should remain at zero in inside mode
+        expect(scene.camera.rotation.x).toBe(0);
+        expect(scene.camera.rotation.y).toBe(0);
+        expect(scene.camera.rotation.z).toBe(0);
+    });
+
+    it('should invert pitch from head tracking to camera in outside mode', () => {
+        const container = document.createElement('div');
+        const scene = new AmbiScene(container);
+        scene.setViewMode('outside');
 
         // Pitch +30 degrees in the tracker
         const pitchRad = 30 * (Math.PI / 180);
@@ -109,10 +129,10 @@ describe('Orientation Logic (Pitch & Roll)', () => {
         expect(scene.camera.up.y).toBeCloseTo(0, 5);
     });
 
-    it('should extract and apply Roll from tracker to camera.up', () => {
+    it('should extract and apply Roll from tracker to camera.up in outside mode', () => {
         const container = document.createElement('div');
         const scene = new AmbiScene(container);
-        scene.setViewMode('inside');
+        scene.setViewMode('outside');
 
         // Roll 45 degrees in tracker
         const rollRad = 45 * (Math.PI / 180);

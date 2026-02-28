@@ -15,6 +15,7 @@ interface CameraControlPanelProps {
     onChange: (axis: keyof CameraUIState, value: number) => void;
     onDragStart?: () => void;
     onDragEnd?: () => void;
+    isTracking?: boolean;
 }
 
 export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
@@ -23,6 +24,7 @@ export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
     onChange,
     onDragStart,
     onDragEnd,
+    isTracking = false,
 }) => {
     const isInside = viewMode === 'inside';
 
@@ -43,6 +45,7 @@ export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
                         onChange={(v) => onChange('yaw', v)}
                         onMouseDown={onDragStart}
                         onMouseUp={onDragEnd}
+                        disabled={isTracking}
                     />
                     <ControlSlider
                         label="Pitch"
@@ -53,6 +56,7 @@ export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
                         onChange={(v) => onChange('pitch', v)}
                         onMouseDown={onDragStart}
                         onMouseUp={onDragEnd}
+                        disabled={isTracking}
                     />
                     <ControlSlider
                         label="Roll"
@@ -63,6 +67,7 @@ export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
                         onChange={(v) => onChange('roll', v)}
                         onMouseDown={onDragStart}
                         onMouseUp={onDragEnd}
+                        disabled={isTracking}
                     />
                 </>
             ) : (
@@ -76,6 +81,7 @@ export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
                         onChange={(v) => onChange('x', v)}
                         onMouseDown={onDragStart}
                         onMouseUp={onDragEnd}
+                        disabled={isTracking}
                     />
                     <ControlSlider
                         label="Y"
@@ -86,6 +92,7 @@ export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
                         onChange={(v) => onChange('y', v)}
                         onMouseDown={onDragStart}
                         onMouseUp={onDragEnd}
+                        disabled={isTracking}
                     />
                     <ControlSlider
                         label="Z"
@@ -96,6 +103,7 @@ export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
                         onChange={(v) => onChange('z', v)}
                         onMouseDown={onDragStart}
                         onMouseUp={onDragEnd}
+                        disabled={isTracking}
                     />
                 </>
             )}
@@ -113,6 +121,7 @@ interface ControlSliderProps {
     onChange: (val: number) => void;
     onMouseDown?: () => void;
     onMouseUp?: () => void;
+    disabled?: boolean;
 }
 
 const ControlSlider: React.FC<ControlSliderProps> = ({
@@ -125,6 +134,7 @@ const ControlSlider: React.FC<ControlSliderProps> = ({
     onChange,
     onMouseDown,
     onMouseUp,
+    disabled = false,
 }) => (
     <div className="camera-control-row">
         <span className="camera-control-label">{label}</span>
@@ -141,6 +151,8 @@ const ControlSlider: React.FC<ControlSliderProps> = ({
             onTouchStart={onMouseDown}
             onTouchEnd={onMouseUp}
             className="camera-control-slider"
+            disabled={disabled}
+            style={{ opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? 'none' : 'auto' }}
         />
         <span className="camera-control-value">
             {Math.round(value * 10) / 10}{unit}

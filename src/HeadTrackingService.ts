@@ -2,6 +2,7 @@ import { SAB_SCHEMA } from './types/HeadTracking';
 import Worker from './workers/VisionWorker?worker';
 import { OBRDecoder } from './audio/OBRDecoder';
 import * as THREE from 'three';
+import { calculateAudioOrientation } from './utils/OrientationUtils';
 
 export class HeadTrackingService {
     private videoElement: HTMLVideoElement | null = null;
@@ -13,6 +14,10 @@ export class HeadTrackingService {
     private sabFloat32: Float32Array | null = null;
     private sabInt32: Int32Array | null = null;
     private sequenceNumber: number = 0;
+
+    // Temporary Three.js objects for Euler/Yaw inversion to avoid GC in loop
+    private tempEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+    private audioQuat = new THREE.Quaternion();
 
     constructor() { }
 
@@ -75,6 +80,16 @@ export class HeadTrackingService {
         this.sabFloat32[SAB_SCHEMA.QUAT_UI_Y] = q.y;
         this.sabFloat32[SAB_SCHEMA.QUAT_UI_Z] = q.z;
         this.sabFloat32[SAB_SCHEMA.QUAT_UI_W] = q.w;
+
+        // --- Audio Path Yaw Decoupling (Phase 2) ---
+        // 1. Calculate audio orientation using utility (no new allocations)
+        calculateAudioOrientation(q, this.audioQuat, this.tempEuler);
+
+        // 2. Write to Audio UI SAB indices
+        this.sabFloat32[SAB_SCHEMA.QUAT_ADUI_X] = this.audioQuat.x;
+        this.sabFloat32[SAB_SCHEMA.QUAT_ADUI_Y] = this.audioQuat.y;
+        this.sabFloat32[SAB_SCHEMA.QUAT_ADUI_Z] = this.audioQuat.z;
+        this.sabFloat32[SAB_SCHEMA.QUAT_ADUI_W] = this.audioQuat.w;
 
         // Increment sequence and store atomically to signal update to the worklet
         this.sequenceNumber++;

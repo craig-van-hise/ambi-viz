@@ -275,7 +275,7 @@ function App() {
           sceneRef.current.updateCovariance(cov, audioEngine.order, gain);
           // Only send manual rotation to engine if NOT tracking
           if (!isTrackingCam) {
-            headTracking.setUIRotation(sceneRef.current.camera.quaternion);
+            headTracking.setUIRotation(sceneRef.current.getNaturalQuaternion());
           }
         }
       }
@@ -402,6 +402,7 @@ function App() {
             onChange={handleCameraUIChange}
             onDragStart={() => setIsDraggingSlider(true)}
             onDragEnd={() => setIsDraggingSlider(false)}
+            isTracking={isTrackingCam}
           />
           <button
             onClick={() => {
