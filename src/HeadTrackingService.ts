@@ -34,6 +34,8 @@ export class HeadTrackingService {
         this.sabFloat32[SAB_SCHEMA.QUAT_RAW_W] = 1.0;
         this.sabFloat32[SAB_SCHEMA.QUAT_PRED_W] = 1.0;
         this.sabFloat32[SAB_SCHEMA.QUAT_UI_W] = 1.0;
+        this.sabFloat32[SAB_SCHEMA.QUAT_ADTRK_W] = 1.0;
+        this.sabFloat32[SAB_SCHEMA.QUAT_ADUI_W] = 1.0;
 
         console.log("[Main] Allocated SAB:", this.sab.byteLength, "bytes");
 
