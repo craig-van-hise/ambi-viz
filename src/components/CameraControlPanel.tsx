@@ -31,7 +31,7 @@ export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
     return (
         <div className="camera-control-panel">
             <h4>
-                Camera {isInside ? 'Orientation' : 'Position'}
+                {isInside ? (isTracking ? 'Head Orientation' : 'Camera Orientation') : 'Camera Position'}
             </h4>
 
             {isInside ? (
