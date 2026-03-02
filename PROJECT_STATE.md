@@ -108,7 +108,7 @@
 -   **Feature (PRP #36)**: Implemented "Stationary World" audio yaw inversion; decoupled audio/visual orientation paths in SAB.
 -   **Feature (PRP #25)**: Implemented 3DOF orientation matrix fix — pitch inversion end-to-end (UI, tracker, OBR worklet), Roll via `camera.up` math, and hard origin lock in animate loop.
 -   **Fix (PRP #24)**: Resolved track queue double-click playback collision with strict stop/load/play teardown sequence.
--   **Feature (PRP #23)**: Integrated webcam orientation directly into the 3D camera and synced UI feedback.
+-   **Feature (PRP #11-12)**: Implemented Volumetric Ray Marching renderer with resolution scaling and covariance-based energy estimation.
 -   **Improvement (PRP #22)**: Decoupled UI sync from events; implemented throttled polling in render loop.
 -   **Fix (PRP #20-21)**: Resolved "Black Screen" and "Warp Zone" crashes via pitch clamping and origin locking.
 -   **Feature (PRP #18-19)**: Achieved full bidirectional synchronization between YPR sliders and OrbitControls.

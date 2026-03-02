@@ -26,6 +26,15 @@ uniform int uOrder;
 uniform float uGain; 
 uniform float uOpacity;
 
+uniform float uDensityThreshold;
+uniform float uDensityMult;
+uniform float uEmissionMult;
+uniform float uHeatmapKnee;
+uniform float uEdgeFalloff;
+uniform sampler2D tPreviousFrame;
+uniform float uDissipationRate;
+uniform vec2 uResolution;
+
 // Constants
 #define MAX_STEPS 32
 #define STEP_SIZE 0.1
@@ -113,62 +122,76 @@ void main() {
     vec3 pClosest = rayOrigin + rayDir * tClosest;
     float closestDist = length(pClosest);
     
-    // If closest approach is outside the volume, this ray misses entirely
-    if (closestDist > 5.5) discard;
-    
-    // Use the direction from origin to the closest point for SH evaluation.
-    // When camera is at origin, pClosest = rayDir * t, so normalize(pClosest) = rayDir (exact).
-    // When camera is far, this correctly samples the sound field direction the ray passes through.
-    vec3 shDir = closestDist > 0.001 ? normalize(pClosest) : rayDir;
-    
-    float energy = computeDirectionalEnergy(shDir);
-    energy = max(energy, 0.0);
-    float dirDensity = sqrt(energy) * uGain;
+    vec4 currentOutput = vec4(0.0);
 
-    // Early exit: no energy in this direction — skip entire ray
-    if (dirDensity < 0.001) discard;
+    // Only march if within the 5.5 radius bound
+    if (closestDist <= 5.5) {
+        vec3 shDir = closestDist > 0.001 ? normalize(pClosest) : rayDir;
+        
+        float energy = computeDirectionalEnergy(shDir);
+        energy = max(energy, 0.0);
+        
+        // 1. Density Threshold (Fog Gate)
+        if (energy >= uDensityThreshold) {
+            
+            // 2. Edge Falloff (Shape the lobe)
+            float shapedEnergy = pow(energy, uEdgeFalloff);
+            float dirDensity = sqrt(shapedEnergy) * uGain;
 
-    // Raymarch: only sweep radial falloff (trivially cheap per step)
-    float totalDensity = 0.0;
-    vec3 accumulatedColor = vec3(0.0);
-    float t = 0.1;
+            if (dirDensity >= 0.001) {
+                float totalDensity = 0.0;
+                vec3 accumulatedColor = vec3(0.0);
+                float t = 0.1;
 
-    for (int i = 0; i < MAX_STEPS; i++) {
-        vec3 p = rayOrigin + rayDir * t;
-        float r = length(p);
+                for (int i = 0; i < MAX_STEPS; i++) {
+                    vec3 p = rayOrigin + rayDir * t;
+                    float r = length(p);
 
-        // Skip if outside bounding volume
-        if (r > 6.0) {
-            t += STEP_SIZE;
-            continue;
+                    if (r > 6.0) {
+                        t += STEP_SIZE;
+                        continue;
+                    }
+
+                    float falloff = smoothstep(5.0, 0.0, r);
+                    float dens = dirDensity * falloff;
+
+                    if (dens > 0.005) {
+                        // 3. Density Multiplier
+                        float absorption = dens * STEP_SIZE * uDensityMult;
+
+                        // 4. Heatmap Shift (Knee)
+                        float val = smoothstep(0.0, 1.0, dens);
+                        val = clamp(val - (uHeatmapKnee - 0.5), 0.0, 1.0); 
+
+                        vec3 color = mix(vec3(0.0, 0.0, 0.5), vec3(0.0, 1.0, 1.0), val);
+                        color = mix(color, vec3(1.0, 1.0, 0.0), smoothstep(0.3, 0.6, val));
+                        color = mix(color, vec3(1.0, 0.0, 0.0), smoothstep(0.6, 1.0, val));
+
+                        float alphaStep = absorption;
+                        accumulatedColor += color * alphaStep * (1.0 - totalDensity);
+                        totalDensity += alphaStep;
+                    }
+
+                    if (totalDensity >= 0.99) break;
+                    t += STEP_SIZE;
+                    if (t > MAX_DIST) break;
+                }
+
+                if (totalDensity > 0.001) {
+                    // 5. Emission Multiplier
+                    currentOutput = vec4(accumulatedColor * 2.0 * uEmissionMult, totalDensity * uOpacity);
+                }
+            }
         }
-
-        // Radial falloff — the ONLY per-step computation
-        float falloff = smoothstep(5.0, 0.0, r);
-        float dens = dirDensity * falloff;
-
-        if (dens > 0.005) {
-            float absorption = dens * STEP_SIZE;
-
-            // Heatmap Color
-            float val = smoothstep(0.0, 1.0, dens);
-            vec3 color = mix(vec3(0.0, 0.0, 0.5), vec3(0.0, 1.0, 1.0), val);
-            color = mix(color, vec3(1.0, 1.0, 0.0), smoothstep(0.3, 0.6, val));
-            color = mix(color, vec3(1.0, 0.0, 0.0), smoothstep(0.6, 1.0, val));
-
-            float alphaStep = absorption;
-            accumulatedColor += color * alphaStep * (1.0 - totalDensity);
-            totalDensity += alphaStep;
-        }
-
-        if (totalDensity >= 0.99) break;
-        t += STEP_SIZE;
-        if (t > MAX_DIST) break;
     }
 
-    // Final Opacity Check
-    if (totalDensity <= 0.001) discard;
+    // 6. Temporal Dissipation Ping-Pong Blend
+    vec2 screenUv = gl_FragCoord.xy / uResolution;
+    vec4 prevFrame = texture2D(tPreviousFrame, screenUv);
+    
+    // Alpha blend current ray-march output over previous decayed frame
+    vec4 finalColor = currentOutput + prevFrame * uDissipationRate * (1.0 - currentOutput.a);
 
-    gl_FragColor = vec4(accumulatedColor * 2.0, totalDensity * uOpacity);
+    gl_FragColor = finalColor;
 }
 `;

@@ -104,7 +104,7 @@ export function ESKFTuningPanel({ onParamsChange, initialParams, onReset }: ESKF
     return (
         <div className="eskf-tuning-panel" style={{ position: 'relative' }}>
             {onReset && (
-                <button 
+                <button
                     onClick={onReset}
                     style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '0.8em', padding: '2px 8px', cursor: 'pointer' }}
                 >
@@ -124,7 +124,7 @@ export function ESKFTuningPanel({ onParamsChange, initialParams, onReset }: ESKF
                         onChange={handleTau}
                         className="eskf-slider"
                     />
-                    <span className="eskf-value">{tauMs} ms</span>
+                    <span className="eskf-value">{`${tauMs} ms`}</span>
                 </label>
             </div>
             <div className="eskf-tuning-row" title="Trust in the webcam. Lower = faster response but captures more micro-jitter. Higher = smoother but can feel sluggish. Listen for rapid stutters in the audio field; increase until the stutter disappears.">

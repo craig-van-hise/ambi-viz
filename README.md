@@ -24,8 +24,9 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 -   **State Persistence**: Automatic `localStorage` persistence for Gain, HRTF profile, and ESKF tuning parameters.
 -   **Ambisonic Decoding**: Supports Order 1-3 Ambisonics (ACN/SN3D) via Google Open Binaural Renderer (OBR) WASM.
 -   **Real-time Visualization**:
-    -   **Spherical Harmonics**: Deforms a 3D sphere based on the directional energy of the sound field.
-    -   **Covariance Matrix**: Uses Quadratic Form ($Y^T C Y$) for accurate energy estimation.
+    -   **Volumetric Ray Marching**: Real-time rendering of the 3D sound field using custom GLSL shaders.
+    -   **Covariance Matrix**: Uses Quadratic Form ($Y^T C Y$) for accurate energy estimation (Order 1-3).
+    -   **Resolution Scaling (Pass-through Composite)**: High-performance rendering for M1/M2 chips by calculating volumetric density at lower resolution and compositing to a full-res quad.
     -   **Interactive Controls**: Gain slider, **Inside View Zoom slider**, View Mode toggle (Inside/Outside), and Camera Tracking toggle.
 
 ## Usage

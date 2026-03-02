@@ -117,3 +117,40 @@ describe('AmbiScene Roll Visualization Math (Phase 3)', () => {
         expect(scene.camera.up.y).toBeCloseTo(1, 5);
     });
 });
+
+describe('AmbiScene Volumetric Parameters (Phase 1)', () => {
+    it('should initialize uniforms with default values', () => {
+        const container = document.createElement('div');
+        const scene = new AmbiScene(container);
+
+        expect(scene.getDensityThreshold()).toBe(0.05);
+        expect(scene.getDensityMult()).toBe(1.0);
+        expect(scene.getEmissionMult()).toBe(1.0);
+        expect(scene.getHeatmapKnee()).toBe(0.5);
+        expect(scene.getEdgeFalloff()).toBe(1.0);
+        expect(scene.getDissipationRate()).toBe(0.9);
+    });
+
+    it('should correctly set and get uniform values with strict type coercion', () => {
+        const container = document.createElement('div');
+        const scene = new AmbiScene(container);
+
+        // Valid numbers
+        scene.setDensityThreshold(0.2);
+        expect(scene.getDensityThreshold()).toBe(0.2);
+
+        // Type coercion (string to number)
+        scene.setDensityMult('2.5' as any);
+        expect(scene.getDensityMult()).toBe(2.5);
+
+        // Invalid input protection (NaN defaults to 0)
+        scene.setEmissionMult(NaN);
+        expect(scene.getEmissionMult()).toBe(0);
+
+        scene.setHeatmapKnee(undefined as any);
+        expect(scene.getHeatmapKnee()).toBe(0);
+
+        scene.setEdgeFalloff('invalid_string' as any);
+        expect(scene.getEdgeFalloff()).toBe(0);
+    });
+});

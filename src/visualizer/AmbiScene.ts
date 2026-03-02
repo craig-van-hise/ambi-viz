@@ -15,7 +15,9 @@ export class AmbiScene {
     controls: OrbitControls;
 
     // Resolution scaling
-    renderTarget: THREE.WebGLRenderTarget | null = null;
+    renderTargetA: THREE.WebGLRenderTarget | null = null;
+    renderTargetB: THREE.WebGLRenderTarget | null = null;
+    pingPong: boolean = true;
     compositeMaterial: THREE.ShaderMaterial | null = null;
     compositeScene: THREE.Scene | null = null;
     compositeCamera: THREE.OrthographicCamera | null = null;
@@ -83,6 +85,14 @@ export class AmbiScene {
                 uOrder: { value: 1 },
                 uGain: { value: 1.0 },
                 uOpacity: { value: 1.0 },
+                uDensityThreshold: { value: 0.05 },
+                uDensityMult: { value: 1.0 },
+                uEmissionMult: { value: 1.0 },
+                uHeatmapKnee: { value: 0.5 },
+                uEdgeFalloff: { value: 1.0 },
+                tPreviousFrame: { value: null },
+                uDissipationRate: { value: 0.9 },
+                uResolution: { value: new THREE.Vector2() },
             },
             transparent: true,
             side: THREE.BackSide,
@@ -118,13 +128,21 @@ export class AmbiScene {
         const rtWidth = Math.max(1, Math.floor(width * this.resolutionScale));
         const rtHeight = Math.max(1, Math.floor(height * this.resolutionScale));
 
-        if (this.renderTarget) this.renderTarget.dispose();
+        if (this.renderTargetA) this.renderTargetA.dispose();
+        if (this.renderTargetB) this.renderTargetB.dispose();
 
-        this.renderTarget = new THREE.WebGLRenderTarget(rtWidth, rtHeight, {
+        const options = {
             minFilter: THREE.LinearFilter,
             magFilter: THREE.LinearFilter,
             format: THREE.RGBAFormat,
-        });
+        };
+
+        this.renderTargetA = new THREE.WebGLRenderTarget(rtWidth, rtHeight, options);
+        this.renderTargetB = new THREE.WebGLRenderTarget(rtWidth, rtHeight, options);
+
+        if (this.material && this.material.uniforms.uResolution) {
+            this.material.uniforms.uResolution.value.set(rtWidth, rtHeight);
+        }
 
         // Composite pass: full-screen quad that displays the low-res render target
         if (!this.compositeScene) {
@@ -133,7 +151,7 @@ export class AmbiScene {
 
             this.compositeMaterial = new THREE.ShaderMaterial({
                 uniforms: {
-                    tDiffuse: { value: this.renderTarget.texture },
+                    tDiffuse: { value: this.renderTargetA.texture },
                 },
                 vertexShader: `
                     varying vec2 vUv;
@@ -159,7 +177,7 @@ export class AmbiScene {
             );
             this.compositeScene.add(quad);
         } else if (this.compositeMaterial) {
-            this.compositeMaterial.uniforms.tDiffuse.value = this.renderTarget.texture;
+            this.compositeMaterial.uniforms.tDiffuse.value = this.renderTargetA.texture;
         }
     }
 
@@ -307,6 +325,25 @@ export class AmbiScene {
         if (this.ghostArrow) this.ghostArrow.visible = visible;
         if (this.predictedArrow) this.predictedArrow.visible = visible;
     }
+
+    // Volumetric Parameter Setters / Getters
+    setDensityThreshold(val: number) { this.material.uniforms.uDensityThreshold.value = Number(val) || 0; }
+    getDensityThreshold(): number { return this.material.uniforms.uDensityThreshold.value; }
+
+    setDensityMult(val: number) { this.material.uniforms.uDensityMult.value = Number(val) || 0; }
+    getDensityMult(): number { return this.material.uniforms.uDensityMult.value; }
+
+    setEmissionMult(val: number) { this.material.uniforms.uEmissionMult.value = Number(val) || 0; }
+    getEmissionMult(): number { return this.material.uniforms.uEmissionMult.value; }
+
+    setHeatmapKnee(val: number) { this.material.uniforms.uHeatmapKnee.value = Number(val) || 0; }
+    getHeatmapKnee(): number { return this.material.uniforms.uHeatmapKnee.value; }
+
+    setEdgeFalloff(val: number) { this.material.uniforms.uEdgeFalloff.value = Number(val) || 0; }
+    getEdgeFalloff(): number { return this.material.uniforms.uEdgeFalloff.value; }
+
+    setDissipationRate(val: number) { this.material.uniforms.uDissipationRate.value = Number(val) || 0; }
+    getDissipationRate(): number { return this.material.uniforms.uDissipationRate.value; }
 
     updateCovariance(cov: Float32Array, order: number, gain: number = 1.0) {
         if (this.material.isShaderMaterial) {
@@ -504,14 +541,26 @@ export class AmbiScene {
             });
         }
 
-        if (this.renderTarget && this.compositeScene && this.compositeCamera) {
-            // Pass 1: Render volumetric scene to low-res target
-            this.renderer.setRenderTarget(this.renderTarget);
+        if (this.renderTargetA && this.renderTargetB && this.compositeScene && this.compositeCamera) {
+            const currentTarget = this.pingPong ? this.renderTargetA : this.renderTargetB;
+            const previousTarget = this.pingPong ? this.renderTargetB : this.renderTargetA;
+
+            // Pass previous frame to shader for temporal dissipation
+            this.material.uniforms.tPreviousFrame.value = previousTarget.texture;
+
+            // Pass 1: Render volumetric scene to current render target
+            this.renderer.setRenderTarget(currentTarget);
             this.renderer.render(this.scene, this.camera);
 
-            // Pass 2: Composite to full-res canvas
+            // Pass 2: Composite current target to full-res canvas
+            if (this.compositeMaterial) {
+                this.compositeMaterial.uniforms.tDiffuse.value = currentTarget.texture;
+            }
             this.renderer.setRenderTarget(null);
             this.renderer.render(this.compositeScene, this.compositeCamera);
+
+            // Swap FBOs for next frame
+            this.pingPong = !this.pingPong;
         } else {
             // Fallback: direct render
             this.renderer.render(this.scene, this.camera);
@@ -524,7 +573,8 @@ export class AmbiScene {
         this.renderer.domElement.removeEventListener('wheel', this.onWheel.bind(this));
 
         this.renderer.dispose();
-        if (this.renderTarget) this.renderTarget.dispose();
+        if (this.renderTargetA) this.renderTargetA.dispose();
+        if (this.renderTargetB) this.renderTargetB.dispose();
         if (this.material.dispose) this.material.dispose();
         if (this.compositeMaterial) this.compositeMaterial.dispose();
         if (this.controls) this.controls.dispose();

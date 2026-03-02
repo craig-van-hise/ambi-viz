@@ -14,6 +14,14 @@ export interface PersistedState {
         R_scalar: number;
         Q_scalar: number;
     };
+    visualParams: {
+        densityThreshold: number;
+        densityMult: number;
+        emissionMult: number;
+        heatmapKnee: number;
+        edgeFalloff: number;
+        dissipationRate: number;
+    };
 }
 
 const DEFAULTS: PersistedState = {
@@ -24,6 +32,14 @@ const DEFAULTS: PersistedState = {
         tau: 0.125, // 125 ms
         R_scalar: 0.000938, // 9.38e-4
         Q_scalar: 0.25,
+    },
+    visualParams: {
+        densityThreshold: 0.05,
+        densityMult: 1.0,
+        emissionMult: 1.0,
+        heatmapKnee: 0.5,
+        edgeFalloff: 1.0,
+        dissipationRate: 0.9,
     },
 };
 
@@ -44,6 +60,14 @@ export function loadState(): PersistedState {
                 tau: parsed.eskf?.tau ?? DEFAULTS.eskf.tau,
                 R_scalar: parsed.eskf?.R_scalar ?? DEFAULTS.eskf.R_scalar,
                 Q_scalar: parsed.eskf?.Q_scalar ?? DEFAULTS.eskf.Q_scalar,
+            },
+            visualParams: {
+                densityThreshold: parsed.visualParams?.densityThreshold ?? DEFAULTS.visualParams.densityThreshold,
+                densityMult: parsed.visualParams?.densityMult ?? DEFAULTS.visualParams.densityMult,
+                emissionMult: parsed.visualParams?.emissionMult ?? DEFAULTS.visualParams.emissionMult,
+                heatmapKnee: parsed.visualParams?.heatmapKnee ?? DEFAULTS.visualParams.heatmapKnee,
+                edgeFalloff: parsed.visualParams?.edgeFalloff ?? DEFAULTS.visualParams.edgeFalloff,
+                dissipationRate: parsed.visualParams?.dissipationRate ?? DEFAULTS.visualParams.dissipationRate,
             },
         };
     } catch {

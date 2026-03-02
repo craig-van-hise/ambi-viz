@@ -3,6 +3,8 @@ import './App.css';
 import { FileLoader } from './components/FileLoader';
 import { HrtfSelector } from './components/HrtfSelector';
 import { ESKFTuningPanel } from './components/ESKFTuningPanel';
+import { VisualizerControls, DEFAULT_VISUAL_PARAMS } from './components/VisualizerControls';
+import type { VisualParams } from './components/VisualizerControls';
 import { TransportControls } from './components/TransportControls';
 import { TrackQueue } from './components/TrackQueue';
 import { AudioEngine } from './audio/AudioEngine';
@@ -48,8 +50,9 @@ function App() {
   const [queue, setQueue] = useState<QueueTrack[]>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
 
-  // ESKF params (persisted)
+  // ESKF & Visual params (persisted)
   const [eskfParams, setEskfParams] = useState(persisted.eskf);
+  const [visualParams, setVisualParams] = useState<VisualParams>(persisted.visualParams);
   const [hrtfUrl, setHrtfUrl] = useState(persisted.hrtfUrl);
 
   // Throttle covariance updates to ~24fps (render stays at 60fps)
@@ -178,6 +181,19 @@ function App() {
     });
   }, [headTracking, persistState]);
 
+  const handleVisualParamsChange = useCallback((params: Partial<VisualParams>) => {
+    setVisualParams(prev => {
+      const updated = { ...prev, ...params };
+      persistState({ visualParams: updated });
+      return updated;
+    });
+  }, [persistState]);
+
+  const handleVisualReset = useCallback(() => {
+    setVisualParams(DEFAULT_VISUAL_PARAMS);
+    persistState({ visualParams: DEFAULT_VISUAL_PARAMS });
+  }, [persistState]);
+
   const handleGainChange = useCallback((newGain: number) => {
     if (viewMode === 'inside') {
       setInsideGain(newGain);
@@ -256,6 +272,14 @@ function App() {
     const scene = new AmbiScene(containerRef.current, 0.6);
     sceneRef.current = scene;
 
+    // Apply initial visual params
+    scene.setDensityThreshold(visualParams.densityThreshold);
+    scene.setDensityMult(visualParams.densityMult);
+    scene.setEmissionMult(visualParams.emissionMult);
+    scene.setHeatmapKnee(visualParams.heatmapKnee);
+    scene.setEdgeFalloff(visualParams.edgeFalloff);
+    scene.setDissipationRate(visualParams.dissipationRate);
+
     // Phase 3: Link AmbiScene state changes back to React UI
     scene.onCameraStateChange = (state) => {
       setCameraUIState(prev => {
@@ -282,7 +306,19 @@ function App() {
     return () => {
       scene.destroy();
     };
-  }, []);
+  }, []); // Note: we only want this to run on mount, so visualParams is intentionally excluded
+
+  // Sync visual params to scene when they change
+  useEffect(() => {
+    if (sceneRef.current) {
+      sceneRef.current.setDensityThreshold(visualParams.densityThreshold);
+      sceneRef.current.setDensityMult(visualParams.densityMult);
+      sceneRef.current.setEmissionMult(visualParams.emissionMult);
+      sceneRef.current.setHeatmapKnee(visualParams.heatmapKnee);
+      sceneRef.current.setEdgeFalloff(visualParams.edgeFalloff);
+      sceneRef.current.setDissipationRate(visualParams.dissipationRate);
+    }
+  }, [visualParams]);
 
   // Sync manual dragging flag to AmbiScene to prevent state fighting
   useEffect(() => {
@@ -387,34 +423,7 @@ function App() {
           }}
         />
         <div style={{ marginTop: '10px', display: 'flex', gap: '20px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
-          <span>Status: {playbackState === 'playing' ? 'Playing' : playbackState === 'paused' ? 'Paused' : 'Stopped'} | Order: {audioEngine.order}</span>
-          <label>
-            Gain:
-            <input
-              type="range"
-              min="0"
-              max="10"
-              step="0.1"
-              value={viewMode === 'inside' ? insideGain : outsideGain}
-              onChange={(e) => handleGainChange(parseFloat(e.target.value))}
-              style={{ marginLeft: '10px', verticalAlign: 'middle' }}
-            />
-            <span style={{ marginLeft: '5px' }}>{(viewMode === 'inside' ? insideGain : outsideGain).toFixed(1)}</span>
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', fontSize: '0.9em', color: '#000' }}>
-            Zoom:
-            <input
-              type="range"
-              min="20"
-              max="160"
-              step="1"
-              value={zoomFov}
-              onChange={(e) => handleZoomChange(parseFloat(e.target.value))}
-              style={{ marginLeft: '10px', verticalAlign: 'middle' }}
-              disabled={viewMode !== 'inside'}
-            />
-            <span style={{ marginLeft: '5px', width: '3ch', color: '#000' }}>{Math.round(zoomFov)}°</span>
-          </label>
+          <span>{`Status: ${playbackState === 'playing' ? 'Playing' : playbackState === 'paused' ? 'Paused' : 'Stopped'} | Order: ${audioEngine.order}`}</span>
           <div className="view-mode-toggle">
             <button
               className={`view-mode-btn ${viewMode === 'inside' ? 'active' : ''}`}
@@ -464,18 +473,30 @@ function App() {
               fontWeight: 'bold',
             }}
           >
-            {isTrackingCam ? '📹 Tracking ON' : '📹 Start Tracking'}
+            <span key={isTrackingCam ? 'on' : 'off'}>{isTrackingCam ? '📹 Tracking ON' : '📹 Start Tracking'}</span>
           </button>
         </div>
       </div>
 
-      {isTrackingCam && (
-        <ESKFTuningPanel
-          onParamsChange={handleESKFParams}
-          initialParams={eskfParams}
-          onReset={handleESKFReset}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', marginTop: '20px' }}>
+        <VisualizerControls
+          params={visualParams}
+          onChange={handleVisualParamsChange}
+          onReset={handleVisualReset}
+          gain={viewMode === 'inside' ? insideGain : outsideGain}
+          onGainChange={handleGainChange}
+          zoomFov={zoomFov}
+          onZoomChange={handleZoomChange}
+          isInsideView={viewMode === 'inside'}
         />
-      )}
+        {isTrackingCam && (
+          <ESKFTuningPanel
+            onParamsChange={handleESKFParams}
+            initialParams={eskfParams}
+            onReset={handleESKFReset}
+          />
+        )}
+      </div>
 
       <div style={{ marginTop: '20px', fontSize: '0.9em', color: '#666' }}>
         <p><strong>Instructions:</strong> Drag and drop audio files or folders. Press <kbd>Space</kbd> to play/pause.</p>

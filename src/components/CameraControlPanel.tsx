@@ -33,7 +33,7 @@ export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
     return (
         <div className="camera-control-panel" style={{ position: 'relative' }}>
             {onReset && (
-                <button 
+                <button
                     onClick={onReset}
                     style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '0.8em', padding: '2px 8px', cursor: 'pointer' }}
                 >
@@ -165,7 +165,7 @@ const ControlSlider: React.FC<ControlSliderProps> = ({
             style={{ opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? 'none' : 'auto' }}
         />
         <span className="camera-control-value">
-            {Math.round(value * 10) / 10}{unit}
+            {`${Math.round(value * 10) / 10}${unit}`}
         </span>
     </div>
 );
