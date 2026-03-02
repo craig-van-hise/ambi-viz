@@ -35,7 +35,7 @@ function App() {
   // Transport state
   const [playbackState, setPlaybackState] = useState<PlaybackState>('stopped');
   const [isLooping, setIsLooping] = useState(true);
-  const [zoomFov, setZoomFov] = useState(115); // Default FOV
+  const [zoomFov, setZoomFov] = useState(120); // Default FOV
 
   const [cameraUIState, setCameraUIState] = useState<CameraUIState>({
     yaw: 0,
@@ -75,10 +75,10 @@ function App() {
         sceneRef.current.updateFromUI('pitch', 0);
         sceneRef.current.updateFromUI('roll', 0);
       }
-      setInsideGain(2.2);
-      persistState({ insideGain: 2.2 });
-      setZoomFov(115);
-      if (sceneRef.current) sceneRef.current.setFov(115);
+      setInsideGain(3.0);
+      persistState({ insideGain: 3.0 });
+      setZoomFov(120);
+      if (sceneRef.current) sceneRef.current.setFov(120);
     } else {
       setCameraUIState(prev => ({ ...prev, x: 0, y: 3.3, z: 3.6 }));
       if (sceneRef.current) {
@@ -86,8 +86,8 @@ function App() {
         sceneRef.current.updateFromUI('y', 3.3);
         sceneRef.current.updateFromUI('z', 3.6);
       }
-      setOutsideGain(7.2);
-      persistState({ outsideGain: 7.2 });
+      setOutsideGain(3.0);
+      persistState({ outsideGain: 3.0 });
     }
   }, [viewMode, persistState]);
 
@@ -191,7 +191,21 @@ function App() {
 
   const handleVisualReset = useCallback(() => {
     setVisualParams(DEFAULT_VISUAL_PARAMS);
-    persistState({ visualParams: DEFAULT_VISUAL_PARAMS });
+
+    // Also reset Zoom and Gain specifically when resetting Visualizer Controls
+    setZoomFov(120);
+    setInsideGain(3.0);
+    setOutsideGain(3.0);
+
+    if (sceneRef.current) {
+      sceneRef.current.setFov(120);
+    }
+
+    persistState({
+      visualParams: DEFAULT_VISUAL_PARAMS,
+      insideGain: 3.0,
+      outsideGain: 3.0
+    });
   }, [persistState]);
 
   const handleGainChange = useCallback((newGain: number) => {

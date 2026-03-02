@@ -33,6 +33,10 @@ describe('VisualizerControls', () => {
         expect(screen.getByText('Knee (Color)')).toBeDefined();
         expect(screen.getByText('Edge Falloff')).toBeDefined();
         expect(screen.getByText('Dissipation')).toBeDefined();
+        expect(screen.getByText('0.000')).toBeDefined(); // densityThreshold uses toFixed(3)
+        expect(screen.getAllByText('1.0x').length).toBeGreaterThan(0); // densityMult and emissionMult defaults 1.0
+        expect(screen.getByText('0.50')).toBeDefined(); // heatmapKnee at 0.50
+        expect(screen.getAllByText('0.00').length).toBeGreaterThan(0); // dissipationRate at 0.00
 
         // Migrated params
         expect(screen.getByText('Zoom')).toBeDefined();

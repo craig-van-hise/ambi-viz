@@ -26,20 +26,20 @@ export interface PersistedState {
 
 const DEFAULTS: PersistedState = {
     hrtfUrl: '/hrtf/MIT_KEMAR_Normal.sofa',
-    insideGain: 2.2,
-    outsideGain: 7.2,
+    insideGain: 3.0,
+    outsideGain: 3.0,
     eskf: {
         tau: 0.125, // 125 ms
         R_scalar: 0.000938, // 9.38e-4
         Q_scalar: 0.25,
     },
     visualParams: {
-        densityThreshold: 0.05,
+        densityThreshold: 0,
         densityMult: 1.0,
         emissionMult: 1.0,
         heatmapKnee: 0.5,
         edgeFalloff: 1.0,
-        dissipationRate: 0.9,
+        dissipationRate: 0,
     },
 };
 

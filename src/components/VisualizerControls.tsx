@@ -10,12 +10,12 @@ export interface VisualParams {
 }
 
 export const DEFAULT_VISUAL_PARAMS: VisualParams = {
-    densityThreshold: 0.05,
+    densityThreshold: 0,
     densityMult: 1.0,
     emissionMult: 1.0,
     heatmapKnee: 0.5,
     edgeFalloff: 1.0,
-    dissipationRate: 0.9,
+    dissipationRate: 0,
 };
 
 interface Props {
