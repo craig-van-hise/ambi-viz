@@ -9,7 +9,7 @@ import { TrackQueue } from './components/TrackQueue';
 import { AudioEngine } from './audio/AudioEngine';
 import type { PlaybackState, QueueTrack } from './audio/AudioEngine';
 import { AmbiScene } from './visualizer/AmbiScene';
-import type { ViewMode } from './visualizer/AmbiScene';
+import type { ViewMode, VisualizationMode } from './visualizer/AmbiScene';
 
 const SUPPORTED_EXTENSIONS = ['wav', 'ambix', 'ogg', 'iamf'];
 
@@ -64,6 +64,7 @@ function App() {
   const [insideGain, setInsideGain] = useState(persisted.insideGain);
   const [outsideGain, setOutsideGain] = useState(persisted.outsideGain);
   const [viewMode, setViewMode] = useState<ViewMode>('inside');
+  const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>('volumetric');
   const [isDraggingSlider, setIsDraggingSlider] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -447,6 +448,13 @@ function App() {
     }
   }, [isTrackingCam]);
 
+  // Sync visualization mode to scene
+  useEffect(() => {
+    if (sceneRef.current) {
+      sceneRef.current.setVisualizationMode(visualizationMode);
+    }
+  }, [visualizationMode]);
+
   // Update Loop — render at 60fps, data at ~24fps
   useEffect(() => {
     let outputAnimationFrameId: number;
@@ -583,6 +591,22 @@ function App() {
               🔭 Outside
             </button>
           </div>
+
+          <div className="view-mode-toggle" style={{ marginTop: '5px' }}>
+            <button
+              className={`view-mode-btn ${visualizationMode === 'volumetric' ? 'active' : ''}`}
+              onClick={() => setVisualizationMode('volumetric')}
+            >
+              ☁️ Volumetric
+            </button>
+            <button
+              className={`view-mode-btn outside ${visualizationMode === 'sphere' ? 'active' : ''}`}
+              onClick={() => setVisualizationMode('sphere')}
+            >
+              🌐 Sphere
+            </button>
+          </div>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <button
               onClick={() => {

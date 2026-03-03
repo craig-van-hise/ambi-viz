@@ -1,17 +1,21 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { ambisonicVertexShader, ambisonicFragmentShader } from './shaders/ambisonic';
+import { sphereDeformationVertexShader, sphereDeformationFragmentShader } from './shaders/sphereDeformation';
 import { Throttle } from '../utils/Throttle';
 
 export type ViewMode = 'inside' | 'outside';
+export type VisualizationMode = 'volumetric' | 'sphere';
 
 export class AmbiScene {
     container: HTMLElement;
     scene: THREE.Scene;
     camera: THREE.PerspectiveCamera;
     renderer: THREE.WebGLRenderer;
-    material: THREE.ShaderMaterial;
-    mesh: THREE.Mesh;
+    volumetricMaterial: THREE.ShaderMaterial;
+    volumetricMesh: THREE.Mesh;
+    sphereMaterial: THREE.ShaderMaterial;
+    sphereMesh: THREE.Mesh;
     controls: OrbitControls;
 
     // Resolution scaling
@@ -23,7 +27,8 @@ export class AmbiScene {
     compositeCamera: THREE.OrthographicCamera | null = null;
     resolutionScale: number;
 
-    // View mode
+    // View & Visualization mode
+    visualizationMode: VisualizationMode = 'volumetric';
     viewMode: ViewMode = 'inside';
     onFovChange: ((fov: number) => void) | null = null;
 
@@ -76,8 +81,8 @@ export class AmbiScene {
         // Default to inside-out view
         this.setViewMode('inside');
 
-        // 5. Shader Material
-        this.material = new THREE.ShaderMaterial({
+        // 5. Volumetric Shader Material
+        this.volumetricMaterial = new THREE.ShaderMaterial({
             vertexShader: ambisonicVertexShader,
             fragmentShader: ambisonicFragmentShader,
             uniforms: {
@@ -101,8 +106,26 @@ export class AmbiScene {
 
         // 6. Geometry — BoxGeometry encompassing camera
         const geometry = new THREE.BoxGeometry(10, 10, 10);
-        this.mesh = new THREE.Mesh(geometry, this.material);
-        this.scene.add(this.mesh);
+        this.volumetricMesh = new THREE.Mesh(geometry, this.volumetricMaterial);
+        this.scene.add(this.volumetricMesh);
+
+        // 6.5. Sphere Deformation Shader Material
+        this.sphereMaterial = new THREE.ShaderMaterial({
+            vertexShader: sphereDeformationVertexShader,
+            fragmentShader: sphereDeformationFragmentShader,
+            uniforms: {
+                uCovariance: { value: new Float32Array(256) },
+                uOrder: { value: 1 },
+                uGain: { value: 1.0 },
+                uOpacity: { value: 1.0 }
+            },
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+        const sphereGeometry = new THREE.SphereGeometry(1, 128, 128);
+        this.sphereMesh = new THREE.Mesh(sphereGeometry, this.sphereMaterial);
+        this.sphereMesh.visible = false;
+        this.scene.add(this.sphereMesh);
 
         // Helpers
         const axesHelper = new THREE.AxesHelper(2);
@@ -140,8 +163,8 @@ export class AmbiScene {
         this.renderTargetA = new THREE.WebGLRenderTarget(rtWidth, rtHeight, options);
         this.renderTargetB = new THREE.WebGLRenderTarget(rtWidth, rtHeight, options);
 
-        if (this.material && this.material.uniforms.uResolution) {
-            this.material.uniforms.uResolution.value.set(rtWidth, rtHeight);
+        if (this.volumetricMaterial && this.volumetricMaterial.uniforms.uResolution) {
+            this.volumetricMaterial.uniforms.uResolution.value.set(rtWidth, rtHeight);
         }
 
         // Composite pass: full-screen quad that displays the low-res render target
@@ -178,6 +201,17 @@ export class AmbiScene {
             this.compositeScene.add(quad);
         } else if (this.compositeMaterial) {
             this.compositeMaterial.uniforms.tDiffuse.value = this.renderTargetA.texture;
+        }
+    }
+
+    setVisualizationMode(mode: VisualizationMode) {
+        this.visualizationMode = mode;
+        if (mode === 'volumetric') {
+            this.volumetricMesh.visible = true;
+            this.sphereMesh.visible = false;
+        } else {
+            this.volumetricMesh.visible = false;
+            this.sphereMesh.visible = true;
         }
     }
 
@@ -327,41 +361,53 @@ export class AmbiScene {
     }
 
     // Volumetric Parameter Setters / Getters
-    setDensityThreshold(val: number) { this.material.uniforms.uDensityThreshold.value = Number(val) || 0; }
-    getDensityThreshold(): number { return this.material.uniforms.uDensityThreshold.value; }
+    setDensityThreshold(val: number) { this.volumetricMaterial.uniforms.uDensityThreshold.value = Number(val) || 0; }
+    getDensityThreshold(): number { return this.volumetricMaterial.uniforms.uDensityThreshold.value; }
 
-    setDensityMult(val: number) { this.material.uniforms.uDensityMult.value = Number(val) || 0; }
-    getDensityMult(): number { return this.material.uniforms.uDensityMult.value; }
+    setDensityMult(val: number) { this.volumetricMaterial.uniforms.uDensityMult.value = Number(val) || 0; }
+    getDensityMult(): number { return this.volumetricMaterial.uniforms.uDensityMult.value; }
 
-    setEmissionMult(val: number) { this.material.uniforms.uEmissionMult.value = Number(val) || 0; }
-    getEmissionMult(): number { return this.material.uniforms.uEmissionMult.value; }
+    setEmissionMult(val: number) { this.volumetricMaterial.uniforms.uEmissionMult.value = Number(val) || 0; }
+    getEmissionMult(): number { return this.volumetricMaterial.uniforms.uEmissionMult.value; }
 
-    setHeatmapKnee(val: number) { this.material.uniforms.uHeatmapKnee.value = Number(val) || 0; }
-    getHeatmapKnee(): number { return this.material.uniforms.uHeatmapKnee.value; }
+    setHeatmapKnee(val: number) { this.volumetricMaterial.uniforms.uHeatmapKnee.value = Number(val) || 0; }
+    getHeatmapKnee(): number { return this.volumetricMaterial.uniforms.uHeatmapKnee.value; }
 
-    setEdgeFalloff(val: number) { this.material.uniforms.uEdgeFalloff.value = Number(val) || 0; }
-    getEdgeFalloff(): number { return this.material.uniforms.uEdgeFalloff.value; }
+    setEdgeFalloff(val: number) { this.volumetricMaterial.uniforms.uEdgeFalloff.value = Number(val) || 0; }
+    getEdgeFalloff(): number { return this.volumetricMaterial.uniforms.uEdgeFalloff.value; }
 
-    setDissipationRate(val: number) { this.material.uniforms.uDissipationRate.value = Number(val) || 0; }
-    getDissipationRate(): number { return this.material.uniforms.uDissipationRate.value; }
+    setDissipationRate(val: number) { this.volumetricMaterial.uniforms.uDissipationRate.value = Number(val) || 0; }
+    getDissipationRate(): number { return this.volumetricMaterial.uniforms.uDissipationRate.value; }
 
     updateCovariance(cov: Float32Array, order: number, gain: number = 1.0) {
-        if (this.material.isShaderMaterial) {
-            // Pack flat covariance into 64 Vector4s for the shader
-            const vec4Array = this.material.uniforms.uCovariance.value as THREE.Vector4[];
-            for (let i = 0; i < 64; i++) {
-                const baseIdx = i * 4;
-                // Only fill values within the actual covariance matrix bounds
-                // The covariance is nCh×nCh, packed row-major
-                // Each row of the 16×16 matrix is split across 4 vec4s
-                if (baseIdx + 3 < cov.length) {
-                    vec4Array[i].set(cov[baseIdx], cov[baseIdx + 1], cov[baseIdx + 2], cov[baseIdx + 3]);
-                } else {
-                    vec4Array[i].set(0, 0, 0, 0);
+        if (this.visualizationMode === 'volumetric') {
+            if (this.volumetricMaterial.isShaderMaterial) {
+                // Pack flat covariance into 64 Vector4s for the shader
+                const vec4Array = this.volumetricMaterial.uniforms.uCovariance.value as THREE.Vector4[];
+                for (let i = 0; i < 64; i++) {
+                    const baseIdx = i * 4;
+                    // Only fill values within the actual covariance matrix bounds
+                    // The covariance is nCh×nCh, packed row-major
+                    // Each row of the 16×16 matrix is split across 4 vec4s
+                    if (baseIdx + 3 < cov.length) {
+                        vec4Array[i].set(cov[baseIdx], cov[baseIdx + 1], cov[baseIdx + 2], cov[baseIdx + 3]);
+                    } else {
+                        vec4Array[i].set(0, 0, 0, 0);
+                    }
                 }
+                this.volumetricMaterial.uniforms.uOrder.value = order;
+                this.volumetricMaterial.uniforms.uGain.value = gain;
             }
-            this.material.uniforms.uOrder.value = order;
-            this.material.uniforms.uGain.value = gain;
+        } else {
+            // Sphere Deformation fallback
+            let safeCov = cov;
+            if (cov.length < 256) {
+                safeCov = new Float32Array(256);
+                safeCov.set(cov);
+            }
+            this.sphereMaterial.uniforms.uCovariance.value = safeCov;
+            this.sphereMaterial.uniforms.uOrder.value = order;
+            this.sphereMaterial.uniforms.uGain.value = gain;
         }
     }
 
@@ -541,12 +587,12 @@ export class AmbiScene {
             });
         }
 
-        if (this.renderTargetA && this.renderTargetB && this.compositeScene && this.compositeCamera) {
+        if (this.visualizationMode === 'volumetric' && this.renderTargetA && this.renderTargetB && this.compositeScene && this.compositeCamera) {
             const currentTarget = this.pingPong ? this.renderTargetA : this.renderTargetB;
             const previousTarget = this.pingPong ? this.renderTargetB : this.renderTargetA;
 
             // Pass previous frame to shader for temporal dissipation
-            this.material.uniforms.tPreviousFrame.value = previousTarget.texture;
+            this.volumetricMaterial.uniforms.tPreviousFrame.value = previousTarget.texture;
 
             // Pass 1: Render volumetric scene to current render target
             this.renderer.setRenderTarget(currentTarget);
@@ -562,7 +608,8 @@ export class AmbiScene {
             // Swap FBOs for next frame
             this.pingPong = !this.pingPong;
         } else {
-            // Fallback: direct render
+            // Fallback or Sphere mode bypasses the composite pass to run at native resolution
+            this.renderer.setRenderTarget(null);
             this.renderer.render(this.scene, this.camera);
         }
     }
@@ -575,7 +622,8 @@ export class AmbiScene {
         this.renderer.dispose();
         if (this.renderTargetA) this.renderTargetA.dispose();
         if (this.renderTargetB) this.renderTargetB.dispose();
-        if (this.material.dispose) this.material.dispose();
+        if (this.volumetricMaterial.dispose) this.volumetricMaterial.dispose();
+        if (this.sphereMaterial.dispose) this.sphereMaterial.dispose();
         if (this.compositeMaterial) this.compositeMaterial.dispose();
         if (this.controls) this.controls.dispose();
 
