@@ -11,11 +11,38 @@
 |  ├── # 12-1.md
 |  ├── # 12.md
 |  ├── # 13
-|  |  └── # 1.md
 |  ├── # 13.md
+|  ├── # 14.md
+|  ├── # 15.md
+|  ├── # 16.md
+|  ├── # 17.md
+|  ├── # 18.md
+|  ├── # 19.md
 |  ├── # 2.md
+|  ├── # 20.md
+|  ├── # 21.md
+|  ├── # 22.md
+|  ├── # 23.md
+|  ├── # 24.md
+|  ├── # 25.md
+|  ├── # 26.md
 |  ├── # 3.md
+|  ├── # 30.md
+|  ├── # 31.md
+|  ├── # 32.md
+|  ├── # 33.md
+|  ├── # 34.md
+|  ├── # 36.md
+|  ├── # 37.md
+|  ├── # 38.md
+|  ├── # 39.md
 |  ├── # 4.md
+|  ├── # 40.md
+|  ├── # 41.md
+|  ├── # 42.md
+|  ├── # 43.md
+|  ├── # 44.md
+|  ├── # 45.md
 |  ├── # 5.md
 |  ├── # 6.md
 |  ├── # 7.md
@@ -24,6 +51,9 @@
 |  └── DEBUG_PLAN.md
 ├── README.md
 ├── REMOTE_LOGGING.md
+├── UI.md
+├── ambisonic_OLD.ts
+├── baseline_shader_math.md
 ├── browser.log
 ├── build_error.log
 ├── convert_sofa_to_json.py
@@ -38,71 +68,38 @@
 ├── public
 |  ├── HRTF_default.sofa.json
 |  ├── hrtf
-|  |  ├── MIT_KEMAR_Normal.sofa
-|  |  ├── Neumann_KU100_48k.sofa
-|  |  └── hrtf_kemar.json
 |  ├── obr.js
 |  ├── obr.wasm
 |  ├── test.wav
 |  ├── vite.svg
 |  └── worklets
-|     └── obr-processor.js
 ├── scripts
 |  └── remote-logger-server.js
 ├── src
 |  ├── App.css
 |  ├── App.tsx
+|  ├── HeadTrackingService.test.ts
 |  ├── HeadTrackingService.ts
+|  ├── Orientation.test.ts
 |  ├── assets
-|  |  └── react.svg
 |  ├── audio
-|  |  ├── AudioEngine.test.ts
-|  |  ├── AudioEngine.ts
-|  |  ├── OBRDecoder.test.ts
-|  |  ├── OBRDecoder.ts
-|  |  ├── RawCoefAnalyser.ts
-|  |  ├── obr-processor.test.ts
-|  |  └── obr_wrapper.cpp
 |  ├── components
-|  |  ├── ESKFTuningPanel.tsx
-|  |  ├── FileLoader.tsx
-|  |  ├── HrtfSelector.tsx
-|  |  ├── TrackQueue.tsx
-|  |  └── TransportControls.tsx
 |  ├── index.css
 |  ├── main.tsx
 |  ├── tracking
-|  |  ├── ESKF.test.ts
-|  |  ├── ESKF.ts
-|  |  ├── OneEuroFilter.test.ts
-|  |  ├── OneEuroFilter.ts
-|  |  ├── QuatPredictor.test.ts
-|  |  └── QuatPredictor.ts
 |  ├── types
-|  |  ├── HeadTracking.ts
-|  |  └── ambisonics.d.ts
 |  ├── utils
-|  |  ├── Throttle.test.ts
-|  |  ├── Throttle.ts
-|  |  ├── debug.ts
-|  |  ├── persistence.ts
-|  |  └── remoteLogger.ts
 |  ├── visualizer
-|  |  ├── AmbiScene.ts
-|  |  ├── shaderMath.test.ts
-|  |  ├── shaderMath.ts
-|  |  └── shaders
 |  └── workers
-|     └── VisionWorker.ts
 ├── tsconfig.app.json
 ├── tsconfig.json
 ├── tsconfig.node.json
 ├── vite.config.ts
 └── vitest.config.ts
 
-directory: 415 file: 882
+directory: 243 file: 87
 
-ignored: directory (36)
+ignored: directory (2)
 
 
 [2K[1G

@@ -1,4 +1,4 @@
-# PROJECT_STATE (2026-02-27)
+# PROJECT_STATE (2026-03-03)
 
 ## 1. Architecture
 
@@ -37,7 +37,8 @@
 |  |  ├── FileLoader.tsx
 |  |  ├── HrtfSelector.tsx
 |  |  ├── TrackQueue.tsx
-|  |  └── TransportControls.tsx
+|  |  ├── TransportControls.tsx
+|  |  └── VisualizerControls.tsx
 |  ├── tracking
 |  |  ├── ESKF.ts / ESKF.test.ts
 |  |  ├── OneEuroFilter.ts / OneEuroFilter.test.ts
@@ -48,7 +49,9 @@
 |  |  ├── AmbiScene.ts / AmbiScene.test.ts
 |  |  ├── CameraControl.test.ts
 |  |  ├── shaderMath.ts / shaderMath.test.ts
-|  |  └── shaders/
+|  |  └── shaders
+|  |     ├── ambisonic.ts
+|  |     └── sphereDeformation.ts
 |  └── workers
 |     └── VisionWorker.ts
 ├── scripts
@@ -100,20 +103,26 @@
     - Implemented Yaw inversion for the audio path (Stationary World model).
     - Forked Tracking and UI orientation paths: Visual = Physical movement, Audio = Environmental stability.
     - Optimized transformation logic via `OrientationUtils.ts` (zero-allocation loop).
--   **PRP #26 (Visual-Cognitive Alignment)**: **Pending**.
+-   **PRP #43 (Volumetric Ray-Marching Bounding Sphere Intersection Fix)**: **Complete**.
+    - Implemented quadratic ray-sphere intersection to fast-forward rays to the volume boundary.
+    - Expanded `MAX_STEPS` to 64 and `MAX_DIST` to 30.0 for extreme distance viewing.
+-   **PRP #44 (Salvage Legacy Sphere Deformation)**: **Complete**.
+    - Isolated and extracted legacy visualization code for analysis.
+-   **PRP #45 (Integrate Multi-Mode Visualization Architecture)**: **Complete**.
+    - Refactored `AmbiScene.ts` to manage both Volumetric and Sphere Deformation meshes.
+    - Implemented UI toggle in `App.tsx` and `VisualizerControls.tsx`.
+-   **PRP #46 (Outside Camera Control Activation)**: **Complete**.
+    - Enabled manual camera position sliders in the Outside View by removing reactive disablement.
+-   **PRP #26 (Visual-Cognitive Alignment)**: **Complete**.
     - Objective: Decouple audio path (raw YPR) from visual path (inverted display), align Green Pointer as gaze indicator, implement cockpit-view roll on `camera.up`.
 
 ## 4. Recent Changes (Summary)
 
--   **Feature (PRP #36)**: Implemented "Stationary World" audio yaw inversion; decoupled audio/visual orientation paths in SAB.
--   **Feature (PRP #25)**: Implemented 3DOF orientation matrix fix — pitch inversion end-to-end (UI, tracker, OBR worklet), Roll via `camera.up` math, and hard origin lock in animate loop.
--   **Fix (PRP #24)**: Resolved track queue double-click playback collision with strict stop/load/play teardown sequence.
--   **Feature (PRP #11-12)**: Implemented Volumetric Ray Marching renderer with resolution scaling and covariance-based energy estimation.
--   **Improvement (PRP #22)**: Decoupled UI sync from events; implemented throttled polling in render loop.
--   **Fix (PRP #20-21)**: Resolved "Black Screen" and "Warp Zone" crashes via pitch clamping and origin locking.
--   **Feature (PRP #18-19)**: Achieved full bidirectional synchronization between YPR sliders and OrbitControls.
--   7e02716 - feat(viz): implement bidirectional camera control, head tracking bridge, and singularity protection (88 minutes ago)
--   c456801 - feat(viz): decouple FOV states, implement zoom slider, and fix transport logic (PRPs #14-17)
--   221fa46 - feat(audio): implement track queue, transport controls, and ESKF tuning (PRP #13 Phase 6)
--   cd7b787 - feat(tracking): implement predictive head tracking using 1 Euro Filter and 6D ESKF
--   adbb8e9 - feat(audio): synchronize UI camera rotation with binaural renderer via SAB bridge
+-   **Feature**: Enabled manual camera position sliders in the Outside View for expanded manual control.
+-   **Feature**: Integrated Multi-Mode Visualization (toggle between Ray-Marching Volumetrics and Legacy Sphere Deformation).
+-   **Fix**: Implemented Bounding Sphere Intersection in shaders to fix disappearing visualization at extreme camera distances.
+-   **b6cd2cc - feat: Enable camera position sliders by removing the `disabled` prop. (78 minutes ago)**
+-   **9371427 - feat: Implement sphere deformation visualization with new GLSL shaders, integrate into `AmbiScene` and `App.tsx`, and add related planning documents. (2 hours ago)**
+-   **145b263 - fix: implement bounding sphere intersection to optimize volumetric ray marching and adjust rendering constants. (16 hours ago)**
+-   **e749b6b - feat: Implement volumetric ray-marching bounding sphere intersection fix by increasing shader limits and fast-forwarding ray start, documented in PRP #43. (16 hours ago)**
+-   **2561b29 - changed UI to get ready for makeover (16 hours ago)**

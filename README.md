@@ -27,7 +27,9 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
     -   **Volumetric Ray Marching**: Real-time rendering of the 3D sound field using custom GLSL shaders.
     -   **Covariance Matrix**: Uses Quadratic Form ($Y^T C Y$) for accurate energy estimation (Order 1-3).
     -   **Resolution Scaling (Pass-through Composite)**: High-performance rendering for M1/M2 chips by calculating volumetric density at lower resolution and compositing to a full-res quad.
-    -   **Interactive Controls**: Gain slider, **Inside View Zoom slider**, View Mode toggle (Inside/Outside), and Camera Tracking toggle.
+    -   **Visualization Modes**: Toggle between high-performance **Volumetric Ray Marching** and legacy **Sphere Deformation** visuals in real-time.
+    -   **Bounding Sphere Intersection**: Quadratic ray-sphere intersection logic optimizes the ray-marching path, preventing visualization clipping and improving performance at extreme camera distances/angles.
+    -   **Interactive Controls**: Gain slider, **Inside View Zoom slider**, manual **Camera Position** sliders (enabled for Outside View), View Mode toggle (Inside/Outside), and Camera Tracking toggle.
 
 ## Usage
 

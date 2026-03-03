@@ -111,7 +111,7 @@ export function ESKFTuningPanel({ onParamsChange, initialParams, onReset }: ESKF
                     Reset
                 </button>
             )}
-            <div className="eskf-tuning-title">⚙ ESKF Tuning</div>
+            <div className="eskf-tuning-title" title="Adjusts the Error-State Kalman Filter (ESKF) parameters that fuse webcam tracking data for responsive, low-latency head orientation. Use these settings to balance smoothness against responsiveness.">⚙ Webcam ESKF Tuning</div>
             <div className="eskf-tuning-row" title="Offsets system delay. Increase until audio panning feels instantaneous. If the sound field 'rubber-bands' or overshoots when you abruptly stop your head, decrease this value.">
                 <label className="eskf-label">
                     <span className="eskf-label-text">τ (Prediction)</span>

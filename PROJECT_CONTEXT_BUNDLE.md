@@ -13,11 +13,38 @@
 |  ├── # 12-1.md
 |  ├── # 12.md
 |  ├── # 13
-|  |  └── # 1.md
 |  ├── # 13.md
+|  ├── # 14.md
+|  ├── # 15.md
+|  ├── # 16.md
+|  ├── # 17.md
+|  ├── # 18.md
+|  ├── # 19.md
 |  ├── # 2.md
+|  ├── # 20.md
+|  ├── # 21.md
+|  ├── # 22.md
+|  ├── # 23.md
+|  ├── # 24.md
+|  ├── # 25.md
+|  ├── # 26.md
 |  ├── # 3.md
+|  ├── # 30.md
+|  ├── # 31.md
+|  ├── # 32.md
+|  ├── # 33.md
+|  ├── # 34.md
+|  ├── # 36.md
+|  ├── # 37.md
+|  ├── # 38.md
+|  ├── # 39.md
 |  ├── # 4.md
+|  ├── # 40.md
+|  ├── # 41.md
+|  ├── # 42.md
+|  ├── # 43.md
+|  ├── # 44.md
+|  ├── # 45.md
 |  ├── # 5.md
 |  ├── # 6.md
 |  ├── # 7.md
@@ -26,6 +53,9 @@
 |  └── DEBUG_PLAN.md
 ├── README.md
 ├── REMOTE_LOGGING.md
+├── UI.md
+├── ambisonic_OLD.ts
+├── baseline_shader_math.md
 ├── browser.log
 ├── build_error.log
 ├── convert_sofa_to_json.py
@@ -40,78 +70,45 @@
 ├── public
 |  ├── HRTF_default.sofa.json
 |  ├── hrtf
-|  |  ├── MIT_KEMAR_Normal.sofa
-|  |  ├── Neumann_KU100_48k.sofa
-|  |  └── hrtf_kemar.json
 |  ├── obr.js
 |  ├── obr.wasm
 |  ├── test.wav
 |  ├── vite.svg
 |  └── worklets
-|     └── obr-processor.js
 ├── scripts
 |  └── remote-logger-server.js
 ├── src
 |  ├── App.css
 |  ├── App.tsx
+|  ├── HeadTrackingService.test.ts
 |  ├── HeadTrackingService.ts
+|  ├── Orientation.test.ts
 |  ├── assets
-|  |  └── react.svg
 |  ├── audio
-|  |  ├── AudioEngine.test.ts
-|  |  ├── AudioEngine.ts
-|  |  ├── OBRDecoder.test.ts
-|  |  ├── OBRDecoder.ts
-|  |  ├── RawCoefAnalyser.ts
-|  |  ├── obr-processor.test.ts
-|  |  └── obr_wrapper.cpp
 |  ├── components
-|  |  ├── ESKFTuningPanel.tsx
-|  |  ├── FileLoader.tsx
-|  |  ├── HrtfSelector.tsx
-|  |  ├── TrackQueue.tsx
-|  |  └── TransportControls.tsx
 |  ├── index.css
 |  ├── main.tsx
 |  ├── tracking
-|  |  ├── ESKF.test.ts
-|  |  ├── ESKF.ts
-|  |  ├── OneEuroFilter.test.ts
-|  |  ├── OneEuroFilter.ts
-|  |  ├── QuatPredictor.test.ts
-|  |  └── QuatPredictor.ts
 |  ├── types
-|  |  ├── HeadTracking.ts
-|  |  └── ambisonics.d.ts
 |  ├── utils
-|  |  ├── Throttle.test.ts
-|  |  ├── Throttle.ts
-|  |  ├── debug.ts
-|  |  ├── persistence.ts
-|  |  └── remoteLogger.ts
 |  ├── visualizer
-|  |  ├── AmbiScene.ts
-|  |  ├── shaderMath.test.ts
-|  |  ├── shaderMath.ts
-|  |  └── shaders
 |  └── workers
-|     └── VisionWorker.ts
 ├── tsconfig.app.json
 ├── tsconfig.json
 ├── tsconfig.node.json
 ├── vite.config.ts
 └── vitest.config.ts
 
-directory: 415 file: 882
+directory: 243 file: 87
 
-ignored: directory (36)
+ignored: directory (2)
 
 
 [2K[1G
 
 ### FILE: PROJECT_STATE.md
 
-# PROJECT_STATE (2026-02-27)
+# PROJECT_STATE (2026-03-03)
 
 ## 1. Architecture
 
@@ -150,7 +147,8 @@ ignored: directory (36)
 |  |  ├── FileLoader.tsx
 |  |  ├── HrtfSelector.tsx
 |  |  ├── TrackQueue.tsx
-|  |  └── TransportControls.tsx
+|  |  ├── TransportControls.tsx
+|  |  └── VisualizerControls.tsx
 |  ├── tracking
 |  |  ├── ESKF.ts / ESKF.test.ts
 |  |  ├── OneEuroFilter.ts / OneEuroFilter.test.ts
@@ -161,7 +159,9 @@ ignored: directory (36)
 |  |  ├── AmbiScene.ts / AmbiScene.test.ts
 |  |  ├── CameraControl.test.ts
 |  |  ├── shaderMath.ts / shaderMath.test.ts
-|  |  └── shaders/
+|  |  └── shaders
+|  |     ├── ambisonic.ts
+|  |     └── sphereDeformation.ts
 |  └── workers
 |     └── VisionWorker.ts
 ├── scripts
@@ -208,22 +208,34 @@ ignored: directory (36)
     - **Phase 2:** Pitch inversion applied end-to-end (tracker → camera, UI feedback round-trip), Roll pipeline activated via `currentRoll` state and `camera.up` math.
     - **Phase 3:** `camera.up.set(-sin(roll), cos(roll), 0)` applied in both UI slider and head-tracking paths; OBR worklet receives pitch-inverted quaternion.
     - All 60 Vitest tests passing (11 test files).
+-   **PRP #36 (Stationary World & Orientation Recovery)**: **Complete**.
+    - Decoupled Audio orientation from Visual orientation in the SAB bridge.
+    - Implemented Yaw inversion for the audio path (Stationary World model).
+    - Forked Tracking and UI orientation paths: Visual = Physical movement, Audio = Environmental stability.
+    - Optimized transformation logic via `OrientationUtils.ts` (zero-allocation loop).
+-   **PRP #43 (Volumetric Ray-Marching Bounding Sphere Intersection Fix)**: **Complete**.
+    - Implemented quadratic ray-sphere intersection to fast-forward rays to the volume boundary.
+    - Expanded `MAX_STEPS` to 64 and `MAX_DIST` to 30.0 for extreme distance viewing.
+-   **PRP #44 (Salvage Legacy Sphere Deformation)**: **Complete**.
+    - Isolated and extracted legacy visualization code for analysis.
+-   **PRP #45 (Integrate Multi-Mode Visualization Architecture)**: **Complete**.
+    - Refactored `AmbiScene.ts` to manage both Volumetric and Sphere Deformation meshes.
+    - Implemented UI toggle in `App.tsx` and `VisualizerControls.tsx`.
+-   **PRP #46 (Outside Camera Control Activation)**: **Complete**.
+    - Enabled manual camera position sliders in the Outside View by removing reactive disablement.
 -   **PRP #26 (Visual-Cognitive Alignment)**: **Pending**.
     - Objective: Decouple audio path (raw YPR) from visual path (inverted display), align Green Pointer as gaze indicator, implement cockpit-view roll on `camera.up`.
 
 ## 4. Recent Changes (Summary)
 
--   **Feature (PRP #25)**: Implemented 3DOF orientation matrix fix — pitch inversion end-to-end (UI, tracker, OBR worklet), Roll via `camera.up` math, and hard origin lock in animate loop.
--   **Fix (PRP #24)**: Resolved track queue double-click playback collision with strict stop/load/play teardown sequence.
--   **Feature (PRP #23)**: Integrated webcam orientation directly into the 3D camera and synced UI feedback.
--   **Improvement (PRP #22)**: Decoupled UI sync from events; implemented throttled polling in render loop.
--   **Fix (PRP #20-21)**: Resolved "Black Screen" and "Warp Zone" crashes via pitch clamping and origin locking.
--   **Feature (PRP #18-19)**: Achieved full bidirectional synchronization between YPR sliders and OrbitControls.
--   7e02716 - feat(viz): implement bidirectional camera control, head tracking bridge, and singularity protection (88 minutes ago)
--   c456801 - feat(viz): decouple FOV states, implement zoom slider, and fix transport logic (PRPs #14-17)
--   221fa46 - feat(audio): implement track queue, transport controls, and ESKF tuning (PRP #13 Phase 6)
--   cd7b787 - feat(tracking): implement predictive head tracking using 1 Euro Filter and 6D ESKF
--   adbb8e9 - feat(audio): synchronize UI camera rotation with binaural renderer via SAB bridge
+-   **Feature**: Enabled manual camera position sliders in the Outside View for expanded manual control.
+-   **Feature**: Integrated Multi-Mode Visualization (toggle between Ray-Marching Volumetrics and Legacy Sphere Deformation).
+-   **Fix**: Implemented Bounding Sphere Intersection in shaders to fix disappearing visualization at extreme camera distances.
+-   **b6cd2cc - feat: Enable camera position sliders by removing the `disabled` prop. (78 minutes ago)**
+-   **9371427 - feat: Implement sphere deformation visualization with new GLSL shaders, integrate into `AmbiScene` and `App.tsx`, and add related planning documents. (2 hours ago)**
+-   **145b263 - fix: implement bounding sphere intersection to optimize volumetric ray marching and adjust rendering constants. (16 hours ago)**
+-   **e749b6b - feat: Implement volumetric ray-marching bounding sphere intersection fix by increasing shader limits and fast-forwarding ray start, documented in PRP #43. (16 hours ago)**
+-   **2561b29 - changed UI to get ready for makeover (16 hours ago)**
 
 
 ### FILE: README.md
@@ -254,9 +266,12 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 -   **State Persistence**: Automatic `localStorage` persistence for Gain, HRTF profile, and ESKF tuning parameters.
 -   **Ambisonic Decoding**: Supports Order 1-3 Ambisonics (ACN/SN3D) via Google Open Binaural Renderer (OBR) WASM.
 -   **Real-time Visualization**:
-    -   **Spherical Harmonics**: Deforms a 3D sphere based on the directional energy of the sound field.
-    -   **Covariance Matrix**: Uses Quadratic Form ($Y^T C Y$) for accurate energy estimation.
-    -   **Interactive Controls**: Gain slider, **Inside View Zoom slider**, View Mode toggle (Inside/Outside), and Camera Tracking toggle.
+    -   **Volumetric Ray Marching**: Real-time rendering of the 3D sound field using custom GLSL shaders.
+    -   **Covariance Matrix**: Uses Quadratic Form ($Y^T C Y$) for accurate energy estimation (Order 1-3).
+    -   **Resolution Scaling (Pass-through Composite)**: High-performance rendering for M1/M2 chips by calculating volumetric density at lower resolution and compositing to a full-res quad.
+    -   **Visualization Modes**: Toggle between high-performance **Volumetric Ray Marching** and legacy **Sphere Deformation** visuals in real-time.
+    -   **Bounding Sphere Intersection**: Quadratic ray-sphere intersection logic optimizes the ray-marching path, preventing visualization clipping and improving performance at extreme camera distances/angles.
+    -   **Interactive Controls**: Gain slider, **Inside View Zoom slider**, manual **Camera Position** sliders (enabled for Outside View), View Mode toggle (Inside/Outside), and Camera Tracking toggle.
 
 ## Usage
 
