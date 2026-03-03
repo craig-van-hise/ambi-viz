@@ -36,9 +36,9 @@ uniform float uDissipationRate;
 uniform vec2 uResolution;
 
 // Constants
-#define MAX_STEPS 32
-#define STEP_SIZE 0.1
-#define MAX_DIST 10.0
+#define MAX_STEPS 64
+#define STEP_SIZE 0.15
+#define MAX_DIST 30.0
 
 // SH Basis Function (Hardcoded for Order 3, ACN/SN3D)
 float getSH(int i, vec3 d) {
@@ -141,7 +141,17 @@ void main() {
             if (dirDensity >= 0.001) {
                 float totalDensity = 0.0;
                 vec3 accumulatedColor = vec3(0.0);
-                float t = 0.1;
+
+                // --- BOUNDING SPHERE INTERSECTION ---
+                float b = dot(rayOrigin, rayDir);
+                float c = dot(rayOrigin, rayOrigin) - 36.0; 
+                float h = b * b - c;
+                
+                // Fast-forward 't' to the entry point. 
+                // If inside the sphere, max(0.1, ...) keeps it safely in front of the camera.
+                float tEnter = max(0.1, -b - sqrt(max(0.0, h))); 
+                float t = tEnter;
+                // ------------------------------------
 
                 for (int i = 0; i < MAX_STEPS; i++) {
                     vec3 p = rayOrigin + rayDir * t;
