@@ -91,7 +91,6 @@ export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
                         onChange={(v) => onChange('x', v)}
                         onMouseDown={onDragStart}
                         onMouseUp={onDragEnd}
-                        disabled={isTracking}
                     />
                     <ControlSlider
                         label="Y"
@@ -102,7 +101,6 @@ export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
                         onChange={(v) => onChange('y', v)}
                         onMouseDown={onDragStart}
                         onMouseUp={onDragEnd}
-                        disabled={isTracking}
                     />
                     <ControlSlider
                         label="Z"
@@ -113,7 +111,6 @@ export const CameraControlPanel: React.FC<CameraControlPanelProps> = ({
                         onChange={(v) => onChange('z', v)}
                         onMouseDown={onDragStart}
                         onMouseUp={onDragEnd}
-                        disabled={isTracking}
                     />
                 </>
             )}
