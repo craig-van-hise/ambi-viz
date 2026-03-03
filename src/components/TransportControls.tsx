@@ -10,6 +10,7 @@ interface TransportControlsProps {
     onLoopToggle: () => void;
     onPrev: () => void;
     onNext: () => void;
+    onSettingsClick?: () => void;
 }
 
 export function TransportControls({
@@ -22,6 +23,7 @@ export function TransportControls({
     onLoopToggle,
     onPrev,
     onNext,
+    onSettingsClick,
 }: TransportControlsProps) {
     const hasMultipleTracks = queueSize > 1;
     const isLoading = playbackState === 'loading';
@@ -73,6 +75,15 @@ export function TransportControls({
                 >
                     🔁
                 </button>
+                {onSettingsClick && (
+                    <button
+                        className="transport-btn"
+                        onClick={onSettingsClick}
+                        title="Settings"
+                    >
+                        ⚙️
+                    </button>
+                )}
             </div>
             {isLoading && <span className="buffering-spinner">Buffering...</span>}
         </div>

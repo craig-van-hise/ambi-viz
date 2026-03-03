@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
-import { FileLoader } from './components/FileLoader';
 import { HrtfSelector } from './components/HrtfSelector';
 import { ESKFTuningPanel } from './components/ESKFTuningPanel';
 import { VisualizerControls, DEFAULT_VISUAL_PARAMS } from './components/VisualizerControls';
@@ -11,6 +10,41 @@ import { AudioEngine } from './audio/AudioEngine';
 import type { PlaybackState, QueueTrack } from './audio/AudioEngine';
 import { AmbiScene } from './visualizer/AmbiScene';
 import type { ViewMode } from './visualizer/AmbiScene';
+
+const SUPPORTED_EXTENSIONS = ['wav', 'ambix', 'ogg', 'iamf'];
+
+function readDirectoryRecursive(entry: FileSystemDirectoryEntry): Promise<File[]> {
+  return new Promise((resolve) => {
+    const reader = entry.createReader();
+    const allFiles: File[] = [];
+
+    const readBatch = () => {
+      reader.readEntries(async (entries) => {
+        if (entries.length === 0) {
+          resolve(allFiles);
+          return;
+        }
+        for (const e of entries) {
+          if (e.isFile) {
+            const file = await new Promise<File>((res) =>
+              (e as FileSystemFileEntry).file(res)
+            );
+            const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+            if (SUPPORTED_EXTENSIONS.includes(ext)) {
+              allFiles.push(file);
+            }
+          } else if (e.isDirectory) {
+            const subFiles = await readDirectoryRecursive(e as FileSystemDirectoryEntry);
+            allFiles.push(...subFiles);
+          }
+        }
+        readBatch();
+      });
+    };
+    readBatch();
+  });
+}
+
 import { Throttle } from './utils/Throttle';
 import { HeadTrackingService } from './HeadTrackingService';
 import { loadState, debouncedSave } from './utils/persistence';
@@ -31,6 +65,8 @@ function App() {
   const [outsideGain, setOutsideGain] = useState(persisted.outsideGain);
   const [viewMode, setViewMode] = useState<ViewMode>('inside');
   const [isDraggingSlider, setIsDraggingSlider] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Transport state
   const [playbackState, setPlaybackState] = useState<PlaybackState>('stopped');
@@ -136,6 +172,18 @@ function App() {
     }
   }, [audioEngine, headTracking]);
 
+  const handleHrtfSelect = useCallback(async (url: string) => {
+    setHrtfUrl(url);
+    persistState({ hrtfUrl: url });
+    if (audioEngine.obrDecoder) {
+      try {
+        await audioEngine.obrDecoder.loadSofa(url);
+      } catch (e) {
+        console.error('Error changing HRTF:', e);
+      }
+    }
+  }, [audioEngine, persistState]);
+
   const handleTrackSelect = useCallback(async (index: number) => {
     // 1. Guard against rapid-click spam
     if (audioEngine.playbackState === 'loading') return;
@@ -160,17 +208,68 @@ function App() {
     }
   }, [audioEngine]);
 
-  const handleHrtfSelect = useCallback(async (url: string) => {
-    setHrtfUrl(url);
-    persistState({ hrtfUrl: url });
-    if (audioEngine.obrDecoder) {
-      try {
-        await audioEngine.obrDecoder.loadSofa(url);
-      } catch (e) {
-        console.error('Error changing HRTF:', e);
+  const onDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  }, []);
+
+  const onDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  }, []);
+
+  const onDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const items = e.dataTransfer.items;
+    const collected: File[] = [];
+
+    if (items && items.length > 0) {
+      const entries: FileSystemEntry[] = [];
+      for (let i = 0; i < items.length; i++) {
+        const entry = items[i].webkitGetAsEntry?.();
+        if (entry) entries.push(entry);
+      }
+
+      if (entries.length > 0) {
+        for (const entry of entries) {
+          if (entry.isDirectory) {
+            const files = await readDirectoryRecursive(entry as FileSystemDirectoryEntry);
+            collected.push(...files);
+          } else if (entry.isFile) {
+            const file = await new Promise<File>((res) =>
+              (entry as FileSystemFileEntry).file(res)
+            );
+            const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+            if (SUPPORTED_EXTENSIONS.includes(ext)) {
+              collected.push(file);
+            }
+          }
+        }
       }
     }
-  }, [audioEngine, persistState]);
+
+    if (collected.length === 0) {
+      for (let i = 0; i < e.dataTransfer.files.length; i++) {
+        const file = e.dataTransfer.files[i];
+        const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+        if (SUPPORTED_EXTENSIONS.includes(ext)) {
+          collected.push(file);
+        }
+      }
+    }
+
+    if (collected.length > 0) {
+      collected.sort((a, b) => a.name.localeCompare(b.name));
+      handleFilesQueued(collected);
+    } else {
+      alert('No supported audio files found (.wav, .ambix, .ogg, .iamf)');
+    }
+  }, [handleFilesQueued]);
 
   const handleESKFParams = useCallback((params: { tau?: number; R_scalar?: number; Q_scalar?: number }) => {
     headTracking.updateESKFParams(params);
@@ -390,54 +489,80 @@ function App() {
     return () => cancelAnimationFrame(outputAnimationFrameId);
   }, [audioEngine, insideGain, outsideGain, viewMode, isTrackingCam, headTracking]);
 
-  const hasQueue = queue.length > 0;
-
   return (
     <div className="container">
       <h1>AmbiViz</h1>
-      <div style={{ marginBottom: '20px' }}>
-        <FileLoader onFilesQueued={handleFilesQueued} />
-        <HrtfSelector onSelect={handleHrtfSelect} />
-      </div>
+      <h3>Spherical Harmonics Visualization (up to Order 3)</h3>
 
-      {hasQueue && (
-        <>
-          <TrackQueue
-            tracks={queue}
-            currentIndex={currentIndex}
-            playbackState={playbackState}
-            onTrackSelect={handleTrackSelect}
-          />
-          <TransportControls
-            playbackState={playbackState}
-            isLooping={isLooping}
-            queueSize={queue.length}
-            onPlay={handlePlay}
-            onPause={handlePause}
-            onStop={handleStop}
-            onLoopToggle={handleLoopToggle}
-            onPrev={handlePrev}
-            onNext={handleNext}
-          />
-        </>
-      )}
-
-      <div className="viz-container">
-        <h3>Spherical Harmonics Visualization (Order 3)</h3>
+      <div
+        className={`viz-container ${isDragOver ? 'drag-over' : ''}`}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+        style={{
+          width: '75%',
+          paddingRight: '20px',
+          margin: '0 auto',
+          position: 'relative'
+        }}
+      >
         <div
           ref={containerRef}
           style={{
             width: '100%',
             aspectRatio: '2.35 / 1',
-            border: '1px solid #333',
+            border: `1px solid ${isDragOver ? '#646cff' : '#333'}`,
             background: '#000',
             position: 'relative',
             borderRadius: '4px',
             overflow: 'hidden',
+            transition: 'border-color 0.2s ease',
           }}
         />
-        <div style={{ marginTop: '10px', display: 'flex', gap: '20px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
-          <span>{`Status: ${playbackState === 'playing' ? 'Playing' : playbackState === 'paused' ? 'Paused' : 'Stopped'} | Order: ${audioEngine.order}`}</span>
+        {isDragOver && (
+          <div className="drop-overlay">
+            <div className="drop-overlay-content">
+              <h2>Drop Audio Files or Folders Here</h2>
+              <p>.wav · .ambix · .ogg · .iamf</p>
+            </div>
+          </div>
+        )}
+
+        {isSettingsOpen && (
+          <div className="settings-modal-overlay">
+            <div className="settings-modal-content">
+              <button className="settings-modal-close" onClick={() => setIsSettingsOpen(false)}>×</button>
+              <h3 className="settings-modal-title">Settings</h3>
+              <HrtfSelector onSelect={handleHrtfSelect} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ marginTop: '20px' }}>
+        <TrackQueue
+          tracks={queue}
+          currentIndex={currentIndex}
+          playbackState={playbackState}
+          onTrackSelect={handleTrackSelect}
+        />
+      </div>
+
+      <TransportControls
+        playbackState={playbackState}
+        isLooping={isLooping}
+        queueSize={queue.length}
+        onPlay={handlePlay}
+        onPause={handlePause}
+        onStop={handleStop}
+        onLoopToggle={handleLoopToggle}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        onSettingsClick={() => setIsSettingsOpen(true)}
+      />
+
+      <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', alignItems: 'flex-start', flexWrap: 'wrap', marginTop: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div className="view-mode-toggle">
             <button
               className={`view-mode-btn ${viewMode === 'inside' ? 'active' : ''}`}
@@ -458,41 +583,43 @@ function App() {
               🔭 Outside
             </button>
           </div>
-          <CameraControlPanel
-            viewMode={viewMode}
-            state={cameraUIState}
-            onChange={handleCameraUIChange}
-            onDragStart={() => setIsDraggingSlider(true)}
-            onDragEnd={() => setIsDraggingSlider(false)}
-            isTracking={isTrackingCam}
-            onReset={handleCameraReset}
-          />
-          <button
-            onClick={() => {
-              if (isTrackingCam) {
-                headTracking.stopCamera();
-                setIsTrackingCam(false);
-              } else {
-                headTracking.startCamera().then(() => setIsTrackingCam(true));
-              }
-            }}
-            style={{
-              padding: '6px 16px',
-              background: isTrackingCam ? '#4CAF50' : '#444',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '0.85em',
-              fontWeight: 'bold',
-            }}
-          >
-            <span key={isTrackingCam ? 'on' : 'off'}>{isTrackingCam ? '📹 Tracking ON' : '📹 Start Tracking'}</span>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <button
+              onClick={() => {
+                if (isTrackingCam) {
+                  headTracking.stopCamera();
+                  setIsTrackingCam(false);
+                } else {
+                  headTracking.startCamera().then(() => setIsTrackingCam(true));
+                }
+              }}
+              style={{
+                padding: '6px 16px',
+                background: isTrackingCam ? '#4CAF50' : '#444',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.85em',
+                fontWeight: 'bold',
+                height: '36px'
+              }}
+            >
+              <span key={isTrackingCam ? 'on' : 'off'}>{isTrackingCam ? '📹 Tracking ON' : '📹 Start Tracking'}</span>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', marginTop: '20px' }}>
+        <CameraControlPanel
+          viewMode={viewMode}
+          state={cameraUIState}
+          onChange={handleCameraUIChange}
+          onDragStart={() => setIsDraggingSlider(true)}
+          onDragEnd={() => setIsDraggingSlider(false)}
+          isTracking={isTrackingCam}
+          onReset={handleCameraReset}
+        />
+
         <VisualizerControls
           params={visualParams}
           onChange={handleVisualParamsChange}
@@ -503,17 +630,18 @@ function App() {
           onZoomChange={handleZoomChange}
           isInsideView={viewMode === 'inside'}
         />
-        {isTrackingCam && (
-          <ESKFTuningPanel
-            onParamsChange={handleESKFParams}
-            initialParams={eskfParams}
-            onReset={handleESKFReset}
-          />
-        )}
+      </div>
+
+      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
+        <ESKFTuningPanel
+          onParamsChange={handleESKFParams}
+          initialParams={eskfParams}
+          onReset={handleESKFReset}
+        />
       </div>
 
       <div style={{ marginTop: '20px', fontSize: '0.9em', color: '#666' }}>
-        <p><strong>Instructions:</strong> Drag and drop audio files or folders. Press <kbd>Space</kbd> to play/pause.</p>
+        <p><strong>Instructions:</strong> Drag and drop audio files or folders onto the main viewer. Press <kbd>Space</kbd> to play/pause.</p>
         <p><strong>Controls:</strong> {viewMode === 'inside'
           ? 'Click and drag to look around (3DoF head rotation).'
           : 'Click and drag to orbit. Scroll to zoom. Right-click to pan.'
