@@ -7,6 +7,9 @@ export interface QueueTrack {
     name: string;
     file: File;
     buffer: AudioBuffer | null;
+    type?: string;
+    duration?: string;
+    durationSec?: number;
 }
 
 export class AudioEngine {
@@ -24,6 +27,10 @@ export class AudioEngine {
     private audioBuffer: AudioBuffer | null = null;
     private _isLooping: boolean = true;
     playbackState: PlaybackState = 'stopped';
+
+    // Time tracking
+    private startTime: number = 0;
+    private pausedTime: number = 0;
 
     // Queue state
     queue: QueueTrack[] = [];
@@ -69,9 +76,15 @@ export class AudioEngine {
             if (!track.buffer) {
                 const arrayBuffer = await track.file.arrayBuffer();
                 track.buffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+                track.durationSec = track.buffer.duration;
+                const m = Math.floor(track.durationSec / 60);
+                const s = Math.floor(track.durationSec % 60);
+                track.duration = `${m}:${s.toString().padStart(2, '0')}`;
+                track.type = track.file.type.split('/')[1]?.toUpperCase() || 'AUDIO';
             }
 
             await this.setupGraph(track.buffer);
+            this.pausedTime = 0;
             this.setState('stopped');
         } catch (error) {
             console.error('AudioEngine: Error loading track:', error);
@@ -167,6 +180,26 @@ export class AudioEngine {
 
     // ── Transport Controls ──
 
+    getCurrentTime(): number {
+        if (this.playbackState === 'playing') {
+            const time = this.pausedTime + (this.audioCtx.currentTime - this.startTime);
+            return this.audioBuffer ? Math.min(time, this.audioBuffer.duration) : time;
+        }
+        return this.pausedTime;
+    }
+
+    getDuration(): number {
+        return this.audioBuffer?.duration || 0;
+    }
+
+    seek(time: number) {
+        if (!this.audioBuffer) return;
+        const wasPlaying = this.playbackState === 'playing';
+        if (wasPlaying) this.stop(true); // Soft stop preserving pausedTime temporarily
+        this.pausedTime = Math.max(0, Math.min(time, this.audioBuffer.duration));
+        if (wasPlaying) this.play();
+    }
+
     /** Start or resume playback */
     async play() {
         if (this.playbackState === 'playing' || this.playbackState === 'error') return;
@@ -181,7 +214,20 @@ export class AudioEngine {
             this.sourceNode.buffer = this.audioBuffer;
             this.sourceNode.loop = this._isLooping;
             this.sourceNode.connect(this.rawAnalyser.in);
-            this.sourceNode.start();
+
+            // Start at paused time
+            this.sourceNode.start(0, this.pausedTime);
+            this.startTime = this.audioCtx.currentTime;
+
+            // Handle native stop (file end)
+            this.sourceNode.onended = () => {
+                if (this.playbackState === 'playing' && !this._isLooping) {
+                    this.stop();
+                    if (this.currentIndex < this.queue.length - 1) {
+                        this.next(); // Auto advance optionally
+                    }
+                }
+            };
         }
 
         if (this.sourceNode) {
@@ -196,20 +242,29 @@ export class AudioEngine {
 
     /** Pause playback (suspend AudioContext — saves CPU) */
     pause() {
-        if (this.audioCtx.state === 'running') {
-            this.audioCtx.suspend();
+        if (this.playbackState !== 'playing') return;
+        this.pausedTime += (this.audioCtx.currentTime - this.startTime);
+
+        if (this.sourceNode) {
+            try { this.sourceNode.stop(); } catch (_) { /* ignore */ }
+            this.sourceNode.disconnect();
+            this.sourceNode = null;
         }
+
         this.setState('paused');
     }
 
     /** Stop playback, reset cursor to 0 (recreates source node) */
-    stop() {
+    stop(soft: boolean = false) {
         if (this.sourceNode) {
             try { this.sourceNode.stop(); } catch (_) { /* already stopped */ }
             this.sourceNode.disconnect();
             this.sourceNode = null;
         }
-        this.setState('stopped');
+        if (!soft) {
+            this.pausedTime = 0;
+            this.setState('stopped');
+        }
     }
 
     /** Load and play previous track in queue */
