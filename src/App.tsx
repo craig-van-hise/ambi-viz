@@ -360,6 +360,16 @@ export default function App() {
 
   useEffect(() => { if (sceneRef.current) sceneRef.current.isUserDraggingSlider = isDraggingSlider; }, [isDraggingSlider]);
   useEffect(() => { if (sceneRef.current) sceneRef.current.setTrackingIndicatorsVisible(isTrackingCam); }, [isTrackingCam]);
+  useEffect(() => {
+    if (isTrackingCam) {
+      headTracking.startCamera().catch(error => {
+        console.error("Failed to start camera for tracking:", error);
+        setIsTrackingCam(false);
+      });
+    } else {
+      headTracking.stopCamera();
+    }
+  }, [isTrackingCam]);
   useEffect(() => { if (sceneRef.current) sceneRef.current.setVisualizationMode(visualizationMode); }, [visualizationMode]);
   useEffect(() => { if (sceneRef.current) sceneRef.current.setViewMode(viewMode); }, [viewMode]);
 
@@ -435,14 +445,14 @@ export default function App() {
   return (
     <div className={`bg-background-dark font-ui uppercase text-slate-100 overflow-hidden h-screen flex flex-col ${isDraggingLeft || isDraggingRight ? 'select-none cursor-col-resize' : ''}`}>
       {/* Top Navigation Bar */}
-      <header className="flex items-center justify-between border-b border-primary/10 px-6 py-3 bg-background-dark/80 backdrop-blur-md z-50">
-        <div className="flex items-center gap-4">
-          <div className="text-primary">
-            <span className="material-symbols-outlined text-3xl">blur_on</span>
+      <header className="flex items-center justify-between border-b border-primary/10 px-6 py-2 bg-background-dark/80 backdrop-blur-md z-50">
+        <div className="flex items-center gap-2">
+          <div className="text-primary flex items-center mt-0.5">
+            <span className="material-symbols-outlined text-4xl font-light">blur_on</span>
           </div>
-          <div>
+          <div className="flex items-baseline gap-3">
             <h2 className="font-display text-slate-100 text-2xl font-bold leading-tight tracking-tight normal-case">AmbiViz</h2>
-            <p className="text-primary/70 text-xs font-medium uppercase tracking-widest">Spherical Harmonics Visualization (Order 3)</p>
+            <p className="text-primary/70 text-[10px] font-medium uppercase tracking-widest">Ambisonic Sound Field Visualization</p>
           </div>
         </div>
         <div className="flex items-center gap-4">

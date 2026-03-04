@@ -49,6 +49,7 @@ export class AmbiScene {
     private predictedArrow: THREE.ArrowHelper | null = null;   // ESKF predicted (green, solid)
 
     private currentRoll: number = 0;
+    private resizeObserver: ResizeObserver | null = null;
 
     constructor(container: HTMLElement, resolutionScale: number = 0.6) {
         this.container = container;
@@ -140,7 +141,10 @@ export class AmbiScene {
         this.initTrackingIndicators();
 
         // 8. Events
-        window.addEventListener('resize', this.onResize.bind(this));
+        this.resizeObserver = new ResizeObserver(() => {
+            this.onResize();
+        });
+        this.resizeObserver.observe(this.container);
         this.renderer.domElement.addEventListener('wheel', this.onWheel.bind(this), { passive: false });
 
         // Start Loop
@@ -616,7 +620,10 @@ export class AmbiScene {
 
     destroy() {
         if (this.rafId) cancelAnimationFrame(this.rafId);
-        window.removeEventListener('resize', this.onResize.bind(this));
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+            this.resizeObserver = null;
+        }
         this.renderer.domElement.removeEventListener('wheel', this.onWheel.bind(this));
 
         this.renderer.dispose();
