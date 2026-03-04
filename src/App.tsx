@@ -14,6 +14,7 @@ import type { PersistedState } from './utils/persistence';
 import { DEFAULT_VISUAL_PARAMS } from './components/VisualizerControls';
 import type { VisualParams } from './components/VisualizerControls';
 import type { CameraUIState } from './components/CameraControlPanel';
+import { InfoModal } from './components/InfoModal';
 
 function readDirectoryRecursive(entry: FileSystemDirectoryEntry): Promise<File[]> {
   return new Promise((resolve) => {
@@ -98,6 +99,7 @@ export default function App() {
   const [isDraggingSlider, setIsDraggingSlider] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   const [playbackState, setPlaybackState] = useState<PlaybackState>('stopped');
   const [isLooping, setIsLooping] = useState(true);
@@ -457,6 +459,13 @@ export default function App() {
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowInfoModal(true)}
+              title="About AmbiViz"
+              className="flex items-center justify-center w-8 h-8 rounded-md transition-all border text-slate-500 border-transparent hover:text-slate-300 hover:bg-slate-800/50"
+            >
+              <span className="material-symbols-outlined text-xl">info</span>
+            </button>
             <button
               onClick={() => setShowQueue(!showQueue)}
               title="Toggle Queue"
@@ -979,6 +988,9 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Info & Attribution Modal */}
+      <InfoModal isOpen={showInfoModal} onClose={() => setShowInfoModal(false)} />
     </div>
   );
 }
