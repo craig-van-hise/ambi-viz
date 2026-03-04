@@ -10,12 +10,33 @@
   --font-ui: "IBM Plex Sans", sans-serif;
 }
 
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+
+@layer base {
+
+  html,
+  body,
+  #root {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #000;
+  }
+}
+
 @layer utilities {
   .glass {
     background: rgba(10, 12, 12, 0.7);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(59, 130, 246, 0.1);
   }
+
   .canvas-bg {
     background: radial-gradient(circle at center, #121414 0%, #0a0c0c 100%);
   }
@@ -25,9 +46,11 @@
   input[type='range'] {
     accent-color: var(--color-primary);
   }
+
   ::-webkit-scrollbar {
     width: 4px;
   }
+
   ::-webkit-scrollbar-thumb {
     background: rgba(59, 130, 246, 0.3);
     border-radius: 10px;

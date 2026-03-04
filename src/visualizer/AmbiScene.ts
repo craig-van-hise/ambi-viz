@@ -10,6 +10,7 @@ export type VisualizationMode = 'volumetric' | 'sphere';
 export class AmbiScene {
     container: HTMLElement;
     scene: THREE.Scene;
+    helperScene: THREE.Scene;
     camera: THREE.PerspectiveCamera;
     renderer: THREE.WebGLRenderer;
     volumetricMaterial: THREE.ShaderMaterial;
@@ -36,6 +37,7 @@ export class AmbiScene {
     rafId: number | null = null;
     private readonly DEFAULT_OUTSIDE_FOV = 50;
     private insideFov = 115;
+    private outsideFov = 120;
     private outsidePositionCache = new THREE.Vector3(0, 3.3, 3.6);
 
     // Head tracking & UI Sync State
@@ -58,6 +60,7 @@ export class AmbiScene {
         // 1. Scene & Camera
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x111111);
+        this.helperScene = new THREE.Scene();
 
         const width = container.clientWidth;
         const height = container.clientHeight;
@@ -128,12 +131,12 @@ export class AmbiScene {
         this.sphereMesh.visible = false;
         this.scene.add(this.sphereMesh);
 
-        // Helpers
+        // Helpers (added to helperScene for 1:1 resolution rendering)
         const axesHelper = new THREE.AxesHelper(2);
-        this.scene.add(axesHelper);
+        this.helperScene.add(axesHelper);
 
         const gridHelper = new THREE.GridHelper(10, 10, 0x888888, 0x888888);
-        this.scene.add(gridHelper);
+        this.helperScene.add(gridHelper);
 
         this.addOrientationLabels();
 
@@ -242,13 +245,13 @@ export class AmbiScene {
             this.currentRoll = 0;
             this.camera.up.set(0, 1, 0);
         } else {
-            // Force standard perspective for outside view
-            this.camera.fov = this.DEFAULT_OUTSIDE_FOV;
+            // Restore outside FOV
+            this.camera.fov = this.outsideFov;
             // Restore from cache
             this.camera.position.copy(this.outsidePositionCache);
             this.controls.target.set(0, 0, 0);
             this.controls.enablePan = false; // Permanently disabled
-            this.controls.enableZoom = true;
+            this.controls.enableZoom = false; // Disable distance zoom to use FOV zoom exclusively
             this.controls.minDistance = 1;
             this.controls.maxDistance = 10;
         }
@@ -262,17 +265,16 @@ export class AmbiScene {
         const context = canvas.getContext('2d');
         if (!context) return;
 
-        canvas.width = 256;
-        canvas.height = 64;
-
         context.fillStyle = 'rgba(0,0,0,0)';
-        context.fillRect(0, 0, 256, 64);
+        // High-DPI labels
+        canvas.width = 512;
+        canvas.height = 128;
 
         context.fillStyle = 'white';
-        context.font = 'bold 40px Arial';
+        context.font = 'bold 80px Inter, Arial, sans-serif';
         context.textAlign = 'center';
         context.textBaseline = 'middle';
-        context.fillText(text, 128, 32);
+        context.fillText(text, 256, 64);
 
         const texture = new THREE.CanvasTexture(canvas);
         const material = new THREE.SpriteMaterial({
@@ -287,7 +289,7 @@ export class AmbiScene {
         sprite.scale.set(2, 0.5, 1);
         sprite.renderOrder = 100;
 
-        this.scene.add(sprite);
+        this.helperScene.add(sprite);
     }
 
     addOrientationLabels() {
@@ -319,14 +321,14 @@ export class AmbiScene {
         (this.ghostArrow.cone.material as THREE.MeshBasicMaterial).transparent = true;
         (this.ghostArrow.cone.material as THREE.MeshBasicMaterial).opacity = 0.35;
         this.ghostArrow.visible = false;
-        this.scene.add(this.ghostArrow);
+        this.helperScene.add(this.ghostArrow);
 
         // Predicted arrow — solid green (ESKF output)
         this.predictedArrow = new THREE.ArrowHelper(
             defaultDir, origin, arrowLength, 0x00e676, headLength, headWidth
         );
         this.predictedArrow.visible = false;
-        this.scene.add(this.predictedArrow);
+        this.helperScene.add(this.predictedArrow);
     }
 
     private visTempEuler = new THREE.Euler(0, 0, 0, 'YXZ');
@@ -433,7 +435,6 @@ export class AmbiScene {
     }
 
     onWheel(e: WheelEvent) {
-        if (this.viewMode !== 'inside' || (!e.metaKey && !e.ctrlKey)) return;
 
         e.preventDefault();
 
@@ -504,13 +505,20 @@ export class AmbiScene {
         }
     }
 
-    setFov(fov: number) {
-        this.insideFov = fov;
+    setFov(fov: number, source: 'ui' | 'internal' = 'internal') {
+        const targetState = this.viewMode === 'inside' ? this.insideFov : this.outsideFov;
+        if (Math.abs(targetState - fov) < 0.001 && Math.abs(this.camera.fov - fov) < 0.001) return;
+
         if (this.viewMode === 'inside') {
-            this.camera.fov = fov;
-            this.camera.updateProjectionMatrix();
+            this.insideFov = fov;
+        } else {
+            this.outsideFov = fov;
         }
-        if (this.onFovChange) {
+
+        this.camera.fov = fov;
+        this.camera.updateProjectionMatrix();
+
+        if (source === 'internal' && this.onFovChange) {
             this.onFovChange(fov);
         }
     }
@@ -609,12 +617,22 @@ export class AmbiScene {
             this.renderer.setRenderTarget(null);
             this.renderer.render(this.compositeScene, this.compositeCamera);
 
+            // Pass 3: Overlay high-res helpers (grid, text, arrows) at 1:1 resolution
+            this.renderer.autoClear = false;
+            this.renderer.render(this.helperScene, this.camera);
+            this.renderer.autoClear = true;
+
             // Swap FBOs for next frame
             this.pingPong = !this.pingPong;
         } else {
             // Fallback or Sphere mode bypasses the composite pass to run at native resolution
             this.renderer.setRenderTarget(null);
             this.renderer.render(this.scene, this.camera);
+
+            // Still overlay helpers
+            this.renderer.autoClear = false;
+            this.renderer.render(this.helperScene, this.camera);
+            this.renderer.autoClear = true;
         }
     }
 

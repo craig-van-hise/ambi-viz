@@ -72,11 +72,11 @@ const Tooltip = ({ children, content, title }: { children: React.ReactNode, cont
       {children}
       {isVisible && createPortal(
         <div
-          className="fixed z-[9999] w-64 p-3 bg-[#121212]/95 border border-white/10 rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.5)] pointer-events-none backdrop-blur-md transform -translate-x-full -translate-y-1/2 flex flex-col gap-1.5"
+          className="fixed z-[9999] w-80 p-4 bg-[#121212]/95 border border-white/10 rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.5)] pointer-events-none backdrop-blur-md transform -translate-x-full -translate-y-1/2 flex flex-col gap-2"
           style={{ left: coords.x, top: coords.y }}
         >
-          {title && <div className="text-[11px] font-bold text-slate-200 uppercase tracking-wider">{title}</div>}
-          <div className="text-[11px] text-slate-400 leading-relaxed normal-case">{content}</div>
+          {title && <div className="text-[12px] font-bold text-slate-200 uppercase tracking-wider">{title}</div>}
+          <div className="text-sm text-slate-400 leading-relaxed normal-case">{content}</div>
           <div className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-3 bg-[#121212]/95 border-r border-t border-white/10 rotate-45"></div>
         </div>,
         document.body
@@ -103,7 +103,8 @@ export default function App() {
 
   const [playbackState, setPlaybackState] = useState<PlaybackState>('stopped');
   const [isLooping, setIsLooping] = useState(true);
-  const [zoomFov, setZoomFov] = useState(120);
+  const [insideZoomFov, setInsideZoomFov] = useState(120);
+  const [outsideZoomFov, setOutsideZoomFov] = useState(120);
 
   const [cameraUIState, setCameraUIState] = useState<CameraUIState>({
     yaw: 0, pitch: 0, roll: 0, x: 0, y: 3.3, z: 3.6,
@@ -125,9 +126,9 @@ export default function App() {
   const [rightWidth, setRightWidth] = useState(320);
   const [isDraggingLeft, setIsDraggingLeft] = useState(false);
   const [isDraggingRight, setIsDraggingRight] = useState(false);
-  const [isCameraCollapsed, setIsCameraCollapsed] = useState(false);
-  const [isVisualizerCollapsed, setIsVisualizerCollapsed] = useState(false);
-  const [isESKFCollapsed, setIsESKFCollapsed] = useState(false);
+  const [isCameraCollapsed, setIsCameraCollapsed] = useState(true);
+  const [isVisualizerCollapsed, setIsVisualizerCollapsed] = useState(true);
+  const [isESKFCollapsed, setIsESKFCollapsed] = useState(true);
   const [isViewTrackingCollapsed, setIsViewTrackingCollapsed] = useState(false);
   const [showTransport, setShowTransport] = useState(true);
   const [volume, setVolume] = useState(75);
@@ -158,8 +159,7 @@ export default function App() {
       }
       setInsideGain(3.0);
       persistState({ insideGain: 3.0 });
-      setZoomFov(120);
-      if (sceneRef.current) sceneRef.current.setFov(120);
+      handleZoomChange(120);
     } else {
       setCameraUIState(prev => ({ ...prev, x: 0, y: 3.3, z: 3.6 }));
       if (sceneRef.current) {
@@ -284,10 +284,9 @@ export default function App() {
 
   const handleVisualReset = useCallback(() => {
     setVisualParams(DEFAULT_VISUAL_PARAMS);
-    setZoomFov(120);
+    handleZoomChange(120);
     setInsideGain(3.0);
     setOutsideGain(3.0);
-    if (sceneRef.current) sceneRef.current.setFov(120);
     persistState({ visualParams: DEFAULT_VISUAL_PARAMS, insideGain: 3.0, outsideGain: 3.0 });
   }, [persistState]);
 
@@ -297,9 +296,21 @@ export default function App() {
   }, [viewMode, persistState]);
 
   const handleZoomChange = useCallback((newFov: number) => {
-    setZoomFov(newFov);
-    if (sceneRef.current) sceneRef.current.setFov(newFov);
-  }, []);
+    if (viewMode === 'inside') {
+      if (Math.abs(insideZoomFov - newFov) < 0.01) return;
+      setInsideZoomFov(newFov);
+    } else {
+      if (Math.abs(outsideZoomFov - newFov) < 0.01) return;
+      setOutsideZoomFov(newFov);
+    }
+    if (sceneRef.current) sceneRef.current.setFov(newFov, 'ui');
+  }, [viewMode, insideZoomFov, outsideZoomFov]);
+
+  // Sync FOV when view mode changes
+  useEffect(() => {
+    const activeZoom = viewMode === 'inside' ? insideZoomFov : outsideZoomFov;
+    if (sceneRef.current) sceneRef.current.setFov(activeZoom);
+  }, [viewMode, insideZoomFov, outsideZoomFov]);
 
   const handleCameraUIChange = useCallback((axis: keyof CameraUIState, value: number) => {
     setCameraUIState(prev => ({ ...prev, [axis]: value }));
@@ -336,18 +347,29 @@ export default function App() {
     scene.setEdgeFalloff(visualParams.edgeFalloff);
     scene.setDissipationRate(visualParams.dissipationRate);
 
-    scene.onCameraStateChange = (state) => {
-      setCameraUIState(prev => {
-        if (Math.abs(prev.yaw - state.yaw) < 0.01 && Math.abs(prev.pitch - state.pitch) < 0.01 && Math.abs(prev.roll - state.roll) < 0.01 &&
-          Math.abs(prev.x - state.x) < 0.001 && Math.abs(prev.y - state.y) < 0.001 && Math.abs(prev.z - state.z) < 0.001) {
-          return prev;
-        }
-        return state;
-      });
-    };
-    scene.onFovChange = (fov) => setZoomFov(fov);
+    // Callbacks will be synchronized in separate effects to avoid stale closures
     return () => scene.destroy();
   }, []); // Run on mount
+
+  useEffect(() => {
+    if (sceneRef.current) {
+      sceneRef.current.onCameraStateChange = (state) => {
+        setCameraUIState(prev => {
+          if (Math.abs(prev.yaw - state.yaw) < 0.01 && Math.abs(prev.pitch - state.pitch) < 0.01 && Math.abs(prev.roll - state.roll) < 0.01 &&
+            Math.abs(prev.x - state.x) < 0.001 && Math.abs(prev.y - state.y) < 0.001 && Math.abs(prev.z - state.z) < 0.001) {
+            return prev;
+          }
+          return state;
+        });
+      };
+    }
+  }, []); // setCameraUIState is stable
+
+  useEffect(() => {
+    if (sceneRef.current) {
+      sceneRef.current.onFovChange = (fov) => handleZoomChange(fov);
+    }
+  }, [handleZoomChange]);
 
   useEffect(() => {
     if (sceneRef.current) {
@@ -445,9 +467,9 @@ export default function App() {
   }, [isDraggingLeft, isDraggingRight]);
 
   return (
-    <div className={`bg-background-dark font-ui uppercase text-slate-100 overflow-hidden h-screen flex flex-col ${isDraggingLeft || isDraggingRight ? 'select-none cursor-col-resize' : ''}`}>
+    <div className={`bg-background-dark font-ui text-slate-100 overflow-hidden h-full flex flex-col antialiased ${isDraggingLeft || isDraggingRight ? 'select-none cursor-col-resize' : ''}`}>
       {/* Top Navigation Bar */}
-      <header className="flex items-center justify-between border-b border-primary/10 px-6 py-2 bg-background-dark/80 backdrop-blur-md z-50">
+      <header className="flex items-center justify-between border-b border-primary/10 px-6 py-1 bg-background-dark/80 backdrop-blur-md z-50 shrink-0">
         <div className="flex items-center gap-2">
           <div className="text-primary flex items-center mt-0.5">
             <span className="material-symbols-outlined text-4xl font-light">blur_on</span>
@@ -503,7 +525,13 @@ export default function App() {
       <main className="flex-1 relative flex overflow-hidden">
         {/* Left Sidebar: Queue */}
         {showQueue && (
-          <aside style={{ width: leftWidth }} className="h-full glass border-r border-primary/10 flex flex-col z-40 shrink-0 relative">
+          <aside
+            style={{ width: leftWidth }}
+            className="h-full glass border-r border-primary/10 flex flex-col z-40 shrink-0 relative"
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+          >
             <div
               className="absolute top-0 -right-1 w-2 h-full cursor-col-resize hover:bg-slate-500/30 z-50 transition-colors"
               onMouseDown={() => setIsDraggingLeft(true)}
@@ -511,7 +539,7 @@ export default function App() {
             <div className="p-4 border-b border-primary/10 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">queue_music</span>
-                <h3 className="font-normal text-[11px] uppercase tracking-widest text-slate-500">Queue</h3>
+                <h3 className="font-normal text-[11px] uppercase tracking-widest text-slate-400">Queue</h3>
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-2 space-y-2">
@@ -533,33 +561,62 @@ export default function App() {
                     <p className={`text-sm truncate normal-case ${currentIndex === idx ? 'font-semibold text-slate-100' : 'font-medium text-slate-300'}`}>
                       {track.name || (track.file && track.file.name)}
                     </p>
-                    <p className={`text-[10px] font-mono ${currentIndex === idx ? 'text-primary/60' : 'text-slate-500'}`}>
+                    <p className={`text-[10px] font-mono ${currentIndex === idx ? 'text-primary/60' : 'text-slate-400'}`}>
                       {track.type || '-'} • {track.duration || '00:00'}
                     </p>
                   </div>
-                  {currentIndex === idx && (
-                    <span className="material-symbols-outlined text-primary text-sm shrink-0">bar_chart</span>
-                  )}
                 </div>
               ))}
 
-              {/* Empty State */}
-              <div className="mt-8 px-4 flex flex-col items-center justify-center text-center opacity-40">
-                <span className="material-symbols-outlined text-4xl mb-2">upload_file</span>
-                <p className="text-xs normal-case">Drag more files to add to queue</p>
-              </div>
+              {/* Empty State / Drop Zone */}
+              {queue.length === 0 && (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`flex-1 flex flex-col items-center justify-center text-center p-8 m-2 border-2 border-dashed rounded-xl transition-all cursor-pointer group ${isDragOver
+                    ? 'border-primary bg-primary/10 scale-[1.02] shadow-[0_0_20px_rgba(29,78,216,0.2)]'
+                    : 'border-slate-700/50 bg-slate-800/20 hover:border-slate-500 hover:bg-slate-800/40'
+                    }`}
+                >
+                  <div className={`size-16 rounded-full flex items-center justify-center mb-4 transition-colors ${isDragOver ? 'bg-primary text-white' : 'bg-slate-800 text-slate-500 group-hover:text-slate-300'
+                    }`}>
+                    <span className="material-symbols-outlined text-3xl">upload_file</span>
+                  </div>
+                  <h4 className={`text-sm font-semibold mb-1 transition-colors ${isDragOver ? 'text-primary' : 'text-slate-300'}`}>
+                    {isDragOver ? 'Drop to Add' : 'Add Audio Files'}
+                  </h4>
+                  <p className="text-[10px] text-slate-500 normal-case mb-4">
+                    Drag and drop or click to browse
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-1.5 opacity-60">
+                    {['.wav', '.amb', '.ogg', '.iamf', '.opus'].map(ext => (
+                      <span key={ext} className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-[9px] font-mono text-slate-400 normal-case">
+                        {ext}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {queue.length > 0 && !isDragOver && (
+                <div className="mt-8 px-4 flex flex-col items-center justify-center text-center opacity-40">
+                  <span className="material-symbols-outlined text-4xl mb-2 text-slate-400">upload_file</span>
+                  <p className="text-xs normal-case text-slate-300">Drag more files to add to queue</p>
+                </div>
+              )}
+
+              {queue.length > 0 && isDragOver && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-primary/20 backdrop-blur-sm m-2 border-2 border-primary border-dashed rounded-xl pointer-events-none animate-in fade-in zoom-in duration-200">
+                  <div className="flex flex-col items-center">
+                    <span className="material-symbols-outlined text-5xl text-primary animate-bounce">download</span>
+                    <p className="text-sm font-bold text-primary uppercase tracking-widest mt-2">Drop to Queue</p>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="p-4 border-t border-primary/10 bg-background-dark/40">
               <input type="file" ref={fileInputRef} className="hidden" accept="audio/*" multiple onChange={(e) => {
                 if (e.target.files) handleFilesQueued(Array.from(e.target.files));
               }} />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full py-2.5 bg-primary-dark text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(29,78,216,0.3)] hover:bg-primary-dark/90 transition-colors"
-              >
-                <span className="material-symbols-outlined text-lg">upload</span>
-                Add Track
-              </button>
             </div>
           </aside>
         )}
@@ -576,7 +633,7 @@ export default function App() {
             <div className="absolute bottom-0 left-0 w-full z-40 px-4 py-4 flex flex-col @2xl:flex-row items-center justify-between gap-y-3 gap-x-6">
               {/* Top Row (Narrow) / Center (Wide): Scrubber */}
               <div className="flex items-center gap-3 w-full @2xl:flex-1 @2xl:order-2 order-1">
-                <span className="text-[10px] font-mono text-slate-500">{formatTime((progress / 100) * (activeTrack.durationSec || 0))}</span>
+                <span className="text-[10px] font-mono text-slate-400">{formatTime((progress / 100) * (activeTrack.durationSec || 0))}</span>
                 <div className="flex-1 h-1.5 bg-slate-800 rounded-full relative group/timeline flex items-center">
                   <div className="absolute top-0 left-0 h-full bg-primary-dark rounded-full group-hover/timeline:bg-primary transition-colors" style={{ width: `${progress}%` }}></div>
                   <div className="absolute size-3 bg-white rounded-full shadow opacity-0 group-hover/timeline:opacity-100 transition-opacity z-10" style={{ left: `calc(${progress}% - 6px)` }}></div>
@@ -594,7 +651,7 @@ export default function App() {
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                   />
                 </div>
-                <span className="text-[10px] font-mono text-slate-500">{activeTrack.duration || "00:00"}</span>
+                <span className="text-[10px] font-mono text-slate-400">{activeTrack.duration || "00:00"}</span>
               </div>
 
               <div className="flex items-center justify-center flex-wrap gap-4 w-full @2xl:w-auto @2xl:contents order-2">
@@ -668,8 +725,8 @@ export default function App() {
                   onClick={() => setIsViewTrackingCollapsed(!isViewTrackingCollapsed)}
                 >
                   <div className="flex items-center gap-2">
-                    <span className={`material-symbols-outlined text-sm text-slate-500 transition-transform ${isViewTrackingCollapsed ? '-rotate-90' : ''}`}>expand_more</span>
-                    <h3 className="text-[10px] font-normal uppercase tracking-widest text-slate-600 group-hover:text-slate-400 transition-colors">View & Tracking</h3>
+                    <span className={`material-symbols-outlined text-sm text-slate-400 transition-transform ${isViewTrackingCollapsed ? '-rotate-90' : ''}`}>expand_more</span>
+                    <h3 className="text-[10px] font-normal uppercase tracking-widest text-slate-500 group-hover:text-slate-400 transition-colors">View & Tracking</h3>
                   </div>
                 </div>
 
@@ -680,11 +737,11 @@ export default function App() {
                       <div className="flex p-1 bg-slate-800/80 rounded-lg border border-white/5 shadow-inner">
                         <button
                           onClick={() => setVisualizationMode('volumetric')}
-                          className={`px-3 py-1 text-[10px] font-bold uppercase rounded transition-colors ${visualizationMode === 'volumetric' ? 'bg-primary-dark text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+                          className={`px-3 py-1 text-[10px] font-bold rounded transition-colors ${visualizationMode === 'volumetric' ? 'bg-primary-dark text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
                         >Volumetric</button>
                         <button
                           onClick={() => setVisualizationMode('sphere')}
-                          className={`px-3 py-1 text-[10px] font-bold uppercase rounded transition-colors ${visualizationMode === 'sphere' ? 'bg-primary-dark text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+                          className={`px-3 py-1 text-[10px] font-bold rounded transition-colors ${visualizationMode === 'sphere' ? 'bg-primary-dark text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
                         >Sphere</button>
                       </div>
                     </div>
@@ -693,19 +750,20 @@ export default function App() {
                       <div className="flex p-1 bg-slate-800/80 rounded-lg border border-white/5 shadow-inner">
                         <button
                           onClick={() => setViewMode('inside')}
-                          className={`px-3 py-1 text-[10px] font-bold uppercase rounded transition-colors ${viewMode === 'inside' ? 'bg-primary-dark text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+                          className={`px-3 py-1 text-[10px] font-bold rounded transition-colors ${viewMode === 'inside' ? 'bg-primary-dark text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
                         >Inside</button>
                         <button
                           onClick={() => setViewMode('outside')}
-                          className={`px-3 py-1 text-[10px] font-bold uppercase rounded transition-colors ${viewMode === 'outside' ? 'bg-primary-dark text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+                          className={`px-3 py-1 text-[10px] font-bold rounded transition-colors ${viewMode === 'outside' ? 'bg-primary-dark text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
                         >Outside</button>
                       </div>
                     </div>
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-slate-300 normal-case">Head Tracking</span>
                       <button
                         onClick={() => setIsTrackingCam(!isTrackingCam)}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${isTrackingCam
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${isTrackingCam
                           ? 'bg-green-600 text-white hover:bg-green-500 shadow-[0_0_10px_rgba(22,163,74,0.3)]'
                           : 'bg-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-white/5'
                           }`}
@@ -713,6 +771,28 @@ export default function App() {
                         <span className="material-symbols-outlined text-sm">videocam</span>
                         <span>{isTrackingCam ? 'Tracking Active' : 'Start Tracking'}</span>
                       </button>
+                    </div>
+
+                    <div className="space-y-3 pt-2">
+                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                        <Tooltip title="Zoom (FOV)" content="Adjusts the field of view. Lower values zoom in, higher values provide a wider perspective.">
+                          <span className="hover:text-slate-300 transition-colors">Zoom</span>
+                        </Tooltip>
+                        <span className="text-primary font-medium">{(viewMode === 'inside' ? insideZoomFov : outsideZoomFov).toFixed(1)}</span>
+                      </div>
+                      <input
+                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                        type="range"
+                        min="10"
+                        max="150"
+                        step="1"
+                        value={viewMode === 'inside' ? insideZoomFov : outsideZoomFov}
+                        onChange={(e) => handleZoomChange(Number(e.target.value))}
+                        onMouseDown={() => setIsDraggingSlider(true)}
+                        onMouseUp={() => setIsDraggingSlider(false)}
+                        onTouchStart={() => setIsDraggingSlider(true)}
+                        onTouchEnd={() => setIsDraggingSlider(false)}
+                      />
                     </div>
                   </div>
                 )}
@@ -725,13 +805,13 @@ export default function App() {
                   onClick={() => setIsCameraCollapsed(!isCameraCollapsed)}
                 >
                   <div className="flex items-center gap-2">
-                    <span className={`material-symbols-outlined text-sm text-slate-500 transition-transform ${isCameraCollapsed ? '-rotate-90' : ''}`}>expand_more</span>
-                    <h3 className="text-[10px] font-normal uppercase tracking-widest text-slate-600 group-hover:text-slate-400 transition-colors">
+                    <span className={`material-symbols-outlined text-sm text-slate-400 transition-transform ${isCameraCollapsed ? '-rotate-90' : ''}`}>expand_more</span>
+                    <h3 className="text-[10px] font-normal uppercase tracking-widest text-slate-500 group-hover:text-slate-400 transition-colors">
                       {viewMode === 'inside' ? 'Camera Orientation' : 'Camera Position'}
                     </h3>
                   </div>
                   <button
-                    className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-primary transition-colors"
+                    className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-primary transition-colors"
                     onClick={(e) => { e.stopPropagation(); handleCameraReset(); }}
                   >
                     <span className="material-symbols-outlined text-sm">refresh</span>
@@ -744,21 +824,21 @@ export default function App() {
                     {viewMode === 'inside' ? (
                       <>
                         <div className="space-y-2">
-                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                             <span>Yaw</span>
                             <span className="text-primary font-medium">{cameraUIState.yaw.toFixed(1)}°</span>
                           </div>
                           <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="-180" max="180" step="0.1" value={cameraUIState.yaw} onChange={(e) => handleCameraUIChange('yaw', Number(e.target.value))} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
                         </div>
                         <div className="space-y-2">
-                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                             <span>Pitch</span>
                             <span className="text-primary font-medium">{cameraUIState.pitch.toFixed(1)}°</span>
                           </div>
                           <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="-89.4" max="89.4" step="0.1" value={cameraUIState.pitch} onChange={(e) => handleCameraUIChange('pitch', Number(e.target.value))} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
                         </div>
                         <div className="space-y-2">
-                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                             <span>Roll</span>
                             <span className="text-primary font-medium">{cameraUIState.roll.toFixed(1)}°</span>
                           </div>
@@ -768,21 +848,21 @@ export default function App() {
                     ) : (
                       <>
                         <div className="space-y-2">
-                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                             <span>X</span>
                             <span className="text-primary font-medium">{cameraUIState.x.toFixed(2)}</span>
                           </div>
                           <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="-50" max="50" step="0.1" value={cameraUIState.x} onChange={(e) => handleCameraUIChange('x', Number(e.target.value))} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
                         </div>
                         <div className="space-y-2">
-                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                             <span>Y</span>
                             <span className="text-primary font-medium">{cameraUIState.y.toFixed(2)}</span>
                           </div>
                           <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="-50" max="50" step="0.1" value={cameraUIState.y} onChange={(e) => handleCameraUIChange('y', Number(e.target.value))} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
                         </div>
                         <div className="space-y-2">
-                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                             <span>Z</span>
                             <span className="text-primary font-medium">{cameraUIState.z.toFixed(2)}</span>
                           </div>
@@ -801,11 +881,11 @@ export default function App() {
                   onClick={() => setIsVisualizerCollapsed(!isVisualizerCollapsed)}
                 >
                   <div className="flex items-center gap-2">
-                    <span className={`material-symbols-outlined text-sm text-slate-500 transition-transform ${isVisualizerCollapsed ? '-rotate-90' : ''}`}>expand_more</span>
-                    <h3 className="text-[10px] font-normal uppercase tracking-widest text-slate-600 group-hover:text-slate-400 transition-colors">Visualizer Controls</h3>
+                    <span className={`material-symbols-outlined text-sm text-slate-400 transition-transform ${isVisualizerCollapsed ? '-rotate-90' : ''}`}>expand_more</span>
+                    <h3 className="text-[10px] font-normal uppercase tracking-widest text-slate-500 group-hover:text-slate-400 transition-colors">Visualizer Controls</h3>
                   </div>
                   <button
-                    className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-primary transition-colors"
+                    className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-primary transition-colors"
                     onClick={(e) => { e.stopPropagation(); handleVisualReset(); }}
                   >
                     <span className="material-symbols-outlined text-sm">refresh</span>
@@ -814,27 +894,30 @@ export default function App() {
                 </div>
 
                 {!isVisualizerCollapsed && (
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-4 pb-1">
+                  <div className="space-y-4 pb-1">
                     <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
-                        <Tooltip title="Zoom" content="Adjusts the camera's field of view and proximity within the 3D ambisonic scene.">
-                          <span className="hover:text-slate-300 transition-colors">Zoom</span>
-                        </Tooltip>
-                        <span className="text-primary font-medium">{zoomFov.toFixed(1)}</span>
-                      </div>
-                      <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="10" max="150" step="1" value={zoomFov} onChange={(e) => handleZoomChange(Number(e.target.value))} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                         <Tooltip title="Gain" content="Scales the raw Ambisonic audio energy before it enters the visual ray-marching pipeline.">
                           <span className="hover:text-slate-300 transition-colors">Gain</span>
                         </Tooltip>
                         <span className="text-primary font-medium">{(viewMode === 'inside' ? insideGain : outsideGain).toFixed(2)}</span>
                       </div>
-                      <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0.1" max="20.0" step="0.1" value={viewMode === 'inside' ? insideGain : outsideGain} onChange={(e) => handleGainChange(Number(e.target.value))} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
+                      <input
+                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                        type="range"
+                        min="0"
+                        max="20"
+                        step="0.01"
+                        value={viewMode === 'inside' ? insideGain : outsideGain}
+                        onChange={(e) => handleGainChange(Number(e.target.value))}
+                        onMouseDown={() => setIsDraggingSlider(true)}
+                        onMouseUp={() => setIsDraggingSlider(false)}
+                        onTouchStart={() => setIsDraggingSlider(true)}
+                        onTouchEnd={() => setIsDraggingSlider(false)}
+                      />
                     </div>
                     <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                         <Tooltip title="Threshold" content="Sets the minimum audio energy required to render a cloud. Increase this to hide background room noise.">
                           <span className="hover:text-slate-300 transition-colors">Threshold</span>
                         </Tooltip>
@@ -843,7 +926,7 @@ export default function App() {
                       <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="0.5" step="0.001" value={visualParams.densityThreshold} onChange={(e) => handleVisualParamsChange({ densityThreshold: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
                     </div>
                     <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                         <Tooltip title="Density" content="Controls the physical thickness and opacity of the volumetric audio clouds.">
                           <span className="hover:text-slate-300 transition-colors">Density</span>
                         </Tooltip>
@@ -852,7 +935,7 @@ export default function App() {
                       <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="500" step="1" value={visualParams.densityMult} onChange={(e) => handleVisualParamsChange({ densityMult: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
                     </div>
                     <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                         <Tooltip title="Emission" content="Controls the glowing heat and brightness of the volume independently of its thickness.">
                           <span className="hover:text-slate-300 transition-colors">Emission</span>
                         </Tooltip>
@@ -861,7 +944,7 @@ export default function App() {
                       <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="50" step="0.1" value={visualParams.emissionMult} onChange={(e) => handleVisualParamsChange({ emissionMult: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
                     </div>
                     <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                         <Tooltip title="Knee (Color)" content="Shifts the color transfer function to prevent loud transient sounds from blowing out the visualizer into solid white.">
                           <span className="hover:text-slate-300 transition-colors">Knee</span>
                         </Tooltip>
@@ -870,7 +953,7 @@ export default function App() {
                       <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0.01" max="1" step="0.01" value={visualParams.heatmapKnee} onChange={(e) => handleVisualParamsChange({ heatmapKnee: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
                     </div>
                     <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                         <Tooltip title="Edge Falloff" content="Adjusts the geometric sharpness of the spatial audio lobes. Higher values create tighter, more focused clouds.">
                           <span className="hover:text-slate-300 transition-colors">Edge Falloff</span>
                         </Tooltip>
@@ -879,7 +962,7 @@ export default function App() {
                       <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="2" step="0.01" value={visualParams.edgeFalloff} onChange={(e) => handleVisualParamsChange({ edgeFalloff: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
                     </div>
                     <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                         <Tooltip title="Dissipation" content="Controls how slowly the visual energy fades over time, creating lingering smoke trails that smooth out erratic flickering.">
                           <span className="hover:text-slate-300 transition-colors">Dissipation</span>
                         </Tooltip>
@@ -898,13 +981,13 @@ export default function App() {
                   onClick={() => setIsESKFCollapsed(!isESKFCollapsed)}
                 >
                   <div className="flex items-center gap-2">
-                    <span className={`material-symbols-outlined text-sm text-slate-500 transition-transform ${isESKFCollapsed ? '-rotate-90' : ''}`}>expand_more</span>
+                    <span className={`material-symbols-outlined text-sm text-slate-400 transition-transform ${isESKFCollapsed ? '-rotate-90' : ''}`}>expand_more</span>
                     <Tooltip title="Webcam ESKF Tuning" content="Adjusts the Error-State Kalman Filter (ESKF) parameters that fuse webcam tracking data for responsive, low-latency head orientation. Use these settings to balance smoothness against responsiveness.">
-                      <h3 className="text-[10px] font-normal uppercase tracking-widest text-slate-600 hover:text-slate-300 transition-colors">ESKF Tuning</h3>
+                      <h3 className="text-[10px] font-normal uppercase tracking-widest text-slate-500 hover:text-slate-300 transition-colors">ESKF Tuning</h3>
                     </Tooltip>
                   </div>
                   <button
-                    className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-primary transition-colors"
+                    className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-primary transition-colors"
                     onClick={(e) => { e.stopPropagation(); handleESKFReset(); }}
                   >
                     <span className="material-symbols-outlined text-sm">refresh</span>
@@ -913,9 +996,14 @@ export default function App() {
                 </div>
 
                 {!isESKFCollapsed && (
-                  <div className="space-y-4 pb-1">
+                  <div className={`space-y-4 pb-1 transition-opacity duration-300 ${!isTrackingCam ? 'opacity-40 pointer-events-none grayscale-[0.5]' : ''}`}>
+                    {!isTrackingCam && (
+                      <div className="py-2 px-3 bg-slate-900/60 border border-white/5 rounded-md text-[10px] text-slate-400 text-center italic">
+                        Head tracking must be active to tune ESKF
+                      </div>
+                    )}
                     <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                         <Tooltip title="τ (Prediction)" content="Offsets system delay. Increase until audio panning feels instantaneous. If the sound field 'rubber-bands' or overshoots when you abruptly stop your head, decrease this value.">
                           <span className="hover:text-slate-300 transition-colors">τ (Time Constant)</span>
                         </Tooltip>
@@ -924,7 +1012,7 @@ export default function App() {
                       <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="1.0" step="0.001" value={eskfParams.tau} onChange={(e) => handleESKFParams({ tau: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
                     </div>
                     <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                         <Tooltip title="R (Measurement Noise)" content="Trust in the webcam. Lower = faster response but captures more micro-jitter. Higher = smoother but can feel sluggish. Listen for rapid stutters in the audio field; increase until the stutter disappears.">
                           <span className="hover:text-slate-300 transition-colors">R (Meas Noise)</span>
                         </Tooltip>
@@ -933,7 +1021,7 @@ export default function App() {
                       <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="0.01" step="0.000001" value={eskfParams.R_scalar} onChange={(e) => handleESKFParams({ R_scalar: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
                     </div>
                     <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-500">
+                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
                         <Tooltip title="Q (Process Noise)" content="Trust in head momentum. Lower = assumes smooth, predictable movement. Higher = better tracking for sudden, erratic head whips. Increase if the audio feels like it drags behind your fast turns.">
                           <span className="hover:text-slate-300 transition-colors">Q (Proc Noise)</span>
                         </Tooltip>
@@ -952,12 +1040,26 @@ export default function App() {
       {/* Footer Stats */}
       <footer className="h-8 bg-background-dark/90 border-t border-primary/10 flex items-center justify-between px-4 text-[10px] font-mono uppercase text-slate-500 z-50 shrink-0">
         <div className="flex items-center gap-6 flex-1">
-          <span className="flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-green-500 animate-pulse"></span> Audio Engine: Ready</span>
+          {(() => {
+            let color = 'bg-slate-500';
+            let label = 'Nothing loaded';
+            let pulse = false;
+            if (playbackState === 'loading') { color = 'bg-yellow-500'; label = 'Buffering'; pulse = true; }
+            else if (playbackState === 'playing' || (playbackState === 'stopped' && currentIndex !== -1)) { color = 'bg-green-500'; label = 'Ready'; pulse = playbackState === 'playing'; }
+            else if (playbackState === 'error') { color = 'bg-red-500'; label = 'Error'; }
+
+            return (
+              <span className="flex items-center gap-1.5">
+                <span className={`size-1.5 rounded-full ${color} ${pulse ? 'animate-pulse' : ''}`}></span>
+                Audio Engine: {label}
+              </span>
+            );
+          })()}
         </div>
         <div className="flex items-center justify-center flex-1">
         </div>
         <div className="flex items-center gap-6 flex-1 justify-end">
-          <span className="text-primary">v1.2.4-stable</span>
+          <span className="text-primary normal-case">v0.9-beta</span>
         </div>
       </footer>
 
