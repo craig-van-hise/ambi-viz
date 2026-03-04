@@ -223,7 +223,7 @@ ignored: directory (2)
     - Implemented UI toggle in `App.tsx` and `VisualizerControls.tsx`.
 -   **PRP #46 (Outside Camera Control Activation)**: **Complete**.
     - Enabled manual camera position sliders in the Outside View by removing reactive disablement.
--   **PRP #26 (Visual-Cognitive Alignment)**: **Pending**.
+-   **PRP #26 (Visual-Cognitive Alignment)**: **Complete**.
     - Objective: Decouple audio path (raw YPR) from visual path (inverted display), align Green Pointer as gaze indicator, implement cockpit-view roll on `camera.up`.
 
 ## 4. Recent Changes (Summary)

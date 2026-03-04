@@ -136,6 +136,22 @@ describe('AudioEngine Integration', () => {
         expect(engine.playbackState).toBe('error');
     });
 
+    it('should trigger decodeAudioData when loading an .opus file (Phase 2 Checkpoint)', async () => {
+        const mockFile = new File([''], 'test.opus', { type: 'audio/opus' });
+        engine.queue = [{ name: 'test.opus', file: mockFile, buffer: null }];
+
+        // Resolve decoding to prevent error state
+        const mockBuffer = {} as AudioBuffer;
+        (mockCtx.decodeAudioData as any).mockResolvedValue(mockBuffer);
+
+        const setupSpy = vi.spyOn(engine, 'setupGraph').mockResolvedValue(undefined);
+
+        await engine.loadTrack(0);
+
+        expect(mockCtx.decodeAudioData).toHaveBeenCalled();
+        expect(setupSpy).toHaveBeenCalled();
+    });
+
     it('should create a new source node on play() if null, and destroy it on stop()', async () => {
         const mockBuffer = { numberOfChannels: 4 } as AudioBuffer;
         await engine.setupGraph(mockBuffer);

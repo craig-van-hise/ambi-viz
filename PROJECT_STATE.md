@@ -22,7 +22,7 @@
 |  └── worklets
 ├── src
 |  ├── App.css
-|  ├── App.tsx
+|  ├── App.tsx / App.css / App.test.tsx
 |  ├── HeadTrackingService.ts
 |  ├── Orientation.test.ts
 |  ├── audio
@@ -45,6 +45,9 @@
 |  |  └── QuatPredictor.ts / QuatPredictor.test.ts
 |  ├── types
 |  ├── utils
+|  |  ├── Persistence.ts
+|  |  ├── Throttle.ts
+|  |  └── fileUtils.ts / fileUtils.test.ts
 |  ├── visualizer
 |  |  ├── AmbiScene.ts / AmbiScene.test.ts
 |  |  ├── CameraControl.test.ts
@@ -111,13 +114,19 @@
 -   **PRP #45 (Integrate Multi-Mode Visualization Architecture)**: **Complete**.
     - Refactored `AmbiScene.ts` to manage both Volumetric and Sphere Deformation meshes.
     - Implemented UI toggle in `App.tsx` and `VisualizerControls.tsx`.
--   **PRP #46 (Outside Camera Control Activation)**: **Complete**.
+-   **PRP #46 (Opus File Support)**: **Complete**.
+    - Integrated `.opus` / `audio/opus` into the ingestion pipeline.
+    - Added recursive directory scanning support for Opus files.
+    - Updated UI (Dropzone, Alerts) to reflect Opus support.
+    - Extracted and verified file validation logic with TDD checkpoints.
+-   **PRP (Extra - Outside Camera Control Activation)**: **Complete**.
     - Enabled manual camera position sliders in the Outside View by removing reactive disablement.
 -   **PRP #26 (Visual-Cognitive Alignment)**: **Complete**.
     - Objective: Decouple audio path (raw YPR) from visual path (inverted display), align Green Pointer as gaze indicator, implement cockpit-view roll on `camera.up`.
 
 ## 4. Recent Changes (Summary)
 
+-   **Feature**: Added native support for `.opus` audio files across the ingestion pipeline and UI.
 -   **Feature**: Enabled manual camera position sliders in the Outside View for expanded manual control.
 -   **Feature**: Integrated Multi-Mode Visualization (toggle between Ray-Marching Volumetrics and Legacy Sphere Deformation).
 -   **Fix**: Implemented Bounding Sphere Intersection in shaders to fix disappearing visualization at extreme camera distances.

@@ -10,8 +10,7 @@ import { AudioEngine } from './audio/AudioEngine';
 import type { PlaybackState, QueueTrack } from './audio/AudioEngine';
 import { AmbiScene } from './visualizer/AmbiScene';
 import type { ViewMode, VisualizationMode } from './visualizer/AmbiScene';
-
-const SUPPORTED_EXTENSIONS = ['wav', 'ambix', 'ogg', 'iamf'];
+import { isSupportedAudioFile } from './utils/fileUtils';
 
 function readDirectoryRecursive(entry: FileSystemDirectoryEntry): Promise<File[]> {
   return new Promise((resolve) => {
@@ -29,8 +28,7 @@ function readDirectoryRecursive(entry: FileSystemDirectoryEntry): Promise<File[]
             const file = await new Promise<File>((res) =>
               (e as FileSystemFileEntry).file(res)
             );
-            const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-            if (SUPPORTED_EXTENSIONS.includes(ext)) {
+            if (isSupportedAudioFile(file)) {
               allFiles.push(file);
             }
           } else if (e.isDirectory) {
@@ -245,8 +243,7 @@ function App() {
             const file = await new Promise<File>((res) =>
               (entry as FileSystemFileEntry).file(res)
             );
-            const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-            if (SUPPORTED_EXTENSIONS.includes(ext)) {
+            if (isSupportedAudioFile(file)) {
               collected.push(file);
             }
           }
@@ -257,8 +254,7 @@ function App() {
     if (collected.length === 0) {
       for (let i = 0; i < e.dataTransfer.files.length; i++) {
         const file = e.dataTransfer.files[i];
-        const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-        if (SUPPORTED_EXTENSIONS.includes(ext)) {
+        if (isSupportedAudioFile(file)) {
           collected.push(file);
         }
       }
@@ -268,7 +264,7 @@ function App() {
       collected.sort((a, b) => a.name.localeCompare(b.name));
       handleFilesQueued(collected);
     } else {
-      alert('No supported audio files found (.wav, .ambix, .ogg, .iamf)');
+      alert('No supported audio files found (.wav, .ambix, .ogg, .iamf, .opus)');
     }
   }, [handleFilesQueued]);
 
@@ -531,7 +527,7 @@ function App() {
           <div className="drop-overlay">
             <div className="drop-overlay-content">
               <h2>Drop Audio Files or Folders Here</h2>
-              <p>.wav · .ambix · .ogg · .iamf</p>
+              <p>.wav · .ambix · .ogg · .iamf · .opus</p>
             </div>
           </div>
         )}
