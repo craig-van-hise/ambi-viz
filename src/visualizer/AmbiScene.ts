@@ -52,6 +52,7 @@ export class AmbiScene {
 
     private currentRoll: number = 0;
     private resizeObserver: ResizeObserver | null = null;
+    private boundOnWheel = this.onWheel.bind(this);
 
     constructor(container: HTMLElement, resolutionScale: number = 0.6) {
         this.container = container;
@@ -148,7 +149,7 @@ export class AmbiScene {
             this.onResize();
         });
         this.resizeObserver.observe(this.container);
-        this.renderer.domElement.addEventListener('wheel', this.onWheel.bind(this), { passive: false });
+        this.container.addEventListener('wheel', this.boundOnWheel, { passive: false, capture: true });
 
         // Start Loop
         this.animate();
@@ -642,7 +643,7 @@ export class AmbiScene {
             this.resizeObserver.disconnect();
             this.resizeObserver = null;
         }
-        this.renderer.domElement.removeEventListener('wheel', this.onWheel.bind(this));
+        this.container.removeEventListener('wheel', this.boundOnWheel, { capture: true } as any);
 
         this.renderer.dispose();
         if (this.renderTargetA) this.renderTargetA.dispose();
