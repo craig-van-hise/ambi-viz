@@ -10,6 +10,9 @@ uniform float uGain; // To scale the displacement
 uniform bool u_isInsideView;
 uniform vec2 u_resolution;
 uniform float u_fov;
+uniform float uAmplitude;
+uniform float uBaseRadius;
+uniform float uSharpness;
 
 // Constants
 #define PI 3.14159265359
@@ -206,10 +209,13 @@ void main() {
     vEnergy = rms; 
     
     // Displacement
-    // Use gain to scale visual effect
-    float disp = rms * uGain * 3.0; 
+    // Apply sharpness: higher sharpness makes peaks tighter and deeper
+    float shapedRms = pow(rms, uSharpness);
     
-    vec3 newPos = position + normal * disp;
+    // Use amplitude to scale the effect, and baseRadius to set the rest state
+    float disp = shapedRms * uGain * uAmplitude * 3.0; 
+    
+    vec3 newPos = position * uBaseRadius + normal * disp;
     vPosition = newPos;
     
     vec4 worldPosition = modelMatrix * vec4(newPos, 1.0);
@@ -268,12 +274,13 @@ varying vec3 vPosition;
 
 uniform float uOpacity;
 uniform float uGain;
+uniform float uColorIntensity;
 
 void main() {
     // Heatmap coloring based on energy
     // Cold (Blue) -> Hot (Red/White)
     
-    float t = smoothstep(0.01, 1.0, vEnergy * uGain * 2.0); 
+    float t = smoothstep(0.01, 1.0, vEnergy * uGain * uColorIntensity * 2.0); 
     
     vec3 color = mix(vec3(0.0, 0.0, 0.4), vec3(0.0, 1.0, 1.0), t); // Blue to Cyan
     color = mix(color, vec3(1.0, 1.0, 0.0), smoothstep(0.4, 0.7, t)); // Cyan to Yellow

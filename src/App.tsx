@@ -11,8 +11,45 @@ import { Throttle } from './utils/Throttle';
 import { HeadTrackingService } from './HeadTrackingService';
 import { loadState, debouncedSave } from './utils/persistence';
 import type { PersistedState } from './utils/persistence';
-import { DEFAULT_VISUAL_PARAMS } from './components/VisualizerControls';
-import type { VisualParams } from './components/VisualizerControls';
+
+export interface VisualParams {
+  densityThreshold: number;
+  densityMult: number;
+  emissionMult: number;
+  heatmapKnee: number;
+  edgeFalloff: number;
+  dissipationRate: number;
+}
+
+export const DEFAULT_VISUAL_PARAMS: VisualParams = {
+  densityThreshold: 0,
+  densityMult: 1.0,
+  emissionMult: 1.0,
+  heatmapKnee: 0.5,
+  edgeFalloff: 1.0,
+  dissipationRate: 0,
+};
+
+export interface DeformationParams {
+  amplitude: number;
+  baseRadius: number;
+  sharpness: number;
+  colorIntensity: number;
+  smoothing: number;
+  resolution: number;
+  wireframe: boolean;
+}
+
+export const DEFAULT_DEFORMATION_PARAMS: DeformationParams = {
+  amplitude: 1.0,
+  baseRadius: 1.0,
+  sharpness: 1.0,
+  colorIntensity: 1.0,
+  smoothing: 0.5,
+  resolution: 128,
+  wireframe: false,
+};
+
 import type { CameraUIState } from './components/CameraControlPanel';
 import { InfoModal } from './components/InfoModal';
 
@@ -118,6 +155,7 @@ export default function App() {
 
   const [eskfParams, setEskfParams] = useState(persisted.eskf);
   const [visualParams, setVisualParams] = useState<VisualParams>(persisted.visualParams);
+  const [deformationParams, setDeformationParams] = useState<DeformationParams>(persisted.deformationParams);
   const [hrtfUrl, setHrtfUrl] = useState(persisted.hrtfUrl);
 
   const throttleRef = useRef(new Throttle(24));
@@ -152,6 +190,17 @@ export default function App() {
     persistRef.current = { ...persistRef.current, ...partial };
     debouncedSave(persistRef.current);
   }, []);
+
+  const handleZoomChange = useCallback((newFov: number) => {
+    if (viewMode === 'inside') {
+      if (Math.abs(insideZoomFov - newFov) < 0.01) return;
+      setInsideZoomFov(newFov);
+    } else {
+      if (Math.abs(outsideZoomFov - newFov) < 0.01) return;
+      setOutsideZoomFov(newFov);
+    }
+    if (sceneRef.current) sceneRef.current.setFov(newFov, 'ui');
+  }, [viewMode, insideZoomFov, outsideZoomFov]);
 
   const handleCameraReset = useCallback(() => {
     if (viewMode === 'inside') {
@@ -313,30 +362,30 @@ export default function App() {
   }, [persistState]);
 
   const handleVisualReset = useCallback(() => {
-    setVisualParams(DEFAULT_VISUAL_PARAMS);
+    if (visualizationMode === 'volumetric') {
+      setVisualParams(DEFAULT_VISUAL_PARAMS);
+      persistState({ visualParams: DEFAULT_VISUAL_PARAMS, insideGain: 3.0, outsideGain: 3.0 });
+    } else {
+      setDeformationParams(DEFAULT_DEFORMATION_PARAMS);
+      persistState({ deformationParams: DEFAULT_DEFORMATION_PARAMS, insideGain: 3.0, outsideGain: 3.0 });
+    }
     handleZoomChange(viewMode === 'inside' ? DEFAULT_INSIDE_ZOOM : DEFAULT_OUTSIDE_ZOOM);
     setInsideGain(3.0);
     setOutsideGain(3.0);
-    persistState({ visualParams: DEFAULT_VISUAL_PARAMS, insideGain: 3.0, outsideGain: 3.0 });
-  }, [persistState]);
+  }, [visualizationMode, viewMode, handleZoomChange, persistState]);
 
   const handleGainChange = useCallback((newGain: number) => {
     if (viewMode === 'inside') { setInsideGain(newGain); persistState({ insideGain: newGain }); }
     else { setOutsideGain(newGain); persistState({ outsideGain: newGain }); }
   }, [viewMode, persistState]);
 
-  const handleZoomChange = useCallback((newFov: number) => {
-    if (viewMode === 'inside') {
-      if (Math.abs(insideZoomFov - newFov) < 0.01) return;
-      setInsideZoomFov(newFov);
-    } else {
-      if (Math.abs(outsideZoomFov - newFov) < 0.01) return;
-      setOutsideZoomFov(newFov);
-    }
-    if (sceneRef.current) sceneRef.current.setFov(newFov, 'ui');
-  }, [viewMode, insideZoomFov, outsideZoomFov]);
-
-
+  const handleDeformationParamsChange = useCallback((params: Partial<DeformationParams>) => {
+    setDeformationParams(prev => {
+      const updated = { ...prev, ...params };
+      persistState({ deformationParams: updated });
+      return updated;
+    });
+  }, [persistState]);
 
   const handleCameraUIChange = useCallback((axis: keyof CameraUIState, value: number) => {
     setCameraUIState(prev => ({ ...prev, [axis]: value }));
@@ -412,6 +461,12 @@ export default function App() {
       sceneRef.current.setDissipationRate(visualParams.dissipationRate);
     }
   }, [visualParams]);
+
+  useEffect(() => {
+    if (sceneRef.current) {
+      sceneRef.current.setDeformationParams(deformationParams);
+    }
+  }, [deformationParams]);
 
   useEffect(() => { if (sceneRef.current) sceneRef.current.isUserDraggingSlider = isDraggingSlider; }, [isDraggingSlider]);
   useEffect(() => { if (sceneRef.current) sceneRef.current.setTrackingIndicatorsVisible(isTrackingCam); }, [isTrackingCam]);
@@ -791,14 +846,22 @@ export default function App() {
           )}
         </section>
 
-        {/* Right Sidebar: Controls */}
         {showControls && (
           <aside style={{ width: rightWidth }} className="h-full glass border-l border-primary/10 flex flex-col z-40 shrink-0 relative">
             <div
               className="absolute top-0 -left-1 w-2 h-full cursor-col-resize hover:bg-slate-500/30 z-50 transition-colors"
               onMouseDown={() => setIsDraggingRight(true)}
             />
-            <div className="flex-1 overflow-y-auto pb-20">
+
+            <div className="flex-1 overflow-y-auto w-full p-4 space-y-6 pb-24 customized-scrollbar">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary text-xl">tune</span>
+                  <h3 className="font-semibold text-sm uppercase tracking-widest text-slate-300">Controls</h3>
+                </div>
+              </div>
+
+
               {/* View & Tracking Section */}
               <div className="px-6 py-3 border-b border-primary/10 bg-primary/5">
                 <div
@@ -997,62 +1060,136 @@ export default function App() {
                         onTouchEnd={() => setIsDraggingSlider(false)}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
-                        <Tooltip title="Threshold" content="Sets the minimum audio energy required to render a cloud. Increase this to hide background room noise.">
-                          <span className="hover:text-slate-300 transition-colors">Threshold</span>
-                        </Tooltip>
-                        <span className="text-primary font-medium">{visualParams.densityThreshold.toFixed(3)}</span>
-                      </div>
-                      <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="0.5" step="0.001" value={visualParams.densityThreshold} onChange={(e) => handleVisualParamsChange({ densityThreshold: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
-                        <Tooltip title="Density" content="Controls the physical thickness and opacity of the volumetric audio clouds.">
-                          <span className="hover:text-slate-300 transition-colors">Density</span>
-                        </Tooltip>
-                        <span className="text-primary font-medium">{visualParams.densityMult.toFixed(1)}</span>
-                      </div>
-                      <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="500" step="1" value={visualParams.densityMult} onChange={(e) => handleVisualParamsChange({ densityMult: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
-                        <Tooltip title="Emission" content="Controls the glowing heat and brightness of the volume independently of its thickness.">
-                          <span className="hover:text-slate-300 transition-colors">Emission</span>
-                        </Tooltip>
-                        <span className="text-primary font-medium">{visualParams.emissionMult.toFixed(2)}</span>
-                      </div>
-                      <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="50" step="0.1" value={visualParams.emissionMult} onChange={(e) => handleVisualParamsChange({ emissionMult: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
-                        <Tooltip title="Knee (Color)" content="Shifts the color transfer function to prevent loud transient sounds from blowing out the visualizer into solid white.">
-                          <span className="hover:text-slate-300 transition-colors">Knee</span>
-                        </Tooltip>
-                        <span className="text-primary font-medium">{visualParams.heatmapKnee.toFixed(2)}</span>
-                      </div>
-                      <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0.01" max="1" step="0.01" value={visualParams.heatmapKnee} onChange={(e) => handleVisualParamsChange({ heatmapKnee: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
-                        <Tooltip title="Edge Falloff" content="Adjusts the geometric sharpness of the spatial audio lobes. Higher values create tighter, more focused clouds.">
-                          <span className="hover:text-slate-300 transition-colors">Edge Falloff</span>
-                        </Tooltip>
-                        <span className="text-primary font-medium">{visualParams.edgeFalloff.toFixed(2)}</span>
-                      </div>
-                      <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="2" step="0.01" value={visualParams.edgeFalloff} onChange={(e) => handleVisualParamsChange({ edgeFalloff: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
-                        <Tooltip title="Dissipation" content="Controls how slowly the visual energy fades over time, creating lingering smoke trails that smooth out erratic flickering.">
-                          <span className="hover:text-slate-300 transition-colors">Dissipation</span>
-                        </Tooltip>
-                        <span className="text-primary font-medium">{visualParams.dissipationRate.toFixed(2)}</span>
-                      </div>
-                      <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="1" step="0.01" value={visualParams.dissipationRate} onChange={(e) => handleVisualParamsChange({ dissipationRate: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
-                    </div>
+
+                    {visualizationMode === 'volumetric' ? (
+                      <>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                            <Tooltip title="Threshold" content="Sets the minimum audio energy required to render a cloud. Increase this to hide background room noise.">
+                              <span className="hover:text-slate-300 transition-colors">Threshold</span>
+                            </Tooltip>
+                            <span className="text-primary font-medium">{visualParams.densityThreshold.toFixed(3)}</span>
+                          </div>
+                          <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="0.5" step="0.001" value={visualParams.densityThreshold} onChange={(e) => handleVisualParamsChange({ densityThreshold: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                            <Tooltip title="Density" content="Controls the physical thickness and opacity of the volumetric audio clouds.">
+                              <span className="hover:text-slate-300 transition-colors">Density</span>
+                            </Tooltip>
+                            <span className="text-primary font-medium">{visualParams.densityMult.toFixed(1)}</span>
+                          </div>
+                          <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="500" step="1" value={visualParams.densityMult} onChange={(e) => handleVisualParamsChange({ densityMult: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                            <Tooltip title="Emission" content="Controls the glowing heat and brightness of the volume independently of its thickness.">
+                              <span className="hover:text-slate-300 transition-colors">Emission</span>
+                            </Tooltip>
+                            <span className="text-primary font-medium">{visualParams.emissionMult.toFixed(2)}</span>
+                          </div>
+                          <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="50" step="0.1" value={visualParams.emissionMult} onChange={(e) => handleVisualParamsChange({ emissionMult: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                            <Tooltip title="Knee (Color)" content="Shifts the color transfer function to prevent loud transient sounds from blowing out the visualizer into solid white.">
+                              <span className="hover:text-slate-300 transition-colors">Knee</span>
+                            </Tooltip>
+                            <span className="text-primary font-medium">{visualParams.heatmapKnee.toFixed(2)}</span>
+                          </div>
+                          <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0.01" max="1" step="0.01" value={visualParams.heatmapKnee} onChange={(e) => handleVisualParamsChange({ heatmapKnee: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                            <Tooltip title="Edge Falloff" content="Adjusts the geometric sharpness of the spatial audio lobes. Higher values create tighter, more focused clouds.">
+                              <span className="hover:text-slate-300 transition-colors">Edge Falloff</span>
+                            </Tooltip>
+                            <span className="text-primary font-medium">{visualParams.edgeFalloff.toFixed(2)}</span>
+                          </div>
+                          <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="2" step="0.01" value={visualParams.edgeFalloff} onChange={(e) => handleVisualParamsChange({ edgeFalloff: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                            <Tooltip title="Dissipation" content="Controls how slowly the visual energy fades over time, creating lingering smoke trails that smooth out erratic flickering.">
+                              <span className="hover:text-slate-300 transition-colors">Dissipation</span>
+                            </Tooltip>
+                            <span className="text-primary font-medium">{visualParams.dissipationRate.toFixed(2)}</span>
+                          </div>
+                          <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="1" step="0.01" value={visualParams.dissipationRate} onChange={(e) => handleVisualParamsChange({ dissipationRate: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                            <Tooltip title="Amplitude" content="Controls the amount of deformation (peak height) applied to the sphere based on audio energy.">
+                              <span className="hover:text-slate-300 transition-colors">Amplitude</span>
+                            </Tooltip>
+                            <span className="text-primary font-medium">{deformationParams.amplitude.toFixed(1)}</span>
+                          </div>
+                          <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0" max="5" step="0.1" value={deformationParams.amplitude} onChange={(e) => handleDeformationParamsChange({ amplitude: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                            <Tooltip title="Base Radius" content="Sets the resting radius of the underlying sphere.">
+                              <span className="hover:text-slate-300 transition-colors">Base Radius</span>
+                            </Tooltip>
+                            <span className="text-primary font-medium">{deformationParams.baseRadius.toFixed(1)}</span>
+                          </div>
+                          <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0.1" max="3" step="0.1" value={deformationParams.baseRadius} onChange={(e) => handleDeformationParamsChange({ baseRadius: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                            <Tooltip title="Sharpness" content="Adjusts how sharp or smooth the audio peaks appear.">
+                              <span className="hover:text-slate-300 transition-colors">Sharpness</span>
+                            </Tooltip>
+                            <span className="text-primary font-medium">{deformationParams.sharpness.toFixed(1)}</span>
+                          </div>
+                          <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0.1" max="5.0" step="0.1" value={deformationParams.sharpness} onChange={(e) => handleDeformationParamsChange({ sharpness: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                            <Tooltip title="Color Intensity" content="Controls the intensity of the heatmap colors mapped onto the surface.">
+                              <span className="hover:text-slate-300 transition-colors">Color Intensity</span>
+                            </Tooltip>
+                            <span className="text-primary font-medium">{deformationParams.colorIntensity.toFixed(1)}</span>
+                          </div>
+                          <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0.1" max="5.0" step="0.1" value={deformationParams.colorIntensity} onChange={(e) => handleDeformationParamsChange({ colorIntensity: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                            <Tooltip title="Smoothing" content="Smooths the audio data over time to prevent erratic flickering.">
+                              <span className="hover:text-slate-300 transition-colors">Smoothing</span>
+                            </Tooltip>
+                            <span className="text-primary font-medium">{deformationParams.smoothing.toFixed(2)}</span>
+                          </div>
+                          <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="0.0" max="0.99" step="0.01" value={deformationParams.smoothing} onChange={(e) => handleDeformationParamsChange({ smoothing: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                            <Tooltip title="Resolution" content="Adjust the number of vertices in the sphere. High resolution looks smoother but requires more geometry rebuilding.">
+                              <span className="hover:text-slate-300 transition-colors">Resolution</span>
+                            </Tooltip>
+                            <span className="text-primary font-medium">{deformationParams.resolution}</span>
+                          </div>
+                          <input className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer" type="range" min="32" max="256" step="16" value={deformationParams.resolution} onChange={(e) => handleDeformationParamsChange({ resolution: Number(e.target.value) })} onMouseDown={() => setIsDraggingSlider(true)} onMouseUp={() => setIsDraggingSlider(false)} onTouchStart={() => setIsDraggingSlider(true)} onTouchEnd={() => setIsDraggingSlider(false)} />
+                        </div>
+                        <div className="flex items-center justify-between pt-1">
+                          <Tooltip title="Wireframe" content="Toggles wireframe rendering mode for the sphere surface.">
+                            <span className="text-[11px] font-normal normal-case text-slate-400 hover:text-slate-300 transition-colors">Wireframe</span>
+                          </Tooltip>
+                          <button
+                            onClick={() => handleDeformationParamsChange({ wireframe: !deformationParams.wireframe })}
+                            className={`w-8 h-4 rounded-full transition-colors relative ${deformationParams.wireframe ? 'bg-primary' : 'bg-slate-700'}`}
+                          >
+                            <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${deformationParams.wireframe ? 'left-4.5' : 'left-0.5'}`} />
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
+
               </div>
 
               {/* ESKF Tuning Section */}

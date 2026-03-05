@@ -193,3 +193,50 @@ describe('AmbiScene Inside View Persistence (Snap-Back Fix)', () => {
         expect(scene.controls.target.z).toBeCloseTo(-0.707, 3);
     });
 });
+
+describe('AmbiScene Sphere Deformation Parameters (Phase 2)', () => {
+    it('should set deformation params and update uniforms', () => {
+        const container = document.createElement('div');
+        const scene = new AmbiScene(container);
+
+        scene.setDeformationParams({
+            amplitude: 2.5,
+            baseRadius: 1.5,
+            sharpness: 3.0,
+            colorIntensity: 0.8,
+            smoothing: 0.2, // smoothing is used in updateCovariance
+            resolution: 128,
+            wireframe: true
+        });
+
+        expect(scene.sphereMaterial.uniforms.uAmplitude.value).toBe(2.5);
+        expect(scene.sphereMaterial.uniforms.uBaseRadius.value).toBe(1.5);
+        expect(scene.sphereMaterial.uniforms.uSharpness.value).toBe(3.0);
+        expect(scene.sphereMaterial.uniforms.uColorIntensity.value).toBe(0.8);
+        expect(scene.sphereMaterial.wireframe).toBe(true);
+    });
+
+    it('should trigger geometry rebuild when resolution changes', () => {
+        const container = document.createElement('div');
+        const scene = new AmbiScene(container);
+
+        const initialGeometry = scene.sphereMesh.geometry;
+        const disposeSpy = vi.spyOn(initialGeometry, 'dispose');
+
+        // Change resolution
+        scene.setDeformationParams({
+            amplitude: 1.0,
+            baseRadius: 1.0,
+            sharpness: 1.0,
+            colorIntensity: 1.0,
+            smoothing: 0.5,
+            resolution: 64, // Different from initial 128
+            wireframe: false
+        });
+
+        expect(disposeSpy).toHaveBeenCalled();
+        expect(scene.sphereMesh.geometry).not.toBe(initialGeometry);
+        // The new geometry should exist
+        expect(scene.sphereMesh.geometry).toBeDefined();
+    });
+});

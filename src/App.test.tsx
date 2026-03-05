@@ -41,6 +41,7 @@ vi.mock('./visualizer/AmbiScene', () => {
                 updateTrackingIndicators: vi.fn(),
                 updateFromUI: vi.fn(),
                 setViewMode: vi.fn(),
+                setDeformationParams: vi.fn(),
             };
         })
     };

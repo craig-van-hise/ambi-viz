@@ -22,6 +22,15 @@ export interface PersistedState {
         edgeFalloff: number;
         dissipationRate: number;
     };
+    deformationParams: {
+        amplitude: number;
+        baseRadius: number;
+        sharpness: number;
+        colorIntensity: number;
+        smoothing: number;
+        resolution: number;
+        wireframe: boolean;
+    };
 }
 
 const DEFAULTS: PersistedState = {
@@ -40,6 +49,15 @@ const DEFAULTS: PersistedState = {
         heatmapKnee: 0.5,
         edgeFalloff: 1.0,
         dissipationRate: 0,
+    },
+    deformationParams: {
+        amplitude: 1.0,
+        baseRadius: 1.0,
+        sharpness: 1.0,
+        colorIntensity: 1.0,
+        smoothing: 0.5,
+        resolution: 128,
+        wireframe: false,
     },
 };
 
@@ -68,6 +86,15 @@ export function loadState(): PersistedState {
                 heatmapKnee: parsed.visualParams?.heatmapKnee ?? DEFAULTS.visualParams.heatmapKnee,
                 edgeFalloff: parsed.visualParams?.edgeFalloff ?? DEFAULTS.visualParams.edgeFalloff,
                 dissipationRate: parsed.visualParams?.dissipationRate ?? DEFAULTS.visualParams.dissipationRate,
+            },
+            deformationParams: {
+                amplitude: parsed.deformationParams?.amplitude ?? DEFAULTS.deformationParams.amplitude,
+                baseRadius: parsed.deformationParams?.baseRadius ?? DEFAULTS.deformationParams.baseRadius,
+                sharpness: parsed.deformationParams?.sharpness ?? DEFAULTS.deformationParams.sharpness,
+                colorIntensity: parsed.deformationParams?.colorIntensity ?? DEFAULTS.deformationParams.colorIntensity,
+                smoothing: parsed.deformationParams?.smoothing ?? DEFAULTS.deformationParams.smoothing,
+                resolution: parsed.deformationParams?.resolution ?? DEFAULTS.deformationParams.resolution,
+                wireframe: parsed.deformationParams?.wireframe ?? DEFAULTS.deformationParams.wireframe,
             },
         };
     } catch {

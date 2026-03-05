@@ -4,6 +4,7 @@ import { ambisonicVertexShader, ambisonicFragmentShader } from './shaders/ambiso
 import { sphereDeformationVertexShader, sphereDeformationFragmentShader } from './shaders/sphereDeformation';
 import { arrowVertexShader, arrowFragmentShader } from './shaders/arrowShader';
 import { Throttle } from '../utils/Throttle';
+import type { DeformationParams } from '../App';
 
 export type ViewMode = 'inside' | 'outside';
 export type VisualizationMode = 'volumetric' | 'sphere';
@@ -57,6 +58,9 @@ export class AmbiScene {
     private currentRoll: number = 0;
     private resizeObserver: ResizeObserver | null = null;
     private boundOnWheel = this.onWheel.bind(this);
+
+    // Deformable Sphere Parameters
+    private currentResolution: number = 128;
 
     constructor(container: HTMLElement, resolutionScale: number = 0.6) {
         this.container = container;
@@ -133,12 +137,16 @@ export class AmbiScene {
                 uOpacity: { value: 1.0 },
                 u_isInsideView: { value: true },
                 u_resolution: { value: new THREE.Vector2(width, height) },
-                u_fov: { value: 150.0 }
+                u_fov: { value: 150.0 },
+                uAmplitude: { value: 1.0 },
+                uBaseRadius: { value: 1.0 },
+                uSharpness: { value: 1.0 },
+                uColorIntensity: { value: 1.0 }
             },
             transparent: true,
             side: THREE.DoubleSide
         });
-        const sphereGeometry = new THREE.SphereGeometry(1, 128, 128);
+        const sphereGeometry = new THREE.SphereGeometry(1, this.currentResolution, this.currentResolution);
         this.sphereMesh = new THREE.Mesh(sphereGeometry, this.sphereMaterial);
         this.sphereMesh.visible = false;
         this.scene.add(this.sphereMesh);
@@ -437,7 +445,29 @@ export class AmbiScene {
     setDissipationRate(val: number) { this.volumetricMaterial.uniforms.uDissipationRate.value = Number(val) || 0; }
     getDissipationRate(): number { return this.volumetricMaterial.uniforms.uDissipationRate.value; }
 
-    updateCovariance(cov: Float32Array, order: number, gain: number = 1.0) {
+    // Deformation Parameter Setter
+    setDeformationParams(params: DeformationParams) {
+        if (!this.sphereMaterial) return;
+
+        this.sphereMaterial.uniforms.uAmplitude.value = params.amplitude;
+        this.sphereMaterial.uniforms.uBaseRadius.value = params.baseRadius;
+        this.sphereMaterial.uniforms.uSharpness.value = params.sharpness;
+        this.sphereMaterial.uniforms.uColorIntensity.value = params.colorIntensity;
+        this.sphereMaterial.wireframe = params.wireframe;
+
+        // Handle resolution change by rebuilding geometry
+        if (this.currentResolution !== params.resolution) {
+            this.currentResolution = params.resolution;
+            if (this.sphereMesh) {
+                this.sphereMesh.geometry.dispose();
+                this.sphereMesh.geometry = new THREE.SphereGeometry(1, this.currentResolution, this.currentResolution);
+            }
+        }
+    }
+
+    // Note: Smoothing factor handling added below in updateCovariance
+
+    updateCovariance(cov: Float32Array, order: number, gain: number = 1.0, smoothing: number = 0.5) {
         // Show the active mesh on first real data
         if (!this._hasReceivedData) {
             this._hasReceivedData = true;
@@ -473,7 +503,17 @@ export class AmbiScene {
                 safeCov = new Float32Array(256);
                 safeCov.set(cov);
             }
-            this.sphereMaterial.uniforms.uCovariance.value = safeCov;
+
+            // Apply exponential smoothing to the covariance matrix data for the sphere
+            if (this.sphereMaterial.uniforms.uCovariance.value) {
+                const existing = this.sphereMaterial.uniforms.uCovariance.value as Float32Array;
+                for (let i = 0; i < 256; i++) {
+                    existing[i] = existing[i] * smoothing + safeCov[i] * (1.0 - smoothing);
+                }
+            } else {
+                this.sphereMaterial.uniforms.uCovariance.value = safeCov;
+            }
+
             this.sphereMaterial.uniforms.uOrder.value = order;
             this.sphereMaterial.uniforms.uGain.value = gain;
         }
