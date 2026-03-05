@@ -177,6 +177,7 @@ export default function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isScrubbing = useRef(false);
   const hasInitializedRemoteQueue = useRef(false);
+  const hasAttachedDecoder = useRef(false);
 
   const activeTrack = queue[currentIndex] || queue[0] || { id: -1, name: "No Track", durationSec: 0, duration: "00:00", type: "-" };
 
@@ -302,6 +303,14 @@ export default function App() {
       audioEngine.onTrackChange = undefined;
     };
   }, [audioEngine]);
+
+  // Ensure head tracking gets attached exactly once when the decoder becomes available
+  useEffect(() => {
+    if (audioEngine.obrDecoder && !hasAttachedDecoder.current && playbackState !== 'stopped') {
+      headTracking.attachDecoder(audioEngine.obrDecoder);
+      hasAttachedDecoder.current = true;
+    }
+  }, [audioEngine, audioEngine.obrDecoder, headTracking, playbackState]);
 
   useEffect(() => {
     if (audioEngine.obrDecoder && hrtfUrl !== `${import.meta.env.BASE_URL}hrtf/MIT_KEMAR_Normal.sofa`) {
