@@ -170,9 +170,6 @@ export class AudioEngine {
     }
 
     async setupGraph(buffer: AudioBuffer) {
-        // 0. Resume context (Modern browser policy)
-        await this.audioCtx.resume();
-
         // Store buffer for JIT source creation
         this.audioBuffer = buffer;
 
