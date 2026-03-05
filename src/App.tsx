@@ -85,6 +85,9 @@ const Tooltip = ({ children, content, title }: { children: React.ReactNode, cont
   );
 };
 
+const DEFAULT_INSIDE_ZOOM = 150;
+const DEFAULT_OUTSIDE_ZOOM = 60;
+
 export default function App() {
   const [persisted] = useState(() => loadState());
   const [audioEngine] = useState(() => new AudioEngine());
@@ -103,8 +106,8 @@ export default function App() {
 
   const [playbackState, setPlaybackState] = useState<PlaybackState>('stopped');
   const [isLooping, setIsLooping] = useState(true);
-  const [insideZoomFov, setInsideZoomFov] = useState(120);
-  const [outsideZoomFov, setOutsideZoomFov] = useState(120);
+  const [insideZoomFov, setInsideZoomFov] = useState(DEFAULT_INSIDE_ZOOM);
+  const [outsideZoomFov, setOutsideZoomFov] = useState(DEFAULT_OUTSIDE_ZOOM);
 
   const [cameraUIState, setCameraUIState] = useState<CameraUIState>({
     yaw: 0, pitch: 0, roll: 0, x: 0, y: 3.3, z: 3.6,
@@ -160,7 +163,7 @@ export default function App() {
       }
       setInsideGain(3.0);
       persistState({ insideGain: 3.0 });
-      handleZoomChange(120);
+      handleZoomChange(DEFAULT_INSIDE_ZOOM);
     } else {
       setCameraUIState(prev => ({ ...prev, x: 0, y: 3.3, z: 3.6 }));
       if (sceneRef.current) {
@@ -170,6 +173,7 @@ export default function App() {
       }
       setOutsideGain(3.0);
       persistState({ outsideGain: 3.0 });
+      handleZoomChange(DEFAULT_OUTSIDE_ZOOM);
     }
   }, [viewMode, persistState]);
 
@@ -285,7 +289,7 @@ export default function App() {
 
   const handleVisualReset = useCallback(() => {
     setVisualParams(DEFAULT_VISUAL_PARAMS);
-    handleZoomChange(120);
+    handleZoomChange(viewMode === 'inside' ? DEFAULT_INSIDE_ZOOM : DEFAULT_OUTSIDE_ZOOM);
     setInsideGain(3.0);
     setOutsideGain(3.0);
     persistState({ visualParams: DEFAULT_VISUAL_PARAMS, insideGain: 3.0, outsideGain: 3.0 });
@@ -307,11 +311,7 @@ export default function App() {
     if (sceneRef.current) sceneRef.current.setFov(newFov, 'ui');
   }, [viewMode, insideZoomFov, outsideZoomFov]);
 
-  // Sync FOV when view mode changes
-  useEffect(() => {
-    const activeZoom = viewMode === 'inside' ? insideZoomFov : outsideZoomFov;
-    if (sceneRef.current) sceneRef.current.setFov(activeZoom);
-  }, [viewMode, insideZoomFov, outsideZoomFov]);
+
 
   const handleCameraUIChange = useCallback((axis: keyof CameraUIState, value: number) => {
     setCameraUIState(prev => ({ ...prev, [axis]: value }));
@@ -396,7 +396,16 @@ export default function App() {
     }
   }, [isTrackingCam]);
   useEffect(() => { if (sceneRef.current) sceneRef.current.setVisualizationMode(visualizationMode); }, [visualizationMode]);
-  useEffect(() => { if (sceneRef.current) sceneRef.current.setViewMode(viewMode); }, [viewMode]);
+
+  // Sync View Mode and FOV to AmbiScene
+  useEffect(() => {
+    if (!sceneRef.current) return;
+    sceneRef.current.setViewMode(viewMode);
+
+    // Immediately apply the correct FOV for this mode directly from React state
+    const activeZoom = viewMode === 'inside' ? insideZoomFov : outsideZoomFov;
+    sceneRef.current.setFov(activeZoom, 'ui');
+  }, [viewMode, insideZoomFov, outsideZoomFov]);
 
   useEffect(() => {
     let outputAnimationFrameId: number;

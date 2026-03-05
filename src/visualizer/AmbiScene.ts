@@ -36,8 +36,8 @@ export class AmbiScene {
 
     // Animation state
     rafId: number | null = null;
-    private readonly DEFAULT_OUTSIDE_FOV = 50;
-    private insideFov = 115;
+    private readonly DEFAULT_OUTSIDE_FOV = 60;
+    private insideFov = 150;
     private outsideFov = this.DEFAULT_OUTSIDE_FOV;
     private outsidePositionCache = new THREE.Vector3(0, 3.3, 3.6);
 
@@ -241,8 +241,6 @@ export class AmbiScene {
         this.viewMode = mode;
 
         if (mode === 'inside') {
-            // Restore inside FOV
-            this.camera.fov = this.insideFov;
             // Camera exactly at origin
             this.camera.position.set(0, 0, 0);
             // Push target forward to prevent distance=0 singularity
@@ -255,8 +253,6 @@ export class AmbiScene {
             this.currentRoll = 0;
             this.camera.up.set(0, 1, 0);
         } else {
-            // Restore outside FOV
-            this.camera.fov = this.outsideFov;
             // Restore from cache
             this.camera.position.copy(this.outsidePositionCache);
             this.controls.target.set(0, 0, 0);
@@ -528,12 +524,6 @@ export class AmbiScene {
     setFov(fov: number, source: 'ui' | 'internal' = 'internal') {
         const targetState = this.viewMode === 'inside' ? this.insideFov : this.outsideFov;
         if (Math.abs(targetState - fov) < 0.001 && Math.abs(this.camera.fov - fov) < 0.001) return;
-
-        if (this.viewMode === 'inside') {
-            this.insideFov = fov;
-        } else {
-            this.outsideFov = fov;
-        }
 
         this.camera.fov = fov;
         this.camera.updateProjectionMatrix();

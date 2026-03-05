@@ -9,7 +9,7 @@ This document captures the default values for all control parameters in the appl
 
 ## 🎨 Visualizer Controls
 - **Gain**: 3.0 (Synchronized for both Inside/Outside views upon reset)
-- **Zoom (FOV)**: 120°
+- **Zoom (FOV)**: Inside 150° / Outside 60°
 - **Threshold**: 0.000
 - **Density**: 1.0x
 - **Emission**: 1.0x
