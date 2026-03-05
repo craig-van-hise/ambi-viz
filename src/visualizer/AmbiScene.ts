@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { ambisonicVertexShader, ambisonicFragmentShader } from './shaders/ambisonic';
 import { sphereDeformationVertexShader, sphereDeformationFragmentShader } from './shaders/sphereDeformation';
+import { arrowVertexShader, arrowFragmentShader } from './shaders/arrowShader';
 import { Throttle } from '../utils/Throttle';
 
 export type ViewMode = 'inside' | 'outside';
@@ -50,6 +51,8 @@ export class AmbiScene {
     // Head tracking visual indicators
     private ghostArrow: THREE.ArrowHelper | null = null;      // Raw MediaPipe (cyan, semi-transparent)
     private predictedArrow: THREE.ArrowHelper | null = null;   // ESKF predicted (green, solid)
+    private arrowMaterial: THREE.ShaderMaterial | null = null;
+    private shadowArrowMaterial: THREE.ShaderMaterial | null = null;
 
     private currentRoll: number = 0;
     private resizeObserver: ResizeObserver | null = null;
@@ -249,6 +252,10 @@ export class AmbiScene {
         if (this.sphereMaterial) {
             this.sphereMaterial.uniforms.u_isInsideView.value = (mode === 'inside');
         }
+        if (this.arrowMaterial) {
+            this.arrowMaterial.uniforms.u_isInsideView.value = (mode === 'inside');
+            this.shadowArrowMaterial!.uniforms.u_isInsideView.value = (mode === 'inside');
+        }
 
         if (mode === 'inside') {
             // Camera exactly at origin
@@ -327,17 +334,42 @@ export class AmbiScene {
         const headLength = 0.3;
         const headWidth = 0.15;
 
+        const width = this.container.clientWidth;
+        const height = this.container.clientHeight;
+
+        const arrowUniforms = {
+            u_isInsideView: { value: this.viewMode === 'inside' },
+            u_resolution: { value: new THREE.Vector2(width, height) },
+            u_fov: { value: this.camera.fov },
+            u_color: { value: new THREE.Color(0x00e676) }, // Default green
+            u_opacity: { value: 1.0 }
+        };
+
+        this.arrowMaterial = new THREE.ShaderMaterial({
+            uniforms: THREE.UniformsUtils.clone(arrowUniforms),
+            vertexShader: arrowVertexShader,
+            fragmentShader: arrowFragmentShader,
+            transparent: true,
+            depthTest: true
+        });
+
+        const shadowUniforms = THREE.UniformsUtils.clone(arrowUniforms);
+        shadowUniforms.u_color.value.set(0x00e5ff); // Cyan
+        shadowUniforms.u_opacity.value = 0.35;
+        this.shadowArrowMaterial = new THREE.ShaderMaterial({
+            uniforms: shadowUniforms,
+            vertexShader: arrowVertexShader,
+            fragmentShader: arrowFragmentShader,
+            transparent: true,
+            depthTest: true
+        });
+
         // Ghost arrow — semi-transparent cyan (raw MediaPipe data)
         this.ghostArrow = new THREE.ArrowHelper(
             defaultDir, origin, arrowLength, 0x00e5ff, headLength, headWidth
         );
-        this.ghostArrow.line.material = new THREE.LineBasicMaterial({
-            color: 0x00e5ff,
-            transparent: true,
-            opacity: 0.35,
-        });
-        (this.ghostArrow.cone.material as THREE.MeshBasicMaterial).transparent = true;
-        (this.ghostArrow.cone.material as THREE.MeshBasicMaterial).opacity = 0.35;
+        this.ghostArrow.line.material = this.shadowArrowMaterial;
+        this.ghostArrow.cone.material = this.shadowArrowMaterial;
         this.ghostArrow.visible = false;
         this.helperScene.add(this.ghostArrow);
 
@@ -345,6 +377,8 @@ export class AmbiScene {
         this.predictedArrow = new THREE.ArrowHelper(
             defaultDir, origin, arrowLength, 0x00e676, headLength, headWidth
         );
+        this.predictedArrow.line.material = this.arrowMaterial;
+        this.predictedArrow.cone.material = this.arrowMaterial;
         this.predictedArrow.visible = false;
         this.helperScene.add(this.predictedArrow);
     }
@@ -460,6 +494,10 @@ export class AmbiScene {
 
         if (this.sphereMaterial && this.sphereMaterial.uniforms.u_resolution) {
             this.sphereMaterial.uniforms.u_resolution.value.set(width, height);
+        }
+        if (this.arrowMaterial && this.arrowMaterial.uniforms.u_resolution) {
+            this.arrowMaterial.uniforms.u_resolution.value.set(width, height);
+            this.shadowArrowMaterial!.uniforms.u_resolution.value.set(width, height);
         }
 
         // Update render target to match new size
@@ -608,6 +646,10 @@ export class AmbiScene {
         this.volumetricMaterial.uniforms.u_fov.value = this.camera.fov;
         if (this.sphereMaterial) {
             this.sphereMaterial.uniforms.u_fov.value = this.camera.fov;
+        }
+        if (this.arrowMaterial) {
+            this.arrowMaterial.uniforms.u_fov.value = this.camera.fov;
+            this.shadowArrowMaterial!.uniforms.u_fov.value = this.camera.fov;
         }
 
         // 2. Render Loop UI Synchronization (Phase 1 Sync)
