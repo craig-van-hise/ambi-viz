@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/ambi-viz/',
   plugins: [react(), tailwindcss()],
   server: {
     headers: {

@@ -37,7 +37,7 @@ export class AudioEngine {
     private _sourceGeneration: number = 0;
     private _loadGeneration: number = 0;
     private _loadingIndex: number = -1;
-    private _loadingPromise: Promise<void> | null = null;
+    private _loadingPromise: Promise<boolean> | null = null;
 
     // Time tracking
     private startTime: number = 0;
@@ -80,8 +80,8 @@ export class AudioEngine {
      * Decode and load a specific track from the queue.
      * Does NOT auto-play — call play() explicitly.
      */
-    async loadTrack(index: number): Promise<void> {
-        if (index < 0 || index >= this.queue.length) return;
+    async loadTrack(index: number): Promise<boolean> {
+        if (index < 0 || index >= this.queue.length) return false;
 
         // If already loading this track, return the existing promise
         if (this._loadingIndex === index && this._loadingPromise) {
@@ -114,11 +114,11 @@ export class AudioEngine {
                         throw new Error('No file or URL source for track');
                     }
 
-                    if (generation !== this._loadGeneration) return;
+                    if (generation !== this._loadGeneration) return false;
 
                     track.buffer = await this.audioCtx.decodeAudioData(arrayBuffer);
 
-                    if (generation !== this._loadGeneration) return;
+                    if (generation !== this._loadGeneration) return false;
 
                     track.durationSec = track.buffer.duration;
                     const m = Math.floor(track.durationSec / 60);
@@ -133,20 +133,21 @@ export class AudioEngine {
                     }
                 }
 
-                if (generation !== this._loadGeneration) return;
+                if (generation !== this._loadGeneration) return false;
 
                 await this.setupGraph(track.buffer);
 
-                if (generation !== this._loadGeneration) return;
+                if (generation !== this._loadGeneration) return false;
 
                 this.pausedTime = 0;
                 this.setState('stopped');
                 console.log(`AudioEngine: Track ${index} ("${track.name}") ready.`);
+                return true;
             } catch (error) {
-                if (generation !== this._loadGeneration) return;
+                if (generation !== this._loadGeneration) return false;
                 console.error('AudioEngine: Error loading track:', error);
                 this.setState('error');
-                throw error;
+                return false;
             } finally {
                 if (generation === this._loadGeneration) {
                     this._loadingPromise = null;
@@ -159,10 +160,13 @@ export class AudioEngine {
     }
 
     /** Legacy single-file load (queues + loads + plays for backward compat) */
-    async loadFile(file: File): Promise<void> {
+    async loadFile(file: File): Promise<boolean> {
         const indices = await this.queueFiles([file]);
-        await this.loadTrack(indices[0]);
-        this.play();
+        const success = await this.loadTrack(indices[0]);
+        if (success) {
+            this.play();
+        }
+        return success;
     }
 
     async setupGraph(buffer: AudioBuffer) {
@@ -281,7 +285,7 @@ export class AudioEngine {
 
     /** Start or resume playback */
     async play() {
-        if (this.playbackState === 'playing' || this.playbackState === 'error') return;
+        if (this.playbackState === 'playing' || this.playbackState === 'error' || this.playbackState === 'loading') return;
 
         if (this.audioCtx.state === 'suspended') {
             await this.audioCtx.resume();
@@ -371,7 +375,7 @@ export class AudioEngine {
             } else {
                 // Play the next track (which now occupies the same index, or wrap to 0 if we deleted the last item)
                 const nextIdx = index < this.queue.length ? index : 0;
-                this.loadTrack(nextIdx).then(() => this.play());
+                this.loadTrack(nextIdx).then(success => { if (success) this.play() });
             }
         } else {
             // If we are removing a track before the current one, decrement currentIndex to keep it pointing to the right track
@@ -400,8 +404,10 @@ export class AudioEngine {
 
     /** Convenience method to load and play in one go */
     async playTrack(index: number) {
-        await this.loadTrack(index);
-        this.play();
+        const success = await this.loadTrack(index);
+        if (success) {
+            this.play();
+        }
     }
 
     /** Set loop state on the source node */
