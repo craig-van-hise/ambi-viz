@@ -5,7 +5,8 @@ export type PlaybackState = 'stopped' | 'playing' | 'paused' | 'loading' | 'erro
 
 export interface QueueTrack {
     name: string;
-    file: File;
+    file?: File;
+    url?: string;
     buffer: AudioBuffer | null;
     type?: string;
     duration?: string;
@@ -57,15 +58,19 @@ export class AudioEngine {
     }
 
     /**
-     * Queue one or more files without starting playback.
+     * Queue one or more files/URLs without starting playback.
      * Returns the indices of the added tracks.
      */
-    async queueFiles(files: File[]): Promise<number[]> {
+    async queueFiles(items: (File | { name: string, url: string, type?: string })[]): Promise<number[]> {
         const startIdx = this.queue.length;
-        for (const file of files) {
-            this.queue.push({ name: file.name, file, buffer: null });
+        for (const item of items) {
+            if (item instanceof File) {
+                this.queue.push({ name: item.name, file: item, buffer: null });
+            } else {
+                this.queue.push({ name: item.name, url: item.url, type: item.type, buffer: null });
+            }
         }
-        return Array.from({ length: files.length }, (_, i) => startIdx + i);
+        return Array.from({ length: items.length }, (_, i) => startIdx + i);
     }
 
     /**
@@ -83,13 +88,29 @@ export class AudioEngine {
         try {
             // Decode buffer if not already cached
             if (!track.buffer) {
-                const arrayBuffer = await track.file.arrayBuffer();
+                let arrayBuffer: ArrayBuffer;
+                if (track.file) {
+                    arrayBuffer = await track.file.arrayBuffer();
+                } else if (track.url) {
+                    const response = await fetch(track.url);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    arrayBuffer = await response.arrayBuffer();
+                } else {
+                    throw new Error('No file or URL source for track');
+                }
+
                 track.buffer = await this.audioCtx.decodeAudioData(arrayBuffer);
                 track.durationSec = track.buffer.duration;
                 const m = Math.floor(track.durationSec / 60);
                 const s = Math.floor(track.durationSec % 60);
                 track.duration = `${m}:${s.toString().padStart(2, '0')}`;
-                track.type = track.file.type.split('/')[1]?.toUpperCase() || 'AUDIO';
+
+                if (track.file) {
+                    track.type = track.file.type.split('/')[1]?.toUpperCase() || 'AUDIO';
+                } else if (!track.type && track.url) {
+                    const ext = track.url.split('.').pop()?.toUpperCase();
+                    track.type = ext || 'URL';
+                }
             }
 
             await this.setupGraph(track.buffer);

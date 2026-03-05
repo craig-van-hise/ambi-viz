@@ -236,6 +236,61 @@ export default function App() {
   useEffect(() => { headTracking.init(); }, [headTracking]);
 
   useEffect(() => {
+    const initializeRemoteQueue = async () => {
+      try {
+        const response = await fetch('/ambisonic_audio_queue/Queue order.txt');
+        if (!response.ok) return;
+        const text = await response.text();
+        const lines = text.split('\n');
+
+        // Match the "1. Title" pattern
+        const trackTitles: string[] = [];
+        for (const line of lines) {
+          const match = line.match(/^\d+\.\s+(.+)$/);
+          if (match) {
+            trackTitles.push(match[1].trim());
+          }
+        }
+
+        if (trackTitles.length === 0) return;
+
+        // Assets are in /public/ambisonic_audio_queue/
+        // We assume the filenames closely match the titles and are .opus
+        // To be precise, we'll map them based on the file list we saw earlier
+        const filenameMap: Record<string, string> = {
+          "3rd Order Clock": "3rd Order Ambi Clock Test.opus",
+          "TEST-09-DYN-B-SPIRAL_Order3": "TEST-09-DYN-B-SPIRAL_Order3.opus",
+          "Final Fantasy Prelude": "Final Fantasy Prelude.opus",
+          "A Furiosa (Maxixe)": "A Furiosa (Maxixe).opus",
+          "Bach Invention no5 in Eb_AmbiX_3O": "Bach Invention no5 in Eb_AmbiX_3O.opus",
+          "Beethoven - String Quartet No 13 in B-flat major - IV Alla danza tedesca": "Beethoven - String Quartet No 13 in B-flat major - IV Alla danza tedesca.opus",
+          "Let Me Tell You About My Boat": "Let Me Tell You About My Boat.opus",
+          "SMB 2 Theme": "SMB 2 Theme.opus"
+        };
+
+        const remoteTracks = trackTitles.map(title => ({
+          name: title,
+          url: `/ambisonic_audio_queue/${filenameMap[title] || `${title}.opus`}`,
+          type: 'OPUS'
+        }));
+
+        const indices = await audioEngine.queueFiles(remoteTracks);
+        setQueue([...audioEngine.queue]);
+
+        if (audioEngine.currentIndex === -1 && indices.length > 0) {
+          await audioEngine.loadTrack(indices[0]);
+          setCurrentIndex(indices[0]);
+          if (audioEngine.obrDecoder) headTracking.attachDecoder(audioEngine.obrDecoder);
+        }
+      } catch (error) {
+        console.error("Failed to initialize remote queue:", error);
+      }
+    };
+
+    initializeRemoteQueue();
+  }, [audioEngine, headTracking]);
+
+  useEffect(() => {
     audioEngine.onStateChange = (state) => setPlaybackState(state);
     audioEngine.onTrackChange = (index) => setCurrentIndex(index);
     return () => {
