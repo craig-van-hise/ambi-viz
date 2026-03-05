@@ -405,12 +405,16 @@ export default function App() {
     const loop = () => {
       const now = performance.now();
       if (throttleRef.current.shouldUpdate(now)) {
-        audioEngine.update();
-        const cov = audioEngine.getCovariance();
-        if (sceneRef.current) {
-          const currentGain = viewMode === 'inside' ? insideGain : outsideGain;
-          sceneRef.current.updateCovariance(cov, audioEngine.order, currentGain);
-          if (!isTrackingCam) headTracking.setUIRotation(sceneRef.current.getNaturalQuaternion());
+        if (audioEngine.playbackState === 'playing') {
+          audioEngine.update();
+          const cov = audioEngine.getCovariance();
+          if (sceneRef.current) {
+            const currentGain = viewMode === 'inside' ? insideGain : outsideGain;
+            sceneRef.current.updateCovariance(cov, audioEngine.order, currentGain);
+          }
+        }
+        if (sceneRef.current && !isTrackingCam) {
+          headTracking.setUIRotation(sceneRef.current.getNaturalQuaternion());
         }
       }
       if (isTrackingCam && sceneRef.current) {

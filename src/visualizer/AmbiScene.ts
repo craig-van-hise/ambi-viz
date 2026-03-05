@@ -30,6 +30,7 @@ export class AmbiScene {
 
     // View & Visualization mode
     visualizationMode: VisualizationMode = 'volumetric';
+    private _hasReceivedData: boolean = false;
     viewMode: ViewMode = 'inside';
     onFovChange: ((fov: number) => void) | null = null;
 
@@ -112,6 +113,7 @@ export class AmbiScene {
         // 6. Geometry — BoxGeometry encompassing camera
         const geometry = new THREE.BoxGeometry(10, 10, 10);
         this.volumetricMesh = new THREE.Mesh(geometry, this.volumetricMaterial);
+        this.volumetricMesh.visible = false; // Hidden until first real data arrives
         this.scene.add(this.volumetricMesh);
 
         // 6.5. Sphere Deformation Shader Material
@@ -171,6 +173,13 @@ export class AmbiScene {
         this.renderTargetA = new THREE.WebGLRenderTarget(rtWidth, rtHeight, options);
         this.renderTargetB = new THREE.WebGLRenderTarget(rtWidth, rtHeight, options);
 
+        // Clear both FBOs to transparent black to prevent garbage on first frame
+        this.renderer.setRenderTarget(this.renderTargetA);
+        this.renderer.clear();
+        this.renderer.setRenderTarget(this.renderTargetB);
+        this.renderer.clear();
+        this.renderer.setRenderTarget(null);
+
         if (this.volumetricMaterial && this.volumetricMaterial.uniforms.uResolution) {
             this.volumetricMaterial.uniforms.uResolution.value.set(rtWidth, rtHeight);
         }
@@ -215,11 +224,11 @@ export class AmbiScene {
     setVisualizationMode(mode: VisualizationMode) {
         this.visualizationMode = mode;
         if (mode === 'volumetric') {
-            this.volumetricMesh.visible = true;
+            this.volumetricMesh.visible = this._hasReceivedData;
             this.sphereMesh.visible = false;
         } else {
             this.volumetricMesh.visible = false;
-            this.sphereMesh.visible = true;
+            this.sphereMesh.visible = this._hasReceivedData;
         }
     }
 
@@ -387,6 +396,16 @@ export class AmbiScene {
     getDissipationRate(): number { return this.volumetricMaterial.uniforms.uDissipationRate.value; }
 
     updateCovariance(cov: Float32Array, order: number, gain: number = 1.0) {
+        // Show the active mesh on first real data
+        if (!this._hasReceivedData) {
+            this._hasReceivedData = true;
+            if (this.visualizationMode === 'volumetric') {
+                this.volumetricMesh.visible = true;
+            } else {
+                this.sphereMesh.visible = true;
+            }
+        }
+
         if (this.visualizationMode === 'volumetric') {
             if (this.volumetricMaterial.isShaderMaterial) {
                 // Pack flat covariance into 64 Vector4s for the shader
