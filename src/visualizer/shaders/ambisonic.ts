@@ -35,6 +35,9 @@ uniform sampler2D tPreviousFrame;
 uniform float uDissipationRate;
 uniform vec2 uResolution;
 
+uniform bool u_isInsideView;
+uniform mat4 u_cameraWorldMatrix;
+
 // Constants
 #define MAX_STEPS 64
 #define STEP_SIZE 0.15
@@ -112,7 +115,42 @@ float computeDirectionalEnergy(vec3 dir) {
 void main() {
     // Raymarching Setup
     vec3 rayOrigin = cameraPosition;
-    vec3 rayDir = normalize(vWorldPos - cameraPosition);
+    vec3 rayDir;
+
+    if (u_isInsideView) {
+        // --- EQUIRECTANGULAR / SPHERICAL PROJECTION ---
+        
+        // 1. Normalize screen coordinates to range [-1.0, 1.0]
+        vec2 uv = (gl_FragCoord.xy / uResolution.xy) * 2.0 - 1.0;
+        
+        // 2. ASPECT RATIO CORRECTION (The Fix)
+        // Multiply the X coordinate by the aspect ratio.
+        // This ensures a circle stays a circle regardless of window size.
+        float aspect = uResolution.x / uResolution.y;
+        uv.x *= aspect; 
+        
+        // 3. Map UVs to Spherical Angles
+        // Use a SINGLE scaling factor for both axes to maintain perfect proportions.
+        // 1.57079632 is PI/2. Adjust this single value to change your base zoom/FOV.
+        float fovScale = 1.57079632 * 0.75; 
+        
+        float yaw = uv.x * fovScale;   
+        float pitch = uv.y * fovScale; 
+        
+        // 4. Convert Spherical to Local Cartesian (Three.js standard: -Z is forward)
+        vec3 localDir = vec3(
+            cos(pitch) * sin(yaw),
+            sin(pitch),
+            -cos(pitch) * cos(yaw)
+        );
+        
+        // 5. Transform local ray by camera's world rotation matrix
+        rayDir = normalize(mat3(u_cameraWorldMatrix) * localDir);
+        
+    } else {
+        // --- STANDARD PERSPECTIVE PROJECTION (Outside View) ---
+        rayDir = normalize(vWorldPos - cameraPosition);
+    }
 
     // === DIRECTION-ONCE: Compute energy for this ray's relevant direction ===
     // Find the point on this ray closest to the origin (the sound field center).

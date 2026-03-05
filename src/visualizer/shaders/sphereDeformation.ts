@@ -7,6 +7,8 @@ varying vec2 vUv;
 uniform float uCovariance[256]; // 16x16 flattened covariance matrix
 uniform int uOrder;
 uniform float uGain; // To scale the displacement
+uniform bool u_isInsideView;
+uniform vec2 u_resolution;
 
 // Constants
 #define PI 3.14159265359
@@ -209,7 +211,50 @@ void main() {
     vec3 newPos = position + normal * disp;
     vPosition = newPos;
     
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
+    vec4 worldPosition = modelMatrix * vec4(newPos, 1.0);
+    vec4 viewPosition = viewMatrix * worldPosition; // Position relative to the camera
+
+    if (u_isInsideView) {
+        // --- NON-LINEAR SPHERICAL PROJECTION (Inside View) ---
+        
+        vec3 dir = normalize(viewPosition.xyz);
+        
+        // Map direction to Spherical Angles (Yaw and Pitch)
+        float yaw = atan(dir.x, -dir.z); 
+        float pitch = asin(dir.y);
+        
+        // Aspect Ratio Correction
+        float aspect = u_resolution.x / u_resolution.y;
+        float fovScale = 1.57079632 * 0.75; 
+        
+        vec2 ndc = vec2(yaw / (fovScale * aspect), pitch / fovScale);
+        
+        // DIRECT CLIP-SPACE OUTPUT (The Fix)
+        // 1. By setting W to 1.0, we bypass WebGL's standard perspective clipping. 
+        // This stops the geometry from being restricted to a narrow box (fixing the cropping)
+        // and stops the clipping plane from tearing the polygons (fixing the wavy edges).
+        
+        // 2. We set a default safe depth of 0.5.
+        float zDepth = 0.5;
+        
+        // 3. Manual Back-Face Cull
+        // --- FIX FOR CROPPING & WAVY EDGES ---
+        // The previous code (dir.z > 0.0) culled the geometry strictly at 90 degrees.
+        // Widescreen monitors require > 90 degrees to fill the horizontal bounds, 
+        // which caused the black boxes and exposed the jagged polygon tearing.
+        // Now, we only cull the extreme back seam (yaw ≈ PI) to prevent screen-spanning 
+        // wrapping artifacts. 3.1 radians is ~177 degrees. This pushes the jagged mesh 
+        // boundary completely off-screen, allowing WebGL to cleanly clip the screen edges.
+        if (abs(yaw) > 3.1) {
+            zDepth = 2.0; 
+        }
+        
+        gl_Position = vec4(ndc, zDepth, 1.0);
+        
+    } else {
+        // --- STANDARD PERSPECTIVE PROJECTION (Outside View) ---
+        gl_Position = projectionMatrix * viewPosition;
+    }
 }
 `;
 

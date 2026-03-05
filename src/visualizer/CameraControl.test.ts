@@ -16,6 +16,7 @@ vi.mock('three', async (importOriginal) => {
                 setPixelRatio: vi.fn(),
                 setRenderTarget: vi.fn(),
                 render: vi.fn(),
+                clear: vi.fn(),
                 dispose: vi.fn(),
                 domElement: document.createElement('canvas'),
             };
@@ -39,6 +40,13 @@ vi.mock('three/addons/controls/OrbitControls.js', () => ({
         };
     }),
 }));
+
+// Mock ResizeObserver
+global.ResizeObserver = class {
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+};
 
 describe('AmbiScene Camera Control & Persistence', () => {
     it('should disable pan in both inside and outside modes', () => {

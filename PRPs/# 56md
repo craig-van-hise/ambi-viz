@@ -1,0 +1,81 @@
+
+### 🛠️ Agent Instruction Plan: Equirectangular Ray Generation for Inside View
+
+**Objective:** Fix rectilinear projection distortion (fisheye stretching) of the Ambisonic Direction of Arrival (DOA) when in the "Inside View".
+**Strategy:** Implement conditional ray generation in the fragment shader. When `u_isInsideView` is true, generate equirectangular/spherical rays mapped directly from screen UVs. When false, fall back to standard perspective ray generation (`vWorldPosition - cameraPosition`).
+
+#### Step 1: Update Uniforms in `AmbiScene.ts`
+
+**File:** `src/visualizer/AmbiScene.ts`
+
+1. **Add New Uniforms:** In the `ShaderMaterial` initialization (specifically for the volumetric shader, likely imported from `ambisonic.ts`), add the following uniforms:
+* `u_isInsideView`: `{ value: true }` (or initialized to current state)
+* `u_resolution`: `{ value: new THREE.Vector2(window.innerWidth, window.innerHeight) }`
+* `u_cameraWorldMatrix`: `{ value: new THREE.Matrix4() }` (Crucial for applying camera rotation to the custom rays).
+
+
+2. **Sync View Mode State:** Locate the method that toggles the view between Inside and Outside (e.g., `setViewMode` or similar). Inside this method, update the uniform:
+* `this.material.uniforms.u_isInsideView.value = isInside;`
+
+
+3. **Update Uniforms in the Render Loop (`animate` / `render`):**
+* Update the camera matrix every frame so the custom rays respect the head-tracking/mouse rotation:
+`this.material.uniforms.u_cameraWorldMatrix.value.copy(this.camera.matrixWorld);`
+
+
+4. **Handle Window Resize:** Ensure `u_resolution` is updated whenever the canvas resizes.
+
+#### Step 2: Update the Volumetric Ray-Marching Fragment Shader
+
+**File:** `src/visualizer/shaders/ambisonic.ts`
+
+1. **Declare the Uniforms:** At the top of the fragment shader, add:
+```glsl
+uniform bool u_isInsideView;
+uniform vec2 u_resolution;
+uniform mat4 u_cameraWorldMatrix;
+
+```
+
+
+2. **Replace Ray Direction (`rd`) Logic:** Locate the section where the initial ray direction is calculated (usually `normalize(vWorldPosition - cameraPosition)`). Replace it with this conditional block:
+```glsl
+vec3 rd;
+
+if (u_isInsideView) {
+    // --- EQUIRECTANGULAR / SPHERICAL PROJECTION ---
+    // 1. Normalize screen coordinates to range [-1.0, 1.0]
+    vec2 uv = (gl_FragCoord.xy / u_resolution.xy) * 2.0 - 1.0;
+
+    // 2. Map UVs to Spherical Angles (Yaw and Pitch)
+    // Adjust these multipliers to change the apparent "FOV" of the inside view.
+    // 3.14159 (PI) maps the screen edges to exactly 180 degrees left/right.
+    float yaw = uv.x * 3.14159265 * 0.5;   // Scale by 0.5 for a more natural ~90deg FOV feel
+    float pitch = uv.y * 1.57079632 * 0.5; // Scale similarly to maintain aspect ratio
+
+    // 3. Convert Spherical to Local Cartesian (Three.js standard: -Z is forward)
+    vec3 localDir = vec3(
+        cos(pitch) * sin(yaw),
+        sin(pitch),
+        -cos(pitch) * cos(yaw)
+    );
+
+    // 4. Transform local ray by camera's world rotation matrix
+    // We cast to mat3 to ignore the translation component (which is locked to 0,0,0 anyway)
+    rd = normalize(mat3(u_cameraWorldMatrix) * localDir);
+
+} else {
+    // --- STANDARD PERSPECTIVE PROJECTION (Outside View) ---
+    rd = normalize(vWorldPosition - cameraPosition);
+}
+
+```
+
+
+
+#### Step 3: Verification Constraints for Agents
+
+* **Do not alter** the underlying ray-marching loop or the Bounding Sphere Intersection logic added in PRP #43. This task is *strictly* about altering the initial `rd` (ray direction) vector.
+* **Test Origin Lock:** Ensure that the Inside View remains strictly locked to `(0,0,0)`. The equirectangular math assumes the camera translation is at the center of the volume.
+* **Test Pitch Inversion / Roll:** Ensure that the `u_cameraWorldMatrix` correctly inherits the Pitch inversion and live Roll calculations implemented in PRP #25. By multiplying the local ray by the `matrixWorld`, all head-tracking rotations should automatically apply.
+

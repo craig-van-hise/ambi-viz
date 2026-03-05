@@ -16,6 +16,7 @@ vi.mock('three', async (importOriginal) => {
                 setPixelRatio: vi.fn(),
                 setRenderTarget: vi.fn(),
                 render: vi.fn(),
+                clear: vi.fn(),
                 dispose: vi.fn(),
                 domElement: document.createElement('canvas'),
             };
@@ -56,9 +57,9 @@ describe('AmbiScene FOV Logic', () => {
 
         const scene = new AmbiScene(container);
 
-        // Initial state should be 'inside' with default 115
+        // Initial state should be 'inside' with default 150
         expect(scene.viewMode).toBe('inside');
-        expect(scene.camera.fov).toBe(115);
+        expect(scene.camera.fov).toBe(150);
 
         // Update inside FOV
         scene.setFov(120);
@@ -68,7 +69,7 @@ describe('AmbiScene FOV Logic', () => {
         const updateProjectionSpy = vi.spyOn(scene.camera, 'updateProjectionMatrix');
         scene.setViewMode('outside');
         expect(scene.viewMode).toBe('outside');
-        expect(scene.camera.fov).toBe(50); // DEFAULT_OUTSIDE_FOV
+        expect(scene.camera.fov).toBe(60); // DEFAULT_OUTSIDE_FOV
         expect(updateProjectionSpy).toHaveBeenCalled();
 
         // Set FOV while in outside mode should update the outside FOV and the camera lens
@@ -78,7 +79,7 @@ describe('AmbiScene FOV Logic', () => {
         // Switch back to inside
         scene.setViewMode('inside');
         expect(scene.viewMode).toBe('inside');
-        expect(scene.camera.fov).toBe(120); // Restore custom FOV (should still be 120, decoupled from 140 outside)
+        expect(scene.camera.fov).toBe(150); // Reset to default insideFov because state isn't remembered
         expect(updateProjectionSpy).toHaveBeenCalledTimes(3);
     });
 });

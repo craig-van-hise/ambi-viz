@@ -66,7 +66,7 @@ export class AmbiScene {
 
         const width = container.clientWidth;
         const height = container.clientHeight;
-        this.camera = new THREE.PerspectiveCamera(75, width / height, 0.01, 1000);
+        this.camera = new THREE.PerspectiveCamera(this.insideFov, width / height, 0.01, 1000);
         this.camera.rotation.order = 'YXZ'; // Yaw, then Pitch, then Roll
 
         // 2. Renderer — pixel ratio capped at 1.0 for M1 performance
@@ -83,9 +83,6 @@ export class AmbiScene {
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
-
-        // Default to inside-out view
-        this.setViewMode('inside');
 
         // 5. Volumetric Shader Material
         this.volumetricMaterial = new THREE.ShaderMaterial({
@@ -104,11 +101,16 @@ export class AmbiScene {
                 tPreviousFrame: { value: null },
                 uDissipationRate: { value: 0.9 },
                 uResolution: { value: new THREE.Vector2() },
+                u_isInsideView: { value: true },
+                u_cameraWorldMatrix: { value: new THREE.Matrix4() },
             },
             transparent: true,
             side: THREE.BackSide,
             depthWrite: false,
         });
+
+        // Default to inside-out view
+        this.setViewMode('inside');
 
         // 6. Geometry — BoxGeometry encompassing camera
         const geometry = new THREE.BoxGeometry(10, 10, 10);
@@ -124,7 +126,9 @@ export class AmbiScene {
                 uCovariance: { value: new Float32Array(256) },
                 uOrder: { value: 1 },
                 uGain: { value: 1.0 },
-                uOpacity: { value: 1.0 }
+                uOpacity: { value: 1.0 },
+                u_isInsideView: { value: true },
+                u_resolution: { value: new THREE.Vector2(width, height) }
             },
             transparent: true,
             side: THREE.DoubleSide
@@ -239,6 +243,10 @@ export class AmbiScene {
         }
 
         this.viewMode = mode;
+        this.volumetricMaterial.uniforms.u_isInsideView.value = (mode === 'inside');
+        if (this.sphereMaterial) {
+            this.sphereMaterial.uniforms.u_isInsideView.value = (mode === 'inside');
+        }
 
         if (mode === 'inside') {
             // Camera exactly at origin
@@ -262,6 +270,8 @@ export class AmbiScene {
             this.controls.maxDistance = 10;
         }
 
+        const targetFov = mode === 'inside' ? this.insideFov : this.outsideFov;
+        this.camera.fov = targetFov;
         this.camera.updateProjectionMatrix();
         this.controls.update();
     }
@@ -446,6 +456,10 @@ export class AmbiScene {
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
 
+        if (this.sphereMaterial && this.sphereMaterial.uniforms.u_resolution) {
+            this.sphereMaterial.uniforms.u_resolution.value.set(width, height);
+        }
+
         // Update render target to match new size
         this.setupRenderTarget(width, height);
     }
@@ -582,6 +596,8 @@ export class AmbiScene {
                 this.camera.position.set(0, 0, 0);
             }
         }
+
+        this.volumetricMaterial.uniforms.u_cameraWorldMatrix.value.copy(this.camera.matrixWorld);
 
         // 2. Render Loop UI Synchronization (Phase 1 Sync)
         // Extract Eulers and send back to React UI for slider feedback
