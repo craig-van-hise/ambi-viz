@@ -284,8 +284,6 @@ export default function App() {
 
         if (audioEngine.currentIndex === -1 && indices.length > 0) {
           await audioEngine.loadTrack(indices[0]);
-          setCurrentIndex(indices[0]);
-          if (audioEngine.obrDecoder) headTracking.attachDecoder(audioEngine.obrDecoder);
         }
       } catch (error) {
         console.error("Failed to initialize remote queue:", error);
@@ -323,8 +321,6 @@ export default function App() {
     setQueue([...audioEngine.queue]);
     if (audioEngine.currentIndex === -1 && indices.length > 0) {
       await audioEngine.loadTrack(indices[0]);
-      setCurrentIndex(indices[0]);
-      if (audioEngine.obrDecoder) headTracking.attachDecoder(audioEngine.obrDecoder);
     }
   }, [audioEngine, headTracking]);
 

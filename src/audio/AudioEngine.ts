@@ -343,7 +343,9 @@ export class AudioEngine {
 
     /** Stop playback, reset cursor to 0 (recreates source node) */
     stop(soft: boolean = false) {
+        this._sourceGeneration++; // Invalidate pending onended tasks
         if (this.sourceNode) {
+            this.sourceNode.onended = null;
             try { this.sourceNode.stop(); } catch (_) { /* already stopped */ }
             this.sourceNode.disconnect();
             this.sourceNode = null;
