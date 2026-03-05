@@ -37,7 +37,7 @@ export class AmbiScene {
     rafId: number | null = null;
     private readonly DEFAULT_OUTSIDE_FOV = 50;
     private insideFov = 115;
-    private outsideFov = 120;
+    private outsideFov = this.DEFAULT_OUTSIDE_FOV;
     private outsidePositionCache = new THREE.Vector3(0, 3.3, 3.6);
 
     // Head tracking & UI Sync State
@@ -563,9 +563,14 @@ export class AmbiScene {
 
         // Hard lock for inside view to prevent drift (even if not tracking, we keep it at origin)
         if (this.viewMode === 'inside') {
-            this.camera.position.set(0, 0, 0);
-            if (this.headTrackingQuat) {
-                this.camera.rotation.set(0, 0, 0);
+            if (this.camera.position.lengthSq() > 0.000001) {
+                // Manual movement from OrbitControls detected
+                const dir = new THREE.Vector3().subVectors(this.controls.target, this.camera.position).normalize();
+                this.controls.target.copy(dir);
+                this.camera.position.set(0, 0, 0);
+                this.camera.lookAt(this.controls.target);
+            } else {
+                this.camera.position.set(0, 0, 0);
             }
         }
 

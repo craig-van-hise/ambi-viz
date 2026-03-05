@@ -40,6 +40,13 @@ vi.mock('three/addons/controls/OrbitControls.js', () => ({
     }),
 }));
 
+// Mock ResizeObserver
+global.ResizeObserver = class {
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+};
+
 describe('AmbiScene FOV Logic', () => {
     it('should correctly decouple Inside and Outside FOV', () => {
         const container = document.createElement('div');
@@ -64,15 +71,15 @@ describe('AmbiScene FOV Logic', () => {
         expect(scene.camera.fov).toBe(50); // DEFAULT_OUTSIDE_FOV
         expect(updateProjectionSpy).toHaveBeenCalled();
 
-        // Set FOV while in outside mode should update internal state but NOT the camera lens
+        // Set FOV while in outside mode should update the outside FOV and the camera lens
         scene.setFov(140);
-        expect(scene.camera.fov).toBe(50); // Still 50
+        expect(scene.camera.fov).toBe(140);
 
         // Switch back to inside
         scene.setViewMode('inside');
         expect(scene.viewMode).toBe('inside');
-        expect(scene.camera.fov).toBe(140); // Restore custom FOV
-        expect(updateProjectionSpy).toHaveBeenCalledTimes(2);
+        expect(scene.camera.fov).toBe(120); // Restore custom FOV (should still be 120, decoupled from 140 outside)
+        expect(updateProjectionSpy).toHaveBeenCalledTimes(3);
     });
 });
 
@@ -152,5 +159,36 @@ describe('AmbiScene Volumetric Parameters (Phase 1)', () => {
 
         scene.setEdgeFalloff('invalid_string' as any);
         expect(scene.getEdgeFalloff()).toBe(0);
+    });
+});
+
+describe('AmbiScene Inside View Persistence (Snap-Back Fix)', () => {
+    it('should update target and reset position when manual rotation is detected', () => {
+        const container = document.createElement('div');
+        const scene = new AmbiScene(container);
+        scene.setViewMode('inside');
+
+        // Initial state: position at origin, target at (0,0,-1)
+        expect(scene.camera.position.x).toBe(0);
+        expect(scene.camera.position.z).toBe(0);
+        expect(scene.controls.target.z).toBe(-1);
+
+        // Simulate OrbitControls drag: camera moved to (1, 0, 1), target stayed at (0, 0, 0)
+        scene.camera.position.set(1, 0, 1);
+        scene.controls.target.set(0, 0, 0);
+
+        // Run animation frame
+        scene.animate();
+
+        // 1. Camera should be back at origin
+        expect(scene.camera.position.x).toBe(0);
+        expect(scene.camera.position.y).toBe(0);
+        expect(scene.camera.position.z).toBe(0);
+
+        // 2. target should be projected forward (normalized direction from camera pos to previous target)
+        // dir = target - camera_pos = (0,0,0) - (1,0,1) = (-1, 0, -1)
+        // normalized = (-0.707, 0, -0.707)
+        expect(scene.controls.target.x).toBeCloseTo(-0.707, 3);
+        expect(scene.controls.target.z).toBeCloseTo(-0.707, 3);
     });
 });
