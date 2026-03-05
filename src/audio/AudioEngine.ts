@@ -29,6 +29,9 @@ export class AudioEngine {
     private _isLooping: boolean = false;
     playbackState: PlaybackState = 'stopped';
 
+    // Volume control
+    private gainNode: GainNode;
+
     // Time tracking
     private startTime: number = 0;
     private pausedTime: number = 0;
@@ -41,6 +44,7 @@ export class AudioEngine {
     constructor() {
         const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         this.audioCtx = new AudioContextClass();
+        this.gainNode = this.audioCtx.createGain();
         this.smoothedCoeffs = new Float32Array(16); // Max order 3 (16 channels)
     }
 
@@ -126,9 +130,10 @@ export class AudioEngine {
             // We use absolute path/relative to public root as handled by vite
             await this.obrDecoder.loadSofa('/hrtf/MIT_KEMAR_Normal.sofa');
 
-            // Connect RawAnalyser -> BinDecoder -> Destination
+            // Connect RawAnalyser -> BinDecoder -> GainNode -> Destination
             this.rawAnalyser.out.connect(this.obrDecoder.in);
-            this.obrDecoder.out.connect(this.audioCtx.destination);
+            this.obrDecoder.out.connect(this.gainNode);
+            this.gainNode.connect(this.audioCtx.destination);
             this._graphReady = true;
         }
 
@@ -203,6 +208,10 @@ export class AudioEngine {
     seek(time: number) {
         if (!this.audioBuffer) return;
         const wasPlaying = this.playbackState === 'playing';
+        // Detach onended from the current source BEFORE stopping it.
+        // This prevents the stale async callback from firing and advancing the queue.
+        // The new source created by play() will get a fresh onended handler.
+        if (this.sourceNode) this.sourceNode.onended = null;
         if (wasPlaying) this.stop(true); // Soft stop preserving pausedTime temporarily
         this.pausedTime = Math.max(0, Math.min(time, this.audioBuffer.duration));
         if (wasPlaying) {
@@ -341,5 +350,10 @@ export class AudioEngine {
     /** Get current loop state */
     getLoop(): boolean {
         return this._isLooping;
+    }
+
+    /** Set playback volume (0–100 UI range → 0.0–1.0 gain) */
+    setVolume(value: number) {
+        this.gainNode.gain.value = Math.max(0, Math.min(value / 100, 1));
     }
 }

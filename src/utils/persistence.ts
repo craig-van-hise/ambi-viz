@@ -51,10 +51,10 @@ const DEFAULTS: PersistedState = {
         dissipationRate: 0,
     },
     deformationParams: {
-        amplitude: 1.0,
-        baseRadius: 1.0,
+        amplitude: 0.5,
+        baseRadius: 0.5,
         sharpness: 1.0,
-        colorIntensity: 1.0,
+        colorIntensity: 0.5,
         smoothing: 0.5,
         resolution: 128,
         wireframe: false,

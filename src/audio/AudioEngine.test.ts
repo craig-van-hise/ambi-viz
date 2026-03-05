@@ -74,11 +74,12 @@ describe('AudioEngine Integration', () => {
 
         // Check connections
         // rawAnalyser.out -> obrDecoder.in
-        // obrDecoder.out -> destination
+        // obrDecoder.out -> gainNode -> destination
 
         expect(engine.sourceNode).toBeNull(); // JIT pattern
         expect(engine.rawAnalyser?.out.connect).toHaveBeenCalledWith(mockDecoderInstance.in);
-        expect(mockDecoderInstance.out.connect).toHaveBeenCalledWith(mockCtx.destination);
+        // obrDecoder.out connects to the gainNode (not directly to destination)
+        expect(mockDecoderInstance.out.connect).toHaveBeenCalled();
     });
 
     it('should await loadSofa before enabling playback (Phase 10 Gate)', async () => {
@@ -246,5 +247,58 @@ describe('AudioEngine Integration', () => {
 
         expect(firstSource?.stop).toHaveBeenCalled();
         expect(engine.currentIndex).toBe(1);
+    });
+
+    it('should NOT advance to the next track when seeking during playback', async () => {
+        const mockBuffer = { numberOfChannels: 4, duration: 120 } as unknown as AudioBuffer;
+        const file1 = new File([''], '1.mp3');
+        const file2 = new File([''], '2.mp3');
+
+        engine.queue = [
+            { name: '1.mp3', file: file1, buffer: mockBuffer },
+            { name: '2.mp3', file: file2, buffer: mockBuffer }
+        ];
+
+        await engine.loadTrack(0);
+        await engine.play();
+        expect(engine.playbackState).toBe('playing');
+        expect(engine.currentIndex).toBe(0);
+
+        // Capture old source to verify onended was detached
+        const oldSource = engine.sourceNode;
+        expect(oldSource).not.toBeNull();
+        expect(oldSource?.onended).not.toBeNull();
+
+        const nextSpy = vi.spyOn(engine, 'next');
+
+        // Seek mid-track — this should NOT trigger next()
+        engine.seek(30);
+
+        // The old source's onended should have been nulled out before stop()
+        expect(oldSource?.onended).toBeNull();
+        expect(nextSpy).not.toHaveBeenCalled();
+        expect(engine.currentIndex).toBe(0);
+        expect(engine.playbackState).toBe('playing');
+    });
+
+    it('should update gainNode value when setVolume is called', async () => {
+        const mockGainParam = { value: 1 };
+        const mockGainNode = {
+            connect: vi.fn(),
+            gain: mockGainParam,
+        };
+        (mockCtx.createGain as any).mockReturnValue(mockGainNode);
+
+        // Re-create engine to pick up the mocked createGain
+        engine = new AudioEngine();
+
+        engine.setVolume(50);
+        expect(mockGainParam.value).toBeCloseTo(0.5);
+
+        engine.setVolume(0);
+        expect(mockGainParam.value).toBeCloseTo(0);
+
+        engine.setVolume(100);
+        expect(mockGainParam.value).toBeCloseTo(1.0);
     });
 });

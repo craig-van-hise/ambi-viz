@@ -15,6 +15,7 @@ vi.mock('./audio/AudioEngine', () => {
                 init: vi.fn(),
                 update: vi.fn(),
                 setLoop: vi.fn(),
+                setVolume: vi.fn(),
                 onStateChange: undefined,
                 getCovariance: vi.fn().mockReturnValue(new Float32Array(16)),
             };

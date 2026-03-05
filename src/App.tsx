@@ -41,11 +41,11 @@ export interface DeformationParams {
 }
 
 export const DEFAULT_DEFORMATION_PARAMS: DeformationParams = {
-  amplitude: 1.0,
-  baseRadius: 1.0,
+  amplitude: 0.5,
+  baseRadius: 0.5,
   sharpness: 1.0,
-  colorIntensity: 1.0,
-  smoothing: 0.5,
+  colorIntensity: 0.5,
+  smoothing: 0.50,
   resolution: 128,
   wireframe: false,
 };
@@ -135,7 +135,7 @@ export default function App() {
   const [insideGain, setInsideGain] = useState(persisted.insideGain);
   const [outsideGain, setOutsideGain] = useState(persisted.outsideGain);
   const [viewMode, setViewMode] = useState<ViewMode>('outside');
-  const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>('volumetric');
+  const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>('sphere');
   const [isDraggingSlider, setIsDraggingSlider] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -415,6 +415,9 @@ export default function App() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [audioEngine, handlePlay, handlePause]);
+
+  // Sync initial volume to AudioEngine on mount
+  useEffect(() => { audioEngine.setVolume(volume); }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -821,7 +824,7 @@ export default function App() {
                         type="range"
                         min="0" max="100"
                         value={volume}
-                        onChange={(e) => setVolume(Number(e.target.value))}
+                        onChange={(e) => { const v = Number(e.target.value); setVolume(v); audioEngine.setVolume(v); }}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                       />
                     </div>
@@ -938,6 +941,28 @@ export default function App() {
                         onTouchEnd={() => setIsDraggingSlider(false)}
                       />
                     </div>
+
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
+                        <Tooltip title="Gain" content="Scales the raw Ambisonic audio energy before it enters the visual ray-marching pipeline.">
+                          <span className="hover:text-slate-300 transition-colors">Gain</span>
+                        </Tooltip>
+                        <span className="text-primary font-medium">{(viewMode === 'inside' ? insideGain : outsideGain).toFixed(2)}</span>
+                      </div>
+                      <input
+                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                        type="range"
+                        min="0"
+                        max="20"
+                        step="0.01"
+                        value={viewMode === 'inside' ? insideGain : outsideGain}
+                        onChange={(e) => handleGainChange(Number(e.target.value))}
+                        onMouseDown={() => setIsDraggingSlider(true)}
+                        onMouseUp={() => setIsDraggingSlider(false)}
+                        onTouchStart={() => setIsDraggingSlider(true)}
+                        onTouchEnd={() => setIsDraggingSlider(false)}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -1039,28 +1064,6 @@ export default function App() {
 
                 {!isVisualizerCollapsed && (
                   <div className="space-y-4 pb-1">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-[11px] font-normal normal-case text-slate-400">
-                        <Tooltip title="Gain" content="Scales the raw Ambisonic audio energy before it enters the visual ray-marching pipeline.">
-                          <span className="hover:text-slate-300 transition-colors">Gain</span>
-                        </Tooltip>
-                        <span className="text-primary font-medium">{(viewMode === 'inside' ? insideGain : outsideGain).toFixed(2)}</span>
-                      </div>
-                      <input
-                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer"
-                        type="range"
-                        min="0"
-                        max="20"
-                        step="0.01"
-                        value={viewMode === 'inside' ? insideGain : outsideGain}
-                        onChange={(e) => handleGainChange(Number(e.target.value))}
-                        onMouseDown={() => setIsDraggingSlider(true)}
-                        onMouseUp={() => setIsDraggingSlider(false)}
-                        onTouchStart={() => setIsDraggingSlider(true)}
-                        onTouchEnd={() => setIsDraggingSlider(false)}
-                      />
-                    </div>
-
                     {visualizationMode === 'volumetric' ? (
                       <>
                         <div className="space-y-2">
