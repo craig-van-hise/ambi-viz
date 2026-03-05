@@ -265,7 +265,7 @@ export default function App() {
           "3rd Order Clock": "3rd Order Ambi Clock Test.opus",
           "TEST-09-DYN-B-SPIRAL_Order3": "TEST-09-DYN-B-SPIRAL_Order3.opus",
           "Final Fantasy Prelude": "Final Fantasy Prelude.opus",
-          "A Furiosa (Maxixe)": "A Furiosa (Maxixe).opus",
+          "A Furiosa (Maxixe)_dry": "A Furiosa (Maxixe)_dry.opus",
           "Bach Invention no5 in Eb_AmbiX_3O": "Bach Invention no5 in Eb_AmbiX_3O.opus",
           "Beethoven - String Quartet No 13 in B-flat major - IV Alla danza tedesca": "Beethoven - String Quartet No 13 in B-flat major - IV Alla danza tedesca.opus",
           "Let Me Tell You About My Boat": "Let Me Tell You About My Boat.opus",
