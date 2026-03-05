@@ -32,7 +32,14 @@ if (typeof (globalThis as any).AudioWorkletProcessor !== 'undefined') {
 let isServerAvailable = true;
 let nextRetryTime = 0;
 
+// Determine if we are running locally
+const isLocalhost = typeof location !== 'undefined' &&
+    (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+
 async function sendRemoteLog(level: LogData['level'], args: any[]) {
+    // Only send logs if running locally
+    if (!isLocalhost) return;
+
     if (!isServerAvailable && Date.now() < nextRetryTime) {
         return; // Circuit breaker active, avoid console spam
     }
