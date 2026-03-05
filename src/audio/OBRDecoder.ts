@@ -23,14 +23,15 @@ export class OBRDecoder {
     public async init(): Promise<void> {
         try {
             // 1. Fetch WASM binary on the main thread
-            const fetchResponse = await fetch('/obr.wasm');
+            // Load obr.wasm module using vite base URL for proper paths
+            const fetchResponse = await fetch(`${import.meta.env.BASE_URL}obr.wasm`);
             if (!fetchResponse.ok) {
-                throw new Error(`Failed to fetch /obr.wasm: ${fetchResponse.statusText}`);
+                throw new Error(`Failed to fetch ${import.meta.env.BASE_URL}obr.wasm: ${fetchResponse.statusText}`);
             }
             const wasmBinary = await fetchResponse.arrayBuffer();
 
-            // 2. Add Worklet module (needs type: 'module' since obr-processor.js uses ES6 imports)
-            await this.ctx.audioWorklet.addModule('/worklets/obr-processor.js', { type: 'module' } as any);
+            // 2. Load the AudioWorklet processor script
+            await this.ctx.audioWorklet.addModule(`${import.meta.env.BASE_URL}worklets/obr-processor.js`, { type: 'module' } as any);
 
             const numChannels = (this.order + 1) ** 2;
 

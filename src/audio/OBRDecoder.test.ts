@@ -54,8 +54,8 @@ describe('OBRDecoder', () => {
 
         await decoder.init();
 
-        expect(globalThis.fetch).toHaveBeenCalledWith('/obr.wasm');
-        expect(mockCtx.audioWorklet.addModule).toHaveBeenCalledWith('/worklets/obr-processor.js', expect.objectContaining({ type: 'module' }));
+        expect(globalThis.fetch).toHaveBeenCalledWith(`${import.meta.env.BASE_URL}obr.wasm`);
+        expect(mockCtx.audioWorklet.addModule).toHaveBeenCalledWith(`${import.meta.env.BASE_URL}worklets/obr-processor.js`, expect.objectContaining({ type: 'module' }));
         expect((globalThis as unknown as { AudioWorkletNode: unknown }).AudioWorkletNode).toHaveBeenCalledWith(mockCtx, 'obr-processor', expect.objectContaining({
             numberOfInputs: 1,
             numberOfOutputs: 1,

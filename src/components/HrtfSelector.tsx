@@ -5,8 +5,8 @@ interface HrtfSelectorProps {
 }
 
 const hrtfOptions = [
-    { label: 'MIT KEMAR Normal', value: '/hrtf/MIT_KEMAR_Normal.sofa' },
-    { label: 'Neumann KU100 48k', value: '/hrtf/Neumann_KU100_48k.sofa' }
+    { label: 'MIT KEMAR Normal', value: `${import.meta.env.BASE_URL}hrtf/MIT_KEMAR_Normal.sofa` },
+    { label: 'Neumann KU100 48k', value: `${import.meta.env.BASE_URL}hrtf/Neumann_KU100_48k.sofa` }
 ];
 
 export const HrtfSelector: React.FC<HrtfSelectorProps> = ({ onSelect }) => {

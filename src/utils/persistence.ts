@@ -34,7 +34,7 @@ export interface PersistedState {
 }
 
 const DEFAULTS: PersistedState = {
-    hrtfUrl: '/hrtf/MIT_KEMAR_Normal.sofa',
+    hrtfUrl: `${import.meta.env.BASE_URL}hrtf/MIT_KEMAR_Normal.sofa`,
     insideGain: 3.0,
     outsideGain: 3.0,
     eskf: {

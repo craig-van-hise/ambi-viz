@@ -242,7 +242,7 @@ export default function App() {
       hasInitializedRemoteQueue.current = true;
 
       try {
-        const response = await fetch('/ambisonic_audio_queue/Queue order.txt');
+        const response = await fetch(`${import.meta.env.BASE_URL}ambisonic_audio_queue/Queue order.txt`);
         if (!response.ok) return;
         const text = await response.text();
         const lines = text.split('\n');
@@ -274,7 +274,7 @@ export default function App() {
 
         const remoteTracks = trackTitles.map(title => ({
           name: title,
-          url: `/ambisonic_audio_queue/${filenameMap[title] || `${title}.opus`}`,
+          url: `${import.meta.env.BASE_URL}ambisonic_audio_queue/${filenameMap[title] || `${title}.opus`}`,
           type: 'OPUS'
         }));
 
@@ -304,7 +304,7 @@ export default function App() {
   }, [audioEngine]);
 
   useEffect(() => {
-    if (audioEngine.obrDecoder && hrtfUrl !== '/hrtf/MIT_KEMAR_Normal.sofa') {
+    if (audioEngine.obrDecoder && hrtfUrl !== `${import.meta.env.BASE_URL}hrtf/MIT_KEMAR_Normal.sofa`) {
       audioEngine.obrDecoder.loadSofa(hrtfUrl).catch(console.error);
     }
   }, [audioEngine.obrDecoder]);

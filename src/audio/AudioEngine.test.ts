@@ -69,8 +69,8 @@ describe('AudioEngine Integration', () => {
         await engine.setupGraph(mockBuffer);
 
         expect(OBRDecoder).toHaveBeenCalledWith(mockCtx, 1);
-        expect(mockDecoderInstance.init).toHaveBeenCalled();
-        expect(mockDecoderInstance.loadSofa).toHaveBeenCalledWith('/hrtf/MIT_KEMAR_Normal.sofa');
+        expect(mockDecoderInstance.init).toHaveBeenCalled();        // Should be Phase 7
+        expect(mockDecoderInstance.loadSofa).toHaveBeenCalledWith(`${import.meta.env.BASE_URL}hrtf/MIT_KEMAR_Normal.sofa`);
 
         // Check connections
         // rawAnalyser.out -> obrDecoder.in

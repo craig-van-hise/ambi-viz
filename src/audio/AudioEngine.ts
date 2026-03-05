@@ -191,8 +191,8 @@ export class AudioEngine {
             this.rawAnalyser = new RawCoefAnalyser(this.audioCtx, this.order);
             this.obrDecoder = new OBRDecoder(this.audioCtx, this.order);
             await this.obrDecoder.init();
-            // We use absolute path/relative to public root as handled by vite
-            await this.obrDecoder.loadSofa('/hrtf/MIT_KEMAR_Normal.sofa');
+            // Prefix with Vite's BASE_URL for proper GitHub Pages subpath routing
+            await this.obrDecoder.loadSofa(`${import.meta.env.BASE_URL}hrtf/MIT_KEMAR_Normal.sofa`);
 
             // Connect RawAnalyser -> BinDecoder -> GainNode -> Destination
             this.rawAnalyser.out.connect(this.obrDecoder.in);
