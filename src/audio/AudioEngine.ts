@@ -32,6 +32,9 @@ export class AudioEngine {
     // Volume control
     private gainNode: GainNode;
 
+    // Seek guard: monotonic counter to invalidate stale onended callbacks
+    private _sourceGeneration: number = 0;
+
     // Time tracking
     private startTime: number = 0;
     private pausedTime: number = 0;
@@ -208,9 +211,8 @@ export class AudioEngine {
     seek(time: number) {
         if (!this.audioBuffer) return;
         const wasPlaying = this.playbackState === 'playing';
-        // Detach onended from the current source BEFORE stopping it.
-        // This prevents the stale async callback from firing and advancing the queue.
-        // The new source created by play() will get a fresh onended handler.
+        // Increment generation to invalidate any pending onended callbacks
+        this._sourceGeneration++;
         if (this.sourceNode) this.sourceNode.onended = null;
         if (wasPlaying) this.stop(true); // Soft stop preserving pausedTime temporarily
         this.pausedTime = Math.max(0, Math.min(time, this.audioBuffer.duration));
@@ -239,12 +241,16 @@ export class AudioEngine {
             this.sourceNode.start(0, this.pausedTime);
             this.startTime = this.audioCtx.currentTime;
 
-            // Handle native stop (file end)
+            // Handle native stop (file end).
+            // Capture the current generation so stale callbacks from
+            // previous seek() cycles are automatically ignored.
+            const gen = this._sourceGeneration;
             this.sourceNode.onended = () => {
+                if (gen !== this._sourceGeneration) return; // Stale — ignore
                 if (this.playbackState === 'playing' && !this._isLooping) {
                     this.stop();
                     if (this.currentIndex < this.queue.length - 1) {
-                        this.next(); // Auto advance optionally
+                        this.next(); // Auto advance
                     }
                 }
             };
