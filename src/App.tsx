@@ -221,14 +221,24 @@ export default function App() {
 
   const handleTrackSelect = useCallback(async (index: number) => {
     if (audioEngine.playbackState === 'loading') return;
-    if (index === audioEngine.currentIndex && audioEngine.playbackState === 'playing') return;
     try {
-      audioEngine.stop();
-      await audioEngine.loadTrack(index);
-      if (audioEngine.playbackState !== 'error') audioEngine.play();
+      if (audioEngine.currentIndex !== index) {
+        audioEngine.stop();
+        await audioEngine.loadTrack(index);
+      }
       // currentIndex is now updated via onTrackChange subscription
     } catch (error) { console.error(error); }
   }, [audioEngine]);
+
+  const handleTrackPlay = useCallback(async (index: number) => {
+    if (audioEngine.playbackState === 'loading') return;
+    try {
+      if (audioEngine.currentIndex !== index) {
+        await handleTrackSelect(index);
+      }
+      if (audioEngine.playbackState !== 'error') audioEngine.play();
+    } catch (error) { console.error(error); }
+  }, [audioEngine, handleTrackSelect]);
 
   const handleRemoveTrack = useCallback((index: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -590,6 +600,7 @@ export default function App() {
                 <div
                   key={idx}
                   onClick={() => handleTrackSelect(idx)}
+                  onDoubleClick={() => handleTrackPlay(idx)}
                   className={`group relative flex items-center gap-3 p-3 rounded-lg transition-all cursor-pointer ${currentIndex === idx
                     ? 'bg-primary/20 border border-primary/30'
                     : 'hover:bg-primary/5 border border-transparent'
