@@ -230,6 +230,17 @@ export default function App() {
     } catch (error) { console.error(error); }
   }, [audioEngine]);
 
+  const handleRemoveTrack = useCallback((index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    audioEngine.removeTrack(index);
+    setQueue([...audioEngine.queue]);
+  }, [audioEngine]);
+
+  const handleClearQueue = useCallback(() => {
+    audioEngine.clearQueue();
+    setQueue([]);
+  }, [audioEngine]);
+
   const onDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault(); e.stopPropagation(); setIsDragOver(true);
   }, []);
@@ -564,6 +575,14 @@ export default function App() {
                 <span className="material-symbols-outlined text-primary">queue_music</span>
                 <h3 className="font-normal text-[11px] uppercase tracking-widest text-slate-400">Queue</h3>
               </div>
+              {queue.length > 0 && (
+                <button
+                  onClick={handleClearQueue}
+                  className="text-[10px] font-semibold tracking-wider uppercase text-slate-500 hover:text-red-400 transition-colors"
+                >
+                  Clear
+                </button>
+              )}
             </div>
             <div className="flex-1 overflow-y-auto p-2 space-y-2">
               {/* Loaded Tracks */}
@@ -585,9 +604,20 @@ export default function App() {
                       {track.name || (track.file && track.file.name)}
                     </p>
                     <p className={`text-[10px] font-mono ${currentIndex === idx ? 'text-primary/60' : 'text-slate-400'}`}>
-                      {track.type || '-'} • {track.duration || '00:00'}
+                      {audioEngine.playbackState === 'loading' && currentIndex === idx ? (
+                        <>Loading<span className="loading-dots"></span></>
+                      ) : (
+                        <>{track.type || '-'} • {track.duration || '00:00'}</>
+                      )}
                     </p>
                   </div>
+                  <button
+                    onClick={(e) => handleRemoveTrack(idx, e)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 hover:text-red-400 p-1 flex items-center justify-center shrink-0"
+                    title="Remove Track"
+                  >
+                    <span className="material-symbols-outlined text-lg">close</span>
+                  </button>
                 </div>
               ))}
 

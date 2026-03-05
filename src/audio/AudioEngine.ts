@@ -287,6 +287,40 @@ export class AudioEngine {
         this.play();
     }
 
+    /** Remove a track from the queue */
+    removeTrack(index: number) {
+        if (index < 0 || index >= this.queue.length) return;
+
+        // If we are removing the currently playing track
+        if (index === this.currentIndex) {
+            this.stop();
+            this.queue.splice(index, 1);
+            if (this.queue.length === 0) {
+                this.currentIndex = -1;
+                this.onTrackChange?.(-1);
+            } else {
+                // Play the next track (which now occupies the same index, or wrap to 0 if we deleted the last item)
+                const nextIdx = index < this.queue.length ? index : 0;
+                this.loadTrack(nextIdx).then(() => this.play());
+            }
+        } else {
+            // If we are removing a track before the current one, decrement currentIndex to keep it pointing to the right track
+            this.queue.splice(index, 1);
+            if (index < this.currentIndex) {
+                this.currentIndex--;
+                this.onTrackChange?.(this.currentIndex);
+            }
+        }
+    }
+
+    /** Clear the entire queue */
+    clearQueue() {
+        this.stop();
+        this.queue = [];
+        this.currentIndex = -1;
+        this.onTrackChange?.(-1);
+    }
+
     /** Load and play next track in queue */
     async next() {
         if (this.queue.length === 0) return;
