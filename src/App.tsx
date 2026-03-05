@@ -110,7 +110,7 @@ export default function App() {
   const [outsideZoomFov, setOutsideZoomFov] = useState(DEFAULT_OUTSIDE_ZOOM);
 
   const [cameraUIState, setCameraUIState] = useState<CameraUIState>({
-    yaw: 0, pitch: 0, roll: 0, x: 0, y: 3, z: 0.8,
+    yaw: 0, pitch: 0, roll: 0, x: 0, y: 3.55, z: 3.7,
   });
 
   const [queue, setQueue] = useState<QueueTrack[]>([]);
@@ -165,11 +165,11 @@ export default function App() {
       persistState({ insideGain: 3.0 });
       handleZoomChange(DEFAULT_INSIDE_ZOOM);
     } else {
-      setCameraUIState(prev => ({ ...prev, x: 0, y: 3, z: 0.8 }));
+      setCameraUIState(prev => ({ ...prev, x: 0, y: 3.55, z: 3.7 }));
       if (sceneRef.current) {
         sceneRef.current.updateFromUI('x', 0);
-        sceneRef.current.updateFromUI('y', 3);
-        sceneRef.current.updateFromUI('z', 0.8);
+        sceneRef.current.updateFromUI('y', 3.55);
+        sceneRef.current.updateFromUI('z', 3.7);
       }
       setOutsideGain(3.0);
       persistState({ outsideGain: 3.0 });

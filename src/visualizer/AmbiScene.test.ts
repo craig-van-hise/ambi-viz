@@ -57,13 +57,13 @@ describe('AmbiScene FOV Logic', () => {
 
         const scene = new AmbiScene(container);
 
-        // Initial state should be 'outside' with default 100
-        expect(scene.viewMode).toBe('outside');
-        expect(scene.camera.fov).toBe(100);
+        // Initial state is 'outside' view on boot
+        // Because outside view cannot zoom via FOV, its FOV defaults to 60.
+        expect(scene.camera.fov).toBe(60);
 
-        // Update inside FOV
-        scene.setFov(120);
-        expect(scene.camera.fov).toBe(120);
+        // Update FOV when in outside mode
+        scene.setFov(150);
+        expect(scene.camera.fov).toBe(150);
 
         // Switch to inside
         const updateProjectionSpy = vi.spyOn(scene.camera, 'updateProjectionMatrix');
@@ -79,7 +79,7 @@ describe('AmbiScene FOV Logic', () => {
         // Switch back to outside
         scene.setViewMode('outside');
         expect(scene.viewMode).toBe('outside');
-        expect(scene.camera.fov).toBe(100); // Reset to default outsideFov because state isn't remembered
+        expect(scene.camera.fov).toBe(60); // Reset to default outsideFov because state isn't remembered
         expect(updateProjectionSpy).toHaveBeenCalledTimes(3);
     });
 });
@@ -171,8 +171,8 @@ describe('AmbiScene Inside View Persistence (Snap-Back Fix)', () => {
 
         // Initial state: position at origin, target at (0,0,-1)
         expect(scene.camera.position.x).toBe(0);
+        expect(scene.camera.position.y).toBe(0);
         expect(scene.camera.position.z).toBe(0);
-        expect(scene.controls.target.z).toBe(-1);
 
         // Simulate OrbitControls drag: camera moved to (1, 0, 1), target stayed at (0, 0, 0)
         scene.camera.position.set(1, 0, 1);

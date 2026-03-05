@@ -39,7 +39,7 @@ export class AmbiScene {
     private readonly DEFAULT_OUTSIDE_FOV = 60;
     private insideFov = 150;
     private outsideFov = this.DEFAULT_OUTSIDE_FOV;
-    private outsidePositionCache = new THREE.Vector3(0, 3, 0.8);
+    private outsidePositionCache = new THREE.Vector3(0, 3.55, 3.7);
 
     // Head tracking & UI Sync State
     public headTrackingQuat: THREE.Quaternion | null = null;
