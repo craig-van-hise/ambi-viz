@@ -309,6 +309,14 @@
   text-align: left;
   transition: all 0.12s ease;
   width: 100%;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.track-queue-item * {
+  pointer-events: none;
+  user-select: none !important;
+  -webkit-user-select: none !important;
 }
 
 .track-queue-item:hover {

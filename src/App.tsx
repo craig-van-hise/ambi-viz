@@ -723,7 +723,7 @@ export default function App() {
                   key={idx}
                   onClick={() => handleTrackSelect(idx)}
                   onDoubleClick={() => handleTrackPlay(idx)}
-                  className={`group relative flex items-center gap-3 p-3 rounded-lg transition-all cursor-pointer ${currentIndex === idx
+                  className={`track-queue-item group relative flex items-center gap-3 p-3 rounded-lg transition-all cursor-pointer ${currentIndex === idx
                     ? 'bg-primary/20 border border-primary/30'
                     : 'hover:bg-primary/5 border border-transparent'
                     }`}
@@ -732,7 +732,7 @@ export default function App() {
                     }`}>
                     <span className="material-symbols-outlined">{currentIndex === idx ? 'equalizer' : 'music_note'}</span>
                   </div>
-                  <div className="flex-1 overflow-hidden">
+                  <div className="flex-1 overflow-hidden track-name">
                     <p className={`text-sm truncate normal-case ${currentIndex === idx ? 'font-semibold text-slate-100' : 'font-medium text-slate-300'}`}>
                       {track.name || (track.file && track.file.name)}
                     </p>

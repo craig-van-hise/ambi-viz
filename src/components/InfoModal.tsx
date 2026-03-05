@@ -64,7 +64,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
                         className="inline-block transition-transform duration-200 hover:scale-[1.05] cursor-pointer mt-2"
                     >
                         <img
-                            src="/Virtual Virgin + VV logo card.png"
+                            src="Virtual Virgin + VV logo card.png"
                             alt="Virtual Virgin"
                             className="w-full max-w-[180px] object-contain"
                         />
