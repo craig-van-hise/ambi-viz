@@ -176,6 +176,7 @@ export default function App() {
   const [progress, setProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isScrubbing = useRef(false);
+  const hasInitializedRemoteQueue = useRef(false);
 
   const activeTrack = queue[currentIndex] || queue[0] || { id: -1, name: "No Track", durationSec: 0, duration: "00:00", type: "-" };
 
@@ -237,6 +238,9 @@ export default function App() {
 
   useEffect(() => {
     const initializeRemoteQueue = async () => {
+      if (hasInitializedRemoteQueue.current) return;
+      hasInitializedRemoteQueue.current = true;
+
       try {
         const response = await fetch('/ambisonic_audio_queue/Queue order.txt');
         if (!response.ok) return;
