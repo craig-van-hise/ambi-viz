@@ -57,29 +57,29 @@ describe('AmbiScene FOV Logic', () => {
 
         const scene = new AmbiScene(container);
 
-        // Initial state should be 'inside' with default 150
-        expect(scene.viewMode).toBe('inside');
-        expect(scene.camera.fov).toBe(150);
+        // Initial state should be 'outside' with default 100
+        expect(scene.viewMode).toBe('outside');
+        expect(scene.camera.fov).toBe(100);
 
         // Update inside FOV
         scene.setFov(120);
         expect(scene.camera.fov).toBe(120);
 
-        // Switch to outside
+        // Switch to inside
         const updateProjectionSpy = vi.spyOn(scene.camera, 'updateProjectionMatrix');
-        scene.setViewMode('outside');
-        expect(scene.viewMode).toBe('outside');
-        expect(scene.camera.fov).toBe(60); // DEFAULT_OUTSIDE_FOV
+        scene.setViewMode('inside');
+        expect(scene.viewMode).toBe('inside');
+        expect(scene.camera.fov).toBe(150); // insideFov
         expect(updateProjectionSpy).toHaveBeenCalled();
 
-        // Set FOV while in outside mode should update the outside FOV and the camera lens
+        // Set FOV while in inside mode should update the inside FOV and the camera lens
         scene.setFov(140);
         expect(scene.camera.fov).toBe(140);
 
-        // Switch back to inside
-        scene.setViewMode('inside');
-        expect(scene.viewMode).toBe('inside');
-        expect(scene.camera.fov).toBe(150); // Reset to default insideFov because state isn't remembered
+        // Switch back to outside
+        scene.setViewMode('outside');
+        expect(scene.viewMode).toBe('outside');
+        expect(scene.camera.fov).toBe(100); // Reset to default outsideFov because state isn't remembered
         expect(updateProjectionSpy).toHaveBeenCalledTimes(3);
     });
 });

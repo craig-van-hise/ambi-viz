@@ -36,10 +36,10 @@ export class AmbiScene {
 
     // Animation state
     rafId: number | null = null;
-    private readonly DEFAULT_OUTSIDE_FOV = 60;
+    private readonly DEFAULT_OUTSIDE_FOV = 100;
     private insideFov = 150;
     private outsideFov = this.DEFAULT_OUTSIDE_FOV;
-    private outsidePositionCache = new THREE.Vector3(0, 3.3, 3.6);
+    private outsidePositionCache = new THREE.Vector3(0, 3, 0.8);
 
     // Head tracking & UI Sync State
     public headTrackingQuat: THREE.Quaternion | null = null;
@@ -110,8 +110,8 @@ export class AmbiScene {
             depthWrite: false,
         });
 
-        // Default to inside-out view
-        this.setViewMode('inside');
+        // Default to outside view
+        this.setViewMode('outside');
 
         // 6. Geometry — BoxGeometry encompassing camera
         const geometry = new THREE.BoxGeometry(10, 10, 10);
@@ -240,7 +240,7 @@ export class AmbiScene {
 
     setViewMode(mode: ViewMode) {
         // Cache current position if leaving outside mode
-        if (this.viewMode === 'outside') {
+        if (this.viewMode === 'outside' && mode === 'inside') {
             this.outsidePositionCache.copy(this.camera.position);
         }
 

@@ -56,13 +56,13 @@ describe('AmbiScene Camera Control & Persistence', () => {
 
         const scene = new AmbiScene(container);
 
-        // Inside mode (default)
-        expect(scene.viewMode).toBe('inside');
+        // Outside mode (default)
+        expect(scene.viewMode).toBe('outside');
         expect(scene.controls.enablePan).toBe(false);
 
-        // Outside mode
-        scene.setViewMode('outside');
-        expect(scene.viewMode).toBe('outside');
+        // Inside mode
+        scene.setViewMode('inside');
+        expect(scene.viewMode).toBe('inside');
         expect(scene.controls.enablePan).toBe(false);
     });
 
@@ -70,15 +70,15 @@ describe('AmbiScene Camera Control & Persistence', () => {
         const container = document.createElement('div');
         const scene = new AmbiScene(container);
 
-        // Inside mode (initial)
-        expect(scene.controls.target.x).toBe(0);
-        expect(scene.controls.target.y).toBe(0);
-        expect(scene.controls.target.z).toBe(-1);
-
-        scene.setViewMode('outside');
+        // Outside mode (initial)
         expect(scene.controls.target.x).toBe(0);
         expect(scene.controls.target.y).toBe(0);
         expect(scene.controls.target.z).toBe(0);
+
+        scene.setViewMode('inside');
+        expect(scene.controls.target.x).toBe(0);
+        expect(scene.controls.target.y).toBe(0);
+        expect(scene.controls.target.z).toBe(-1);
     });
 
     it('should persist outside camera position when toggling', () => {

@@ -86,7 +86,7 @@ const Tooltip = ({ children, content, title }: { children: React.ReactNode, cont
 };
 
 const DEFAULT_INSIDE_ZOOM = 150;
-const DEFAULT_OUTSIDE_ZOOM = 60;
+const DEFAULT_OUTSIDE_ZOOM = 100;
 
 export default function App() {
   const [persisted] = useState(() => loadState());
@@ -97,7 +97,7 @@ export default function App() {
   const sceneRef = useRef<AmbiScene | null>(null);
   const [insideGain, setInsideGain] = useState(persisted.insideGain);
   const [outsideGain, setOutsideGain] = useState(persisted.outsideGain);
-  const [viewMode, setViewMode] = useState<ViewMode>('inside');
+  const [viewMode, setViewMode] = useState<ViewMode>('outside');
   const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>('volumetric');
   const [isDraggingSlider, setIsDraggingSlider] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -110,7 +110,7 @@ export default function App() {
   const [outsideZoomFov, setOutsideZoomFov] = useState(DEFAULT_OUTSIDE_ZOOM);
 
   const [cameraUIState, setCameraUIState] = useState<CameraUIState>({
-    yaw: 0, pitch: 0, roll: 0, x: 0, y: 3.3, z: 3.6,
+    yaw: 0, pitch: 0, roll: 0, x: 0, y: 3, z: 0.8,
   });
 
   const [queue, setQueue] = useState<QueueTrack[]>([]);
@@ -165,11 +165,11 @@ export default function App() {
       persistState({ insideGain: 3.0 });
       handleZoomChange(DEFAULT_INSIDE_ZOOM);
     } else {
-      setCameraUIState(prev => ({ ...prev, x: 0, y: 3.3, z: 3.6 }));
+      setCameraUIState(prev => ({ ...prev, x: 0, y: 3, z: 0.8 }));
       if (sceneRef.current) {
         sceneRef.current.updateFromUI('x', 0);
-        sceneRef.current.updateFromUI('y', 3.3);
-        sceneRef.current.updateFromUI('z', 3.6);
+        sceneRef.current.updateFromUI('y', 3);
+        sceneRef.current.updateFromUI('z', 0.8);
       }
       setOutsideGain(3.0);
       persistState({ outsideGain: 3.0 });
