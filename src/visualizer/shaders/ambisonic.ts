@@ -153,84 +153,117 @@ void main() {
         rayDir = normalize(vWorldPos - cameraPosition);
     }
 
-    // === DIRECTION-ONCE: Compute energy for this ray's relevant direction ===
-    // Find the point on this ray closest to the origin (the sound field center).
-    // This gives the correct angular direction for SH evaluation regardless of
-    // camera distance, fixing gain attenuation in outside view.
-    float tClosest = max(0.0, -dot(rayOrigin, rayDir));
-    vec3 pClosest = rayOrigin + rayDir * tClosest;
-    float closestDist = length(pClosest);
-    
+    // === DIRECTION-PER-STEP: Compute energy for this ray's actual position ===
     vec4 currentOutput = vec4(0.0);
+    float totalDensity = 0.0;
+    vec3 accumulatedColor = vec3(0.0);
 
-    // Only march if within the 5.5 radius bound
-    if (closestDist <= 5.5) {
-        vec3 shDir = closestDist > 0.001 ? normalize(pClosest) : rayDir;
+    // --- BOUNDING SPHERE INTERSECTION ---
+    float b = dot(rayOrigin, rayDir);
+    float c = dot(rayOrigin, rayOrigin) - 36.0; 
+    float h = b * b - c;
+    
+    // Only march if within the 6.0 radius bound (h >= 0 means intersection)
+    if (h >= 0.0) {
+        // Fast-forward 't' to the entry point, and compute the exit point.
+        // If inside the sphere, max(0.1, ...) keeps it safely in front of the camera.
+        float tEnter = max(0.1, -b - sqrt(h)); 
+        float tExit = -b + sqrt(h);
+        float t = tEnter;
+        // ------------------------------------
+
+        // === QUADRATIC INTERPOLATION PRE-COMPUTATION ===
+        // To avoid computing 16 Spherical Harmonics * 64 steps per ray (~1000 ops/pixel),
+        // we sample the exact energy at the front, middle, and back of the sphere,
+        // and fit a 2nd-degree algebraic curve (A*t^2 + B*t + C) through them.
         
-        float energy = computeDirectionalEnergy(shDir);
-        energy = max(energy, 0.0);
+        vec3 pStart = rayOrigin + rayDir * tEnter;
+        vec3 pEnd   = rayOrigin + rayDir * tExit;
         
-        // 1. Density Threshold (Fog Gate)
-        if (energy >= uDensityThreshold) {
-            
-            // 2. Edge Falloff (Shape the lobe)
-            float shapedEnergy = pow(energy, uEdgeFalloff);
-            float dirDensity = sqrt(shapedEnergy) * uGain;
+        // Midpoint: the point on the chord closest to the origin
+        float tMid = -b; 
+        // Ensure tMid is actually between Enter and Exit
+        tMid = clamp(tMid, tEnter, tExit);
+        vec3 pMid = rayOrigin + rayDir * tMid;
 
-            if (dirDensity >= 0.001) {
-                float totalDensity = 0.0;
-                vec3 accumulatedColor = vec3(0.0);
+        // Sample exact energy at these 3 anchors
+        float eStart = max(computeDirectionalEnergy(length(pStart) > 0.001 ? normalize(pStart) : rayDir), 0.0);
+        float eMid   = max(computeDirectionalEnergy(length(pMid)   > 0.001 ? normalize(pMid)   : rayDir), 0.0);
+        float eEnd   = max(computeDirectionalEnergy(length(pEnd)   > 0.001 ? normalize(pEnd)   : rayDir), 0.0);
 
-                // --- BOUNDING SPHERE INTERSECTION ---
-                float b = dot(rayOrigin, rayDir);
-                float c = dot(rayOrigin, rayOrigin) - 36.0; 
-                float h = b * b - c;
-                
-                // Fast-forward 't' to the entry point. 
-                // If inside the sphere, max(0.1, ...) keeps it safely in front of the camera.
-                float tEnter = max(0.1, -b - sqrt(max(0.0, h))); 
-                float t = tEnter;
-                // ------------------------------------
+        // Solve A, B, C for the quadratic polynomial: E(t) = A*t^2 + B*t + C
+        // To make math stable, we shift the origin of 't' for the curve to tEnter
+        float dtMid = tMid - tEnter;
+        float dtEnd = tExit - tEnter;
+        
+        float A = 0.0;
+        float B = 0.0;
+        float C = eStart;
 
-                for (int i = 0; i < MAX_STEPS; i++) {
-                    vec3 p = rayOrigin + rayDir * t;
-                    float r = length(p);
+        // Prevent division by zero if the ray merely grazes the sphere (dtEnd ~ 0)
+        if (dtEnd > 0.01 && dtMid > 0.005 && dtMid < dtEnd - 0.005) {
+            float denom = (dtMid * dtMid * dtEnd) - (dtEnd * dtEnd * dtMid);
+            if (abs(denom) > 1e-6) {
+                A = ((eMid - C) * dtEnd - (eEnd - C) * dtMid) / denom;
+                B = ((eEnd - C) - A * dtEnd * dtEnd) / dtEnd;
+            }
+        }
 
-                    if (r > 6.0) {
-                        t += STEP_SIZE;
-                        continue;
-                    }
+        // ------------------------------------
 
-                    float falloff = smoothstep(5.0, 0.0, r);
-                    float dens = dirDensity * falloff;
+        for (int i = 0; i < MAX_STEPS; i++) {
+            if (t > tExit) break; // FAST FAIL 0: We've marched out the back of the sphere
+            vec3 p = rayOrigin + rayDir * t;
+            float r = length(p);
 
-                    if (dens > 0.005) {
-                        // 3. Density Multiplier
-                        float absorption = dens * STEP_SIZE * uDensityMult;
+            if (r > 6.0) {
+                t += STEP_SIZE;
+                continue;
+            }
 
-                        // 4. Heatmap Shift (Knee)
-                        float val = smoothstep(0.0, 1.0, dens);
-                        val = clamp(val - (uHeatmapKnee - 0.5), 0.0, 1.0); 
+            // FAST FAIL 1: Check distance falloff before expensive math
+            float falloff = smoothstep(5.0, 0.0, r);
+            if (falloff <= 0.001) {
+                t += STEP_SIZE;
+                continue;
+            }
 
-                        vec3 color = mix(vec3(0.0, 0.0, 0.5), vec3(0.0, 1.0, 1.0), val);
-                        color = mix(color, vec3(1.0, 1.0, 0.0), smoothstep(0.3, 0.6, val));
-                        color = mix(color, vec3(1.0, 0.0, 0.0), smoothstep(0.6, 1.0, val));
+            // APPROXIMATION: Evaluate the pre-computed Quadratic Curve
+            float dt = t - tEnter;
+            float energy = max(A * dt * dt + B * dt + C, 0.0);
 
-                        float alphaStep = absorption;
-                        accumulatedColor += color * alphaStep * (1.0 - totalDensity);
-                        totalDensity += alphaStep;
-                    }
+            if (energy >= uDensityThreshold) {
+                // Apply shaping only if energy is sufficient
+                float shapedEnergy = pow(energy, uEdgeFalloff);
+                float dirDensity = sqrt(shapedEnergy) * uGain;
+                float dens = dirDensity * falloff;
 
-                    if (totalDensity >= 0.99) break;
-                    t += STEP_SIZE;
-                    if (t > MAX_DIST) break;
-                }
+                if (dens > 0.005) {
+                    // 3. Density Multiplier
+                    float absorption = dens * STEP_SIZE * uDensityMult;
 
-                if (totalDensity > 0.001) {
-                    // 5. Emission Multiplier
-                    currentOutput = vec4(accumulatedColor * 2.0 * uEmissionMult, totalDensity * uOpacity);
+                    // 4. Heatmap Shift (Knee)
+                    float val = smoothstep(0.0, 1.0, dens);
+                    val = clamp(val - (uHeatmapKnee - 0.5), 0.0, 1.0); 
+
+                    vec3 color = mix(vec3(0.0, 0.0, 0.5), vec3(0.0, 1.0, 1.0), val);
+                    color = mix(color, vec3(1.0, 1.0, 0.0), smoothstep(0.3, 0.6, val));
+                    color = mix(color, vec3(1.0, 0.0, 0.0), smoothstep(0.6, 1.0, val));
+
+                    float alphaStep = absorption;
+                    accumulatedColor += color * alphaStep * (1.0 - totalDensity);
+                    totalDensity += alphaStep;
                 }
             }
+
+            if (totalDensity >= 0.99) break;
+            t += STEP_SIZE;
+            if (t > MAX_DIST) break;
+        }
+
+        if (totalDensity > 0.001) {
+            // 5. Emission Multiplier
+            currentOutput = vec4(accumulatedColor * 2.0 * uEmissionMult, totalDensity * uOpacity);
         }
     }
 
