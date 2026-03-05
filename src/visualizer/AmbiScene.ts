@@ -36,7 +36,7 @@ export class AmbiScene {
 
     // Animation state
     rafId: number | null = null;
-    private readonly DEFAULT_OUTSIDE_FOV = 100;
+    private readonly DEFAULT_OUTSIDE_FOV = 60;
     private insideFov = 150;
     private outsideFov = this.DEFAULT_OUTSIDE_FOV;
     private outsidePositionCache = new THREE.Vector3(0, 3, 0.8);
@@ -267,9 +267,9 @@ export class AmbiScene {
             this.camera.position.copy(this.outsidePositionCache);
             this.controls.target.set(0, 0, 0);
             this.controls.enablePan = false; // Permanently disabled
-            this.controls.enableZoom = false; // Disable distance zoom to use FOV zoom exclusively
+            this.controls.enableZoom = true; // Use physical distance zoom in outside mode
             this.controls.minDistance = 1;
-            this.controls.maxDistance = 10;
+            this.controls.maxDistance = 50; // Increased to allow sufficient z-travel
         }
 
         const targetFov = mode === 'inside' ? this.insideFov : this.outsideFov;
@@ -469,6 +469,11 @@ export class AmbiScene {
     onWheel(e: WheelEvent) {
 
         e.preventDefault();
+
+        // 0. Use physical distance zooming (OrbitControls) in Outside mode
+        if (this.viewMode === 'outside') {
+            return;
+        }
 
         // 1. Calculate target FOV change
         const zoomSpeed = 0.05;

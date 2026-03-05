@@ -59,6 +59,7 @@ describe('AmbiScene Camera Control & Persistence', () => {
         // Outside mode (default)
         expect(scene.viewMode).toBe('outside');
         expect(scene.controls.enablePan).toBe(false);
+        expect(scene.controls.enableZoom).toBe(true);
 
         // Inside mode
         scene.setViewMode('inside');

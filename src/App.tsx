@@ -86,7 +86,7 @@ const Tooltip = ({ children, content, title }: { children: React.ReactNode, cont
 };
 
 const DEFAULT_INSIDE_ZOOM = 150;
-const DEFAULT_OUTSIDE_ZOOM = 100;
+const DEFAULT_OUTSIDE_ZOOM = 60;
 
 export default function App() {
   const [persisted] = useState(() => loadState());
