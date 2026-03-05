@@ -328,25 +328,25 @@ export default function App() {
   }, [audioEngine, persistState]);
 
   const handleTrackSelect = useCallback(async (index: number) => {
-    if (audioEngine.playbackState === 'loading') return;
+    // Only block if already loading THIS exact track
+    if (audioEngine.playbackState === 'loading' && audioEngine.currentIndex === index) return;
+
     try {
-      if (audioEngine.currentIndex !== index) {
-        audioEngine.stop();
-        await audioEngine.loadTrack(index);
-      }
-      // currentIndex is now updated via onTrackChange subscription
-    } catch (error) { console.error(error); }
+      // Removing the global loading guard allows switching tracks while one is buffering
+      await audioEngine.loadTrack(index);
+    } catch (error) {
+      console.error("App: Failed to select track:", error);
+    }
   }, [audioEngine]);
 
   const handleTrackPlay = useCallback(async (index: number) => {
-    if (audioEngine.playbackState === 'loading') return;
     try {
-      if (audioEngine.currentIndex !== index) {
-        await handleTrackSelect(index);
-      }
-      if (audioEngine.playbackState !== 'error') audioEngine.play();
-    } catch (error) { console.error(error); }
-  }, [audioEngine, handleTrackSelect]);
+      // Use the new playTrack method which handles load-then-play robustly
+      await audioEngine.playTrack(index);
+    } catch (error) {
+      console.error("App: Failed to play track:", error);
+    }
+  }, [audioEngine]);
 
   const handleRemoveTrack = useCallback((index: number, e: React.MouseEvent) => {
     e.stopPropagation();

@@ -33,8 +33,11 @@ export class AudioEngine {
     // Volume control
     private gainNode: GainNode;
 
-    // Seek guard: monotonic counter to invalidate stale onended callbacks
+    // Load & Seek guards: monotonic counters to invalidate stale callbacks/fetches
     private _sourceGeneration: number = 0;
+    private _loadGeneration: number = 0;
+    private _loadingIndex: number = -1;
+    private _loadingPromise: Promise<void> | null = null;
 
     // Time tracking
     private startTime: number = 0;
@@ -80,46 +83,79 @@ export class AudioEngine {
     async loadTrack(index: number): Promise<void> {
         if (index < 0 || index >= this.queue.length) return;
 
-        this.setState('loading');
-        const track = this.queue[index];
+        // If already loading this track, return the existing promise
+        if (this._loadingIndex === index && this._loadingPromise) {
+            return this._loadingPromise;
+        }
+
+        const generation = ++this._loadGeneration;
+        this._loadingIndex = index;
         this.currentIndex = index;
         this.onTrackChange?.(index);
+        this.setState('loading');
 
-        try {
-            // Decode buffer if not already cached
-            if (!track.buffer) {
-                let arrayBuffer: ArrayBuffer;
-                if (track.file) {
-                    arrayBuffer = await track.file.arrayBuffer();
-                } else if (track.url) {
-                    const response = await fetch(track.url);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    arrayBuffer = await response.arrayBuffer();
-                } else {
-                    throw new Error('No file or URL source for track');
+        // Stop existing playback immediately when switching tracks
+        this.stop(true);
+
+        const track = this.queue[index];
+
+        this._loadingPromise = (async () => {
+            try {
+                if (!track.buffer) {
+                    let arrayBuffer: ArrayBuffer;
+                    if (track.file) {
+                        arrayBuffer = await track.file.arrayBuffer();
+                    } else if (track.url) {
+                        console.log(`AudioEngine: Fetching remote track: ${track.url}`);
+                        const response = await fetch(track.url);
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        arrayBuffer = await response.arrayBuffer();
+                    } else {
+                        throw new Error('No file or URL source for track');
+                    }
+
+                    if (generation !== this._loadGeneration) return;
+
+                    track.buffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+
+                    if (generation !== this._loadGeneration) return;
+
+                    track.durationSec = track.buffer.duration;
+                    const m = Math.floor(track.durationSec / 60);
+                    const s = Math.floor(track.durationSec % 60);
+                    track.duration = `${m}:${s.toString().padStart(2, '0')}`;
+
+                    if (track.file) {
+                        track.type = track.file.type.split('/')[1]?.toUpperCase() || 'AUDIO';
+                    } else if (!track.type && track.url) {
+                        const ext = track.url.split('.').pop()?.toUpperCase();
+                        track.type = ext || 'URL';
+                    }
                 }
 
-                track.buffer = await this.audioCtx.decodeAudioData(arrayBuffer);
-                track.durationSec = track.buffer.duration;
-                const m = Math.floor(track.durationSec / 60);
-                const s = Math.floor(track.durationSec % 60);
-                track.duration = `${m}:${s.toString().padStart(2, '0')}`;
+                if (generation !== this._loadGeneration) return;
 
-                if (track.file) {
-                    track.type = track.file.type.split('/')[1]?.toUpperCase() || 'AUDIO';
-                } else if (!track.type && track.url) {
-                    const ext = track.url.split('.').pop()?.toUpperCase();
-                    track.type = ext || 'URL';
+                await this.setupGraph(track.buffer);
+
+                if (generation !== this._loadGeneration) return;
+
+                this.pausedTime = 0;
+                this.setState('stopped');
+                console.log(`AudioEngine: Track ${index} ("${track.name}") ready.`);
+            } catch (error) {
+                if (generation !== this._loadGeneration) return;
+                console.error('AudioEngine: Error loading track:', error);
+                this.setState('error');
+                throw error;
+            } finally {
+                if (generation === this._loadGeneration) {
+                    this._loadingPromise = null;
+                    this._loadingIndex = -1;
                 }
             }
+        })();
 
-            await this.setupGraph(track.buffer);
-            this.pausedTime = 0;
-            this.setState('stopped');
-        } catch (error) {
-            console.error('AudioEngine: Error loading track:', error);
-            this.setState('error');
-        }
+        return this._loadingPromise;
     }
 
     /** Legacy single-file load (queues + loads + plays for backward compat) */
@@ -317,10 +353,8 @@ export class AudioEngine {
     /** Load and play previous track in queue */
     async prev() {
         if (this.queue.length === 0) return;
-        this.stop();
         const newIdx = this.currentIndex > 0 ? this.currentIndex - 1 : this.queue.length - 1;
-        await this.loadTrack(newIdx);
-        this.play();
+        await this.playTrack(newIdx);
     }
 
     /** Remove a track from the queue */
@@ -360,9 +394,13 @@ export class AudioEngine {
     /** Load and play next track in queue */
     async next() {
         if (this.queue.length === 0) return;
-        this.stop();
         const newIdx = this.currentIndex < this.queue.length - 1 ? this.currentIndex + 1 : 0;
-        await this.loadTrack(newIdx);
+        await this.playTrack(newIdx);
+    }
+
+    /** Convenience method to load and play in one go */
+    async playTrack(index: number) {
+        await this.loadTrack(index);
         this.play();
     }
 
