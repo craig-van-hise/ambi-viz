@@ -197,7 +197,10 @@ export class AudioEngine {
         const wasPlaying = this.playbackState === 'playing';
         if (wasPlaying) this.stop(true); // Soft stop preserving pausedTime temporarily
         this.pausedTime = Math.max(0, Math.min(time, this.audioBuffer.duration));
-        if (wasPlaying) this.play();
+        if (wasPlaying) {
+            this.playbackState = 'paused'; // Allow play() to re-enter after soft stop
+            this.play();
+        }
     }
 
     /** Start or resume playback */

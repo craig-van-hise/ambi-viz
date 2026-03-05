@@ -134,6 +134,7 @@ export default function App() {
   const [volume, setVolume] = useState(75);
   const [progress, setProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isScrubbing = useRef(false);
 
   const activeTrack = queue[currentIndex] || queue[0] || { id: -1, name: "No Track", durationSec: 0, duration: "00:00", type: "-" };
 
@@ -319,7 +320,7 @@ export default function App() {
 
   const handlePlay = useCallback(() => audioEngine.play(), [audioEngine]);
   const handlePause = useCallback(() => audioEngine.pause(), [audioEngine]);
-  const handleStop = useCallback(() => audioEngine.stop(), [audioEngine]);
+  const handleStop = useCallback(() => { audioEngine.stop(); setProgress(0); }, [audioEngine]);
   const handlePrev = useCallback(async () => { await audioEngine.prev(); setCurrentIndex(audioEngine.currentIndex); }, [audioEngine]);
   const handleNext = useCallback(async () => { await audioEngine.next(); setCurrentIndex(audioEngine.currentIndex); }, [audioEngine]);
   const handleLoopToggle = useCallback(() => { const newLoop = !isLooping; audioEngine.setLoop(newLoop); setIsLooping(newLoop); }, [audioEngine, isLooping]);
@@ -427,7 +428,7 @@ export default function App() {
     loop();
 
     const updateProgress = () => {
-      if (audioEngine.playbackState === 'playing') {
+      if (audioEngine.playbackState === 'playing' && !isScrubbing.current) {
         const d = audioEngine.getDuration();
         if (d > 0) {
           const p = (audioEngine.getCurrentTime() / d) * 100;
@@ -644,10 +645,12 @@ export default function App() {
                     onChange={(e) => {
                       const p = Number(e.target.value);
                       setProgress(p);
-                      if (audioEngine.playbackState === 'playing') {
-                        audioEngine.seek((p / 100) * audioEngine.getDuration());
-                      }
+                      audioEngine.seek((p / 100) * audioEngine.getDuration());
                     }}
+                    onMouseDown={() => isScrubbing.current = true}
+                    onMouseUp={() => isScrubbing.current = false}
+                    onTouchStart={() => isScrubbing.current = true}
+                    onTouchEnd={() => isScrubbing.current = false}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                   />
                 </div>
