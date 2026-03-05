@@ -18,6 +18,7 @@ export class AudioEngine {
     rawAnalyser: RawCoefAnalyser | null = null;
     obrDecoder: OBRDecoder | null = null;
     onStateChange?: (state: PlaybackState) => void;
+    onTrackChange?: (index: number) => void;
     order: number = 1;
 
     // Smoothing state
@@ -25,7 +26,7 @@ export class AudioEngine {
 
     // Transport state
     private audioBuffer: AudioBuffer | null = null;
-    private _isLooping: boolean = true;
+    private _isLooping: boolean = false;
     playbackState: PlaybackState = 'stopped';
 
     // Time tracking
@@ -70,6 +71,7 @@ export class AudioEngine {
         this.setState('loading');
         const track = this.queue[index];
         this.currentIndex = index;
+        this.onTrackChange?.(index);
 
         try {
             // Decode buffer if not already cached
@@ -183,7 +185,13 @@ export class AudioEngine {
     getCurrentTime(): number {
         if (this.playbackState === 'playing') {
             const time = this.pausedTime + (this.audioCtx.currentTime - this.startTime);
-            return this.audioBuffer ? Math.min(time, this.audioBuffer.duration) : time;
+            if (!this.audioBuffer) return time;
+
+            if (this._isLooping) {
+                return time % this.audioBuffer.duration;
+            } else {
+                return Math.min(time, this.audioBuffer.duration);
+            }
         }
         return this.pausedTime;
     }

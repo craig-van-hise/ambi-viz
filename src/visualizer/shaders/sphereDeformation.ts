@@ -9,6 +9,7 @@ uniform int uOrder;
 uniform float uGain; // To scale the displacement
 uniform bool u_isInsideView;
 uniform vec2 u_resolution;
+uniform float u_fov;
 
 // Constants
 #define PI 3.14159265359
@@ -225,7 +226,9 @@ void main() {
         
         // Aspect Ratio Correction
         float aspect = u_resolution.x / u_resolution.y;
-        float fovScale = 1.57079632 * 0.75; 
+        
+        // Convert FOV to radians and get the half-angle
+        float fovScale = (u_fov * 3.14159265 / 180.0) * 0.5;
         
         vec2 ndc = vec2(yaw / (fovScale * aspect), pitch / fovScale);
         

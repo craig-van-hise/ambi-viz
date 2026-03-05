@@ -105,7 +105,7 @@ export default function App() {
   const [showInfoModal, setShowInfoModal] = useState(false);
 
   const [playbackState, setPlaybackState] = useState<PlaybackState>('stopped');
-  const [isLooping, setIsLooping] = useState(true);
+  const [isLooping, setIsLooping] = useState(false);
   const [insideZoomFov, setInsideZoomFov] = useState(DEFAULT_INSIDE_ZOOM);
   const [outsideZoomFov, setOutsideZoomFov] = useState(DEFAULT_OUTSIDE_ZOOM);
 
@@ -188,7 +188,11 @@ export default function App() {
 
   useEffect(() => {
     audioEngine.onStateChange = (state) => setPlaybackState(state);
-    return () => { audioEngine.onStateChange = undefined; };
+    audioEngine.onTrackChange = (index) => setCurrentIndex(index);
+    return () => {
+      audioEngine.onStateChange = undefined;
+      audioEngine.onTrackChange = undefined;
+    };
   }, [audioEngine]);
 
   useEffect(() => {
@@ -222,7 +226,7 @@ export default function App() {
       audioEngine.stop();
       await audioEngine.loadTrack(index);
       if (audioEngine.playbackState !== 'error') audioEngine.play();
-      setCurrentIndex(index);
+      // currentIndex is now updated via onTrackChange subscription
     } catch (error) { console.error(error); }
   }, [audioEngine]);
 
@@ -321,16 +325,21 @@ export default function App() {
   const handlePlay = useCallback(() => audioEngine.play(), [audioEngine]);
   const handlePause = useCallback(() => audioEngine.pause(), [audioEngine]);
   const handleStop = useCallback(() => { audioEngine.stop(); setProgress(0); }, [audioEngine]);
-  const handlePrev = useCallback(async () => { await audioEngine.prev(); setCurrentIndex(audioEngine.currentIndex); }, [audioEngine]);
-  const handleNext = useCallback(async () => { await audioEngine.next(); setCurrentIndex(audioEngine.currentIndex); }, [audioEngine]);
+  const handlePrev = useCallback(async () => { await audioEngine.prev(); }, [audioEngine]);
+  const handleNext = useCallback(async () => { await audioEngine.next(); }, [audioEngine]);
   const handleLoopToggle = useCallback(() => { const newLoop = !isLooping; audioEngine.setLoop(newLoop); setIsLooping(newLoop); }, [audioEngine, isLooping]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && e.target === document.body) {
-        e.preventDefault();
-        if (audioEngine.playbackState === 'playing') handlePause();
-        else handlePlay();
+      // Allow Spacebar to toggle playback unless the user is typing in an input/textarea
+      if (e.code === 'Space') {
+        const target = e.target as HTMLElement | null;
+        const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+        if (!isInput) {
+          e.preventDefault(); // Prevent scrolling page or triggering focused buttons
+          if (audioEngine.playbackState === 'playing') handlePause();
+          else handlePlay();
+        }
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -672,24 +681,37 @@ export default function App() {
 
               <div className="flex items-center justify-center flex-wrap gap-4 w-full @2xl:w-auto @2xl:contents order-2">
                 {/* Left: Playback Controls */}
-                <div className="flex items-center gap-3 px-5 h-11 bg-slate-800/50 border border-slate-700/50 rounded-full text-slate-300 @2xl:order-1 shrink-0 shadow-lg">
-                  <button onClick={handlePrev} className="hover:text-primary transition-colors flex items-center justify-center"><span className="material-symbols-outlined text-xl">skip_previous</span></button>
+                <div className="flex items-center gap-2 px-3 h-11 bg-slate-800/40 border border-white/5 rounded-full text-slate-300 @2xl:order-1 shrink-0 shadow-xl backdrop-blur-sm">
+                  <button
+                    onClick={handlePrev}
+                    className="transport-btn"
+                    title="Previous Track"
+                  >
+                    <span className="material-symbols-outlined text-xl">skip_previous</span>
+                  </button>
                   <button
                     onClick={() => { if (playbackState === 'playing') handlePause(); else handlePlay(); }}
-                    className={`flex items-center justify-center size-9 rounded-full transition-all active:scale-95 ${playbackState === 'playing'
-                      ? 'bg-primary-dark text-white shadow-[0_0_15px_rgba(29,78,216,0.4)]'
-                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
-                      }`}
+                    className={`transport-btn ${playbackState === 'playing' ? 'transport-active' : ''}`}
+                    title={playbackState === 'playing' ? 'Pause' : 'Play'}
                   >
-                    <span className="material-symbols-outlined text-xl font-bold">{playbackState === 'playing' ? 'pause' : 'play_arrow'}</span>
+                    <span className="material-symbols-outlined text-2xl font-bold">
+                      {playbackState === 'playing' ? 'pause' : 'play_arrow'}
+                    </span>
                   </button>
                   <button
                     onClick={handleStop}
-                    className={`transition-colors flex items-center justify-center ${(playbackState !== 'playing' && progress === 0) ? 'text-primary' : 'hover:text-primary'}`}
+                    className={`transport-btn ${playbackState === 'stopped' && progress === 0 ? 'transport-active' : ''}`}
+                    title="Stop"
                   >
                     <span className="material-symbols-outlined text-xl">stop</span>
                   </button>
-                  <button onClick={handleNext} className="hover:text-primary transition-colors flex items-center justify-center"><span className="material-symbols-outlined text-xl">skip_next</span></button>
+                  <button
+                    onClick={handleNext}
+                    className="transport-btn"
+                    title="Next Track"
+                  >
+                    <span className="material-symbols-outlined text-xl">skip_next</span>
+                  </button>
                 </div>
 
                 {/* Right: Volume & Toggles */}
@@ -710,13 +732,15 @@ export default function App() {
                   </div>
                   <button
                     onClick={handleLoopToggle}
-                    className={`transition-colors flex items-center justify-center ${isLooping ? 'text-primary' : 'hover:text-primary'}`}
+                    className={`transport-btn transport-loop ${isLooping ? 'transport-active' : ''}`}
+                    title={isLooping ? "Loop: On" : "Loop: Off"}
                   >
                     <span className="material-symbols-outlined text-lg">repeat</span>
                   </button>
                   <button
                     onClick={() => setShowSettingsModal(true)}
-                    className="hover:text-primary transition-colors flex items-center justify-center"
+                    className="transport-btn"
+                    title="Settings"
                   >
                     <span className="material-symbols-outlined text-lg">settings</span>
                   </button>

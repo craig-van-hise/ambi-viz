@@ -103,6 +103,7 @@ export class AmbiScene {
                 uResolution: { value: new THREE.Vector2() },
                 u_isInsideView: { value: true },
                 u_cameraWorldMatrix: { value: new THREE.Matrix4() },
+                u_fov: { value: 150.0 },
             },
             transparent: true,
             side: THREE.BackSide,
@@ -128,7 +129,8 @@ export class AmbiScene {
                 uGain: { value: 1.0 },
                 uOpacity: { value: 1.0 },
                 u_isInsideView: { value: true },
-                u_resolution: { value: new THREE.Vector2(width, height) }
+                u_resolution: { value: new THREE.Vector2(width, height) },
+                u_fov: { value: 150.0 }
             },
             transparent: true,
             side: THREE.DoubleSide
@@ -598,6 +600,10 @@ export class AmbiScene {
         }
 
         this.volumetricMaterial.uniforms.u_cameraWorldMatrix.value.copy(this.camera.matrixWorld);
+        this.volumetricMaterial.uniforms.u_fov.value = this.camera.fov;
+        if (this.sphereMaterial) {
+            this.sphereMaterial.uniforms.u_fov.value = this.camera.fov;
+        }
 
         // 2. Render Loop UI Synchronization (Phase 1 Sync)
         // Extract Eulers and send back to React UI for slider feedback

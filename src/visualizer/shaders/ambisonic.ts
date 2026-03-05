@@ -37,6 +37,7 @@ uniform vec2 uResolution;
 
 uniform bool u_isInsideView;
 uniform mat4 u_cameraWorldMatrix;
+uniform float u_fov;
 
 // Constants
 #define MAX_STEPS 64
@@ -130,9 +131,9 @@ void main() {
         uv.x *= aspect; 
         
         // 3. Map UVs to Spherical Angles
-        // Use a SINGLE scaling factor for both axes to maintain perfect proportions.
-        // 1.57079632 is PI/2. Adjust this single value to change your base zoom/FOV.
-        float fovScale = 1.57079632 * 0.75; 
+        // Convert the camera's FOV from degrees to radians, 
+        // and divide by 2.0 to get the half-angle needed for the math.
+        float fovScale = (u_fov * 3.14159265 / 180.0) * 0.5;
         
         float yaw = uv.x * fovScale;   
         float pitch = uv.y * fovScale; 
