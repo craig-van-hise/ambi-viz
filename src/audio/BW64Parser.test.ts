@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { BW64Parser } from './BW64Parser';
 
 // Mock AudioContext to verify our float32 arrays are passed correctly

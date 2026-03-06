@@ -1,105 +1,108 @@
 
 /Users/vv2024/Documents/AI Projects/WebApps/ambi-viz
-├── FAILURE_REPORT_13.md
+├── 2026-03-06_REPO_REPORT.md
 ├── PROJECT_CONTEXT_BUNDLE.md
 ├── PROJECT_STATE.md
-├── PRPs
-|  ├── # 0.md
-|  ├── # 1.md
-|  ├── # 10.md
-|  ├── # 11.md
-|  ├── # 12-1.md
-|  ├── # 12.md
-|  ├── # 13
-|  ├── # 13.md
-|  ├── # 14.md
-|  ├── # 15.md
-|  ├── # 16.md
-|  ├── # 17.md
-|  ├── # 18.md
-|  ├── # 19.md
-|  ├── # 2.md
-|  ├── # 20.md
-|  ├── # 21.md
-|  ├── # 22.md
-|  ├── # 23.md
-|  ├── # 24.md
-|  ├── # 25.md
-|  ├── # 26.md
-|  ├── # 3.md
-|  ├── # 30.md
-|  ├── # 31.md
-|  ├── # 32.md
-|  ├── # 33.md
-|  ├── # 34.md
-|  ├── # 36.md
-|  ├── # 37.md
-|  ├── # 38.md
-|  ├── # 39.md
-|  ├── # 4.md
-|  ├── # 40.md
-|  ├── # 41.md
-|  ├── # 42.md
-|  ├── # 43.md
-|  ├── # 44.md
-|  ├── # 45.md
-|  ├── # 5.md
-|  ├── # 6.md
-|  ├── # 7.md
-|  ├── # 8.md
-|  ├── # 9.md
-|  └── DEBUG_PLAN.md
 ├── README.md
 ├── REMOTE_LOGGING.md
-├── UI.md
-├── ambisonic_OLD.ts
-├── baseline_shader_math.md
 ├── browser.log
 ├── build_error.log
-├── convert_sofa_to_json.py
 ├── eslint.config.js
 ├── index.html
-├── inspect_sofa.py
 ├── llms.txt
 ├── package-lock.json
 ├── package.json
-├── pffft.o
 ├── project_tree.txt
 ├── public
-|  ├── HRTF_default.sofa.json
+|  ├── Virtual Virgin + VV logo card.png
+|  ├── ambisonic_audio_queue
+|  |  ├── 3rd Order Ambi Clock Test.opus
+|  |  ├── A Furiosa (Maxixe)_dry.opus
+|  |  ├── Bach Invention no5 in Eb_AmbiX_3O.opus
+|  |  ├── Beethoven - String Quartet No 13 in B-flat major - IV Alla danza tedesca.opus
+|  |  ├── Final Fantasy Prelude.opus
+|  |  ├── Let Me Tell You About My Boat.opus
+|  |  ├── Queue order.txt
+|  |  ├── SMB 2 Theme.opus
+|  |  └── TEST-09-DYN-B-SPIRAL_Order3.opus
+|  ├── coi-serviceworker.js
 |  ├── hrtf
+|  |  ├── MIT_KEMAR_Normal.sofa
+|  |  ├── Neumann_KU100_48k.sofa
+|  |  └── hrtf_kemar.json
 |  ├── obr.js
 |  ├── obr.wasm
 |  ├── test.wav
 |  ├── vite.svg
 |  └── worklets
+|     └── obr-processor.js
 ├── scripts
 |  └── remote-logger-server.js
 ├── src
 |  ├── App.css
+|  ├── App.test.tsx
 |  ├── App.tsx
 |  ├── HeadTrackingService.test.ts
 |  ├── HeadTrackingService.ts
 |  ├── Orientation.test.ts
 |  ├── assets
+|  |  └── react.svg
 |  ├── audio
+|  |  ├── AudioEngine.test.ts
+|  |  ├── AudioEngine.ts
+|  |  ├── BW64Parser.test.ts
+|  |  ├── BW64Parser.ts
+|  |  ├── OBRDecoder.test.ts
+|  |  ├── OBRDecoder.ts
+|  |  ├── RawCoefAnalyser.ts
+|  |  ├── obr-processor.test.ts
+|  |  └── obr_wrapper.cpp
 |  ├── components
+|  |  ├── CameraControlPanel.tsx
+|  |  ├── HrtfSelector.tsx
+|  |  └── InfoModal.tsx
 |  ├── index.css
 |  ├── main.tsx
 |  ├── tracking
+|  |  ├── ESKF.test.ts
+|  |  ├── ESKF.ts
+|  |  ├── OneEuroFilter.test.ts
+|  |  ├── OneEuroFilter.ts
+|  |  ├── QuatPredictor.test.ts
+|  |  └── QuatPredictor.ts
 |  ├── types
+|  |  ├── HeadTracking.ts
+|  |  └── ambisonics.d.ts
 |  ├── utils
+|  |  ├── OrientationUtils.ts
+|  |  ├── Throttle.test.ts
+|  |  ├── Throttle.ts
+|  |  ├── debug.ts
+|  |  ├── fileUtils.test.ts
+|  |  ├── fileUtils.ts
+|  |  ├── persistence.ts
+|  |  └── remoteLogger.ts
 |  ├── visualizer
+|  |  ├── AmbiScene.test.ts
+|  |  ├── AmbiScene.ts
+|  |  ├── CameraControl.test.ts
+|  |  ├── shaderMath.test.ts
+|  |  ├── shaderMath.ts
+|  |  └── shaders
+|  |     ├── ambisonic.ts
+|  |     ├── arrowShader.ts
+|  |     └── sphereDeformation.ts
 |  └── workers
+|     └── VisionWorker.ts
 ├── tsconfig.app.json
 ├── tsconfig.json
 ├── tsconfig.node.json
 ├── vite.config.ts
 └── vitest.config.ts
 
-directory: 243 file: 87
+directory: 1147 file: 7863
 
-ignored: directory (2)
+ignored: directory (125)
 
 
 [2K[1G
