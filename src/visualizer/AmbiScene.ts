@@ -275,6 +275,7 @@ export class AmbiScene {
             this.controls.enableZoom = false;
             this.controls.minDistance = 0;
             this.controls.maxDistance = 10; // Allow target projection
+            this.controls.rotateSpeed = -1; // Reverse horizontal dragging for pull-to-rotate feel
             this.currentRoll = 0;
             this.camera.up.set(0, 1, 0);
         } else {
@@ -283,6 +284,7 @@ export class AmbiScene {
             this.controls.target.set(0, 0, 0);
             this.controls.enablePan = false; // Permanently disabled
             this.controls.enableZoom = true; // Use physical distance zoom in outside mode
+            this.controls.rotateSpeed = 1.0; // Standard dragging for outside view
             this.controls.minDistance = 1;
             this.controls.maxDistance = 50; // Increased to allow sufficient z-travel
         }
