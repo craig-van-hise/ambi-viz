@@ -69,28 +69,35 @@ export const TrackQueue: React.FC<TrackQueueProps> = ({
             onClick={() => onTrackSelect(idx)}
             onDoubleClick={() => onTrackPlay(idx)}
             className={`track-queue-item group relative flex items-center gap-3 p-3 rounded-lg transition-all cursor-pointer ${currentIndex === idx
-              ? 'bg-primary/20 border border-primary/30'
+              ? 'bg-primary/20 border-primary shadow-[0_0_15px_var(--color-primary)] text-white'
               : 'hover:bg-primary/5 border border-transparent'
               }`}
           >
-            <div className={`flex items-center justify-center size-10 rounded shrink-0 ${currentIndex === idx ? 'bg-primary/20 text-primary' : 'bg-slate-800 text-slate-400'
+            <div className={`flex items-center justify-center size-10 rounded shrink-0 ${currentIndex === idx ? 'bg-primary/20 text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'bg-slate-800 text-slate-400'
               }`}>
               <span className="material-symbols-outlined">{currentIndex === idx ? 'equalizer' : 'music_note'}</span>
             </div>
             <div className="flex-1 overflow-hidden track-name">
-              <p className={`text-sm truncate normal-case ${currentIndex === idx ? 'font-semibold text-slate-100' : 'font-medium text-slate-300'}`}>
+              <p className={`text-sm truncate normal-case ${currentIndex === idx ? 'font-bold text-white drop-shadow-md' : 'font-medium text-slate-300'}`}>
                 {track.name || (track.file && track.file.name)}
               </p>
               <p className={`text-[10px] font-mono ${currentIndex === idx ? 'text-primary/60' : 'text-slate-400'}`}>
                 {isLoading && currentIndex === idx ? (
-                  <>Loading<span className="loading-dots"></span></>
+                  <span className="flex items-center text-primary font-bold animate-pulse">
+                    Loading
+                    <span className="flex ml-0.5">
+                      <span className="animate-[bounce_1.4s_infinite_0s] mx-[0.5px]">.</span>
+                      <span className="animate-[bounce_1.4s_infinite_0.2s] mx-[0.5px]">.</span>
+                      <span className="animate-[bounce_1.4s_infinite_0.4s] mx-[0.5px]">.</span>
+                    </span>
+                  </span>
                 ) : (
                   <>{track.type || '-'} • {track.duration || '00:00'}</>
                 )}
               </p>
             </div>
             <button
-              onClick={(e) => onRemoveTrack(idx, e)}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRemoveTrack(idx, e); }}
               className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 hover:text-red-400 p-1 flex items-center justify-center shrink-0"
               title="Remove Track"
             >

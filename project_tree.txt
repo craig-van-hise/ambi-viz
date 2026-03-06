@@ -5,6 +5,11 @@
 ├── PROJECT_STATE.md
 ├── README.md
 ├── REMOTE_LOGGING.md
+├── WOs
+|  ├── # 1.md
+|  ├── # 2.md
+|  ├── # 3.md
+|  └── # 4.md
 ├── browser.log
 ├── build_error.log
 ├── eslint.config.js
@@ -59,8 +64,21 @@
 |  |  └── obr_wrapper.cpp
 |  ├── components
 |  |  ├── CameraControlPanel.tsx
+|  |  ├── ControlSidebar.tsx
+|  |  ├── Footer.tsx
+|  |  ├── Header.tsx
 |  |  ├── HrtfSelector.tsx
-|  |  └── InfoModal.tsx
+|  |  ├── InfoModal.tsx
+|  |  ├── MainViewer.tsx
+|  |  ├── SettingsModal.tsx
+|  |  ├── Tooltip.tsx
+|  |  ├── TrackQueue.tsx
+|  |  ├── TransportControls.tsx
+|  |  └── panels
+|  |     ├── CameraControlPanel.tsx
+|  |     ├── ESKFTuningPanel.tsx
+|  |     ├── ViewAndTrackingPanel.tsx
+|  |     └── VisualizerSettingsPanel.tsx
 |  ├── index.css
 |  ├── main.tsx
 |  ├── tracking
@@ -100,7 +118,7 @@
 ├── vite.config.ts
 └── vitest.config.ts
 
-directory: 1147 file: 7863
+directory: 1149 file: 7880
 
 ignored: directory (125)
 

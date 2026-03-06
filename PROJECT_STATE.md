@@ -1,137 +1,83 @@
-# PROJECT_STATE (2026-03-03)
+# PROJECT_STATE (2026-03-06)
 
 ## 1. Architecture
 
 ```text
 /Users/vv2024/Documents/AI Projects/WebApps/ambi-viz
-├── FAILURE_REPORT_13.md
-├── PROJECT_CONTEXT_BUNDLE.md
-├── PROJECT_STATE.md
-├── PRPs
-├── README.md
-├── REMOTE_LOGGING.md
-├── index.html
-├── llms.txt
-├── package.json
-├── public
-|  ├── HRTF_default.sofa.json
-|  ├── hrtf
-|  ├── obr.js
-|  ├── obr.wasm
-|  ├── test.wav
-|  └── worklets
-├── src
-|  ├── App.css
-|  ├── App.tsx / App.css / App.test.tsx
-|  ├── HeadTrackingService.ts
-|  ├── Orientation.test.ts
-|  ├── audio
-|  |  ├── AudioEngine.ts / AudioEngine.test.ts
-|  |  ├── OBRDecoder.ts / OBRDecoder.test.ts
-|  |  ├── RawCoefAnalyser.ts
-|  |  ├── obr-processor.test.ts
-|  |  └── obr_wrapper.cpp
-|  ├── components
-|  |  ├── CameraControlPanel.tsx
-|  |  ├── ESKFTuningPanel.tsx
-|  |  ├── FileLoader.tsx
-|  |  ├── HrtfSelector.tsx
-|  |  ├── TrackQueue.tsx
-|  |  ├── TransportControls.tsx
-|  |  └── VisualizerControls.tsx
-|  ├── tracking
-|  |  ├── ESKF.ts / ESKF.test.ts
-|  |  ├── OneEuroFilter.ts / OneEuroFilter.test.ts
-|  |  └── QuatPredictor.ts / QuatPredictor.test.ts
-|  ├── types
-|  ├── utils
-|  |  ├── Persistence.ts
-|  |  ├── Throttle.ts
-|  |  └── fileUtils.ts / fileUtils.test.ts
-|  ├── visualizer
-|  |  ├── AmbiScene.ts / AmbiScene.test.ts
-|  |  ├── CameraControl.test.ts
-|  |  ├── shaderMath.ts / shaderMath.test.ts
-|  |  └── shaders
-|  |     ├── ambisonic.ts
-|  |     └── sphereDeformation.ts
-|  └── workers
-|     └── VisionWorker.ts
-├── scripts
-├── vite.config.ts
-└── vitest.config.ts
+├── 2026-03-06_REPO_REPORT.md  # Latest codebase analysis
+├── PROJECT_STATE.md           # This file (Source of Truth)
+├── PRPs/                      # Product Requirements Prompts (Historical Logs)
+├── WOs/                       # Work Orders (Active Tasks)
+├── src/
+│   ├── App.tsx                # Application Entry & Layout
+│   ├── HeadTrackingService.ts # Orchestrates MediaPipe & ESKF
+│   ├── audio/
+│   │   ├── AudioEngine.ts     # Main Audio Graph & Transport
+│   │   ├── OBRDecoder.ts      # Google OBR WASM Interface
+│   │   ├── BW64Parser.ts      # Native BW64/RIFF Decoding
+│   │   └── RawCoefAnalyser.ts # Real-time Ambisonic Coeff Analysis
+│   ├── components/            # Modular UI Components
+│   │   ├── panels/            # Specialist Control Panels
+│   │   │   ├── ESKFTuningPanel.tsx
+│   │   │   └── VisualizerSettingsPanel.tsx
+│   │   ├── MainViewer.tsx     # Three.js Canvas Container
+│   │   ├── ControlSidebar.tsx # Right-side controls hub
+│   │   ├── TrackQueue.tsx     # Audio File Management
+│   │   └── TransportControls.tsx
+│   ├── tracking/
+│   │   ├── ESKF.ts           # Error-State Kalman Filter (Tangent Space)
+│   │   └── OneEuroFilter.ts   # Jitter Reduction
+│   ├── visualizer/
+│   │   ├── AmbiScene.ts       # Three.js Scene & Render Loop
+│   │   └── shaders/           # GLSL Volumetric & Deformation
+│   └── workers/
+│       └── VisionWorker.ts    # MediaPipe FaceLandmarker (Off-thread)
+└── public/
+    ├── hrtf/                  # SOFA files
+    ├── worklets/              # OBR Audio Processor
+    └── obr.wasm               # Binary renderer
 ```
-
 
 ## 2. Tech Stack
 
--   **Language**: TypeScript / C++ (WASM)
--   **Framework**: React (Vite)
--   **Graphics**: Three.js (WebGL)
--   **Audio/Tracking**: Web Audio API, Google Open Binaural Renderer (OBR), MediaPipe Tasks Vision (FaceLandmarker)
--   **Predictive Tracking**: Error-State Kalman Filter (ESKF) implementation
--   **State Persistence**: LocalStorage for UI settings and filters.
+- **Framework**: React 19 (Vite)
+- **Graphics**: Three.js (WebGL) + Custom GLSL Shaders
+- **Audio**: Web Audio API + Google Open Binaural Renderer (OBR) WASM
+- **Tracking**: MediaPipe Tasks Vision (FaceLandmarker)
+- **Filters**: Error-State Kalman Filter (ESKF) for 6DOF prediction, 1-Euro for jitter
+- **Styling**: TailwindCSS 4.0
+- **Testing**: Vitest + JSDOM
 
-## 3. Status
+## 3. Current System Capabilities
 
--   **PRP #0–12**: **Complete** (Genesis, Audio Engine, Rendering, Ambisonics Pipeline).
--   **PRP #13 (Head Tracking & Transport)**: **Complete**.
--   **PRP #14–17 (UI/FOV Refinement)**: **Complete**.
--   **PRP #18–19 (Bidirectional Control)**: **Complete**.
-    - Implemented Forward Vector Target Projection for `OrbitControls`.
-    - Enabled Roll support by dynamically updating `camera.up`.
-    - Synced 3D canvas manipulation back to React UI sliders.
--   **PRP #20 (Singularity Prevention)**: **Complete**.
-    - Hard-clamped Pitch to ±89.4° to prevent WebGL matrix collapse/Black Screen.
-    - Added strict type coercion for slider inputs.
--   **PRP #21 (Warp Zone Hardening)**: **Complete**.
-    - Enforced strict origin lock `(0,0,0)` for Inside View.
-    - Projected target exactly 1 unit away to prevent distance=0 singularities.
--   **PRP #22 (Universal UI Sync)**: **Complete**.
-    - Moved UI state polling to the main render loop for universal capture (Mouse + Head).
-    - Implemented `isDraggingSlider` flag to prevent state-fighting during manual interaction.
--   **PRP #23 (Camera Data Bridge)**: **Complete**.
-    - Closed the loop: Webcam → SAB → 3D Camera → UI Sliders.
-    - Head tracking now drives both the audio rotation and the visual camera orientation.
--   **PRP #24 (Track Queue Glitch Fix)**: **Complete**.
-    - Fixed playback state collision on double-click by enforcing strict `stop() → loadTrack() → play()` teardown.
-    - Added `'loading'` guard to prevent rapid-click spam.
--   **PRP #25 (3DOF Orientation Matrix Fix)**: **Complete**.
-    - **Phase 1:** Hard origin-lock guard added to `animate()` loop; target spawn corrected to `(0, 0, -1)`.
-    - **Phase 2:** Pitch inversion applied end-to-end (tracker → camera, UI feedback round-trip), Roll pipeline activated via `currentRoll` state and `camera.up` math.
-    - **Phase 3:** `camera.up.set(-sin(roll), cos(roll), 0)` applied in both UI slider and head-tracking paths; OBR worklet receives pitch-inverted quaternion.
-    - All 60 Vitest tests passing (11 test files).
--   **PRP #36 (Stationary World & Orientation Recovery)**: **Complete**.
-    - Decoupled Audio orientation from Visual orientation in the SAB bridge.
-    - Implemented Yaw inversion for the audio path (Stationary World model).
-    - Forked Tracking and UI orientation paths: Visual = Physical movement, Audio = Environmental stability.
-    - Optimized transformation logic via `OrientationUtils.ts` (zero-allocation loop).
--   **PRP #43 (Volumetric Ray-Marching Bounding Sphere Intersection Fix)**: **Complete**.
-    - Implemented quadratic ray-sphere intersection to fast-forward rays to the volume boundary.
-    - Expanded `MAX_STEPS` to 64 and `MAX_DIST` to 30.0 for extreme distance viewing.
--   **PRP #44 (Salvage Legacy Sphere Deformation)**: **Complete**.
-    - Isolated and extracted legacy visualization code for analysis.
--   **PRP #45 (Integrate Multi-Mode Visualization Architecture)**: **Complete**.
-    - Refactored `AmbiScene.ts` to manage both Volumetric and Sphere Deformation meshes.
-    - Implemented UI toggle in `App.tsx` and `VisualizerControls.tsx`.
--   **PRP #46 (Opus File Support)**: **Complete**.
-    - Integrated `.opus` / `audio/opus` into the ingestion pipeline.
-    - Added recursive directory scanning support for Opus files.
-    - Updated UI (Dropzone, Alerts) to reflect Opus support.
-    - Extracted and verified file validation logic with TDD checkpoints.
--   **PRP (Extra - Outside Camera Control Activation)**: **Complete**.
-    - Enabled manual camera position sliders in the Outside View by removing reactive disablement.
--   **PRP #26 (Visual-Cognitive Alignment)**: **Complete**.
-    - Objective: Decouple audio path (raw YPR) from visual path (inverted display), align Green Pointer as gaze indicator, implement cockpit-view roll on `camera.up`.
+### 🎧 Audio Pipeline
+- **Ambisonic Rendering**: 3DOF spatialization supporting Order 1-3 (ACN/SN3D).
+- **Format Support**: Native ingestion of `.wav`, `.ambix`, `.opus`, and `.bw64` (ADM).
+- **HRTF Management**: Selection of built-in profiles or custom `.sofa` file uploads.
+- **Transport**: Play/Pause/Stop with generation-tracked seeking to prevent state collisions.
 
-## 4. Recent Changes (Summary)
+### 🎭 Tracking Engine (ESKF)
+- **Low Latency**: Off-thread FaceLandmasking (Worker) coupled with forward-prediction (ESKF).
+- **Prediction**: 3DOF orientation prediction (τ ≈ 45ms) to compensate for sensor/render lag.
+- **Stabilization**: 1-Euro filtering applied to raw landmarks before ESKF correction.
+- **Visual Feedback**: Real-time "Predicted" and "Ghost" orientation arrows in the 3D scene.
 
--   **Feature**: Added native support for `.opus` audio files across the ingestion pipeline and UI.
--   **Feature**: Enabled manual camera position sliders in the Outside View for expanded manual control.
--   **Feature**: Integrated Multi-Mode Visualization (toggle between Ray-Marching Volumetrics and Legacy Sphere Deformation).
--   **Fix**: Implemented Bounding Sphere Intersection in shaders to fix disappearing visualization at extreme camera distances.
--   **b6cd2cc - feat: Enable camera position sliders by removing the `disabled` prop. (78 minutes ago)**
--   **9371427 - feat: Implement sphere deformation visualization with new GLSL shaders, integrate into `AmbiScene` and `App.tsx`, and add related planning documents. (2 hours ago)**
--   **145b263 - fix: implement bounding sphere intersection to optimize volumetric ray marching and adjust rendering constants. (16 hours ago)**
--   **e749b6b - feat: Implement volumetric ray-marching bounding sphere intersection fix by increasing shader limits and fast-forwarding ray start, documented in PRP #43. (16 hours ago)**
--   **2561b29 - changed UI to get ready for makeover (16 hours ago)**
+### 🌑 Visualizer Modes
+- **Volumetric Ray-Marching**: Real-time energy field visualization using Quadratic Form ($Y^T C Y$) energy estimation.
+- **Sphere Deformation**: Legacy particle-based mode for sound source localization.
+- **Optimization**: Bounding Sphere Intersection logic prevents ray-marching "escapes" and improves performance.
+- **Inside/Outside View**: Toggle between First-Person "Cockpit" view and Global "God" view.
+
+### 🎛️ Control & Sync
+- **Bidirectional Logic**: 3D `OrbitControls` manipulation syncs back to UI sliders and vice-versa.
+- **Singularity Lock**: Hard-clamped Pitch (±89.4°) and per-frame Origin Lock `(0,0,0)` to ensure stability.
+- **State Persistence**: Gain, HRTF, and ESKF parameters persist via `localStorage`.
+
+## 4. Active Development Focus
+- **Refactoring the App Monolith**: (PRP #71 / WO #4) Completing the migration of business logic from `App.tsx` into specialized components (`src/components/`). Ensuring prop-drilling is minimized via clean interfaces while maintaining state synchronization across the new modular architecture.
+
+## 5. Recent Version History (Post-Refactor)
+- **2026-03-06**: Completed Splitting of `App.tsx` into modular components (`ControlSidebar`, `MainViewer`, etc.).
+- **2026-03-06**: Added native support for BW64 audio parsing.
+- **2026-03-05**: Integrated Custom HRTF `.sofa` upload capability.
+- **2026-03-04**: Hardened Tracking Engine with 3-axis (YPR) orientation matrix fix.
