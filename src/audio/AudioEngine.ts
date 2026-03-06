@@ -1,5 +1,6 @@
 import { OBRDecoder } from './OBRDecoder';
 import { RawCoefAnalyser } from './RawCoefAnalyser';
+import { BW64Parser } from './BW64Parser';
 
 export type PlaybackState = 'stopped' | 'playing' | 'paused' | 'loading' | 'error';
 
@@ -116,7 +117,20 @@ export class AudioEngine {
 
                     if (generation !== this._loadGeneration) return false;
 
-                    track.buffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+                    if (generation !== this._loadGeneration) return false;
+
+                    // Check for BW64 magic bytes
+                    if (arrayBuffer.byteLength >= 4) {
+                        const view = new DataView(arrayBuffer);
+                        const magic = String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3));
+                        if (magic === 'BW64') {
+                            track.buffer = await BW64Parser.parse(arrayBuffer, this.audioCtx);
+                        } else {
+                            track.buffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+                        }
+                    } else {
+                        track.buffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+                    }
 
                     if (generation !== this._loadGeneration) return false;
 

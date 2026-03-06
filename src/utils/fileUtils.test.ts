@@ -15,6 +15,12 @@ describe('fileUtils', () => {
             expect(result).toBe(true);
         });
 
+        it('should return true given a filename like test.bw64', () => {
+            const file = new File([''], 'test.bw64');
+            const result = isSupportedAudioFile(file);
+            expect(result).toBe(true);
+        });
+
         it('should return true given MIME type audio/opus even if extension is missing (Phase 1 Checkpoint 2)', () => {
             // Wait, the current implementation only checks the extension!
             // Let's write a failing test first as per TDD requirement in PRP.

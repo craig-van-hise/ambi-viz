@@ -1,4 +1,4 @@
-export const SUPPORTED_EXTENSIONS = ['wav', 'ambix', 'ogg', 'iamf', 'opus'];
+export const SUPPORTED_EXTENSIONS = ['wav', 'ambix', 'ogg', 'iamf', 'opus', 'bw64'];
 
 export function isSupportedAudioFile(file: File): boolean {
     const ext = file.name.split('.').pop()?.toLowerCase() ?? '';

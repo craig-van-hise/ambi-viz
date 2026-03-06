@@ -420,7 +420,7 @@ export default function App() {
       collected.sort((a, b) => a.name.localeCompare(b.name));
       handleFilesQueued(collected);
     } else {
-      alert('No supported audio files found (.wav, .ambix, .ogg, .iamf, .opus)');
+      alert('No supported audio files found (.wav, .ambix, .ogg, .iamf, .opus, .bw64)');
     }
   }, [handleFilesQueued]);
 
@@ -790,7 +790,7 @@ export default function App() {
                     Drag and drop or click to browse
                   </p>
                   <div className="flex flex-wrap justify-center gap-1.5 opacity-60">
-                    {['.wav', '.amb', '.ogg', '.iamf', '.opus'].map(ext => (
+                    {['.wav', '.amb', '.ogg', '.iamf', '.opus', '.bw64'].map(ext => (
                       <span key={ext} className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-[9px] font-mono text-slate-400 normal-case">
                         {ext}
                       </span>
