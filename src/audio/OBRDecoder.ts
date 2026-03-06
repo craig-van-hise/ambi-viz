@@ -62,19 +62,25 @@ export class OBRDecoder {
         }
     }
 
-    public async loadSofa(url: string): Promise<void> {
+    public async loadSofa(urlOrBuffer: string | ArrayBuffer): Promise<void> {
         if (!this.workletNode) {
             throw new Error('OBRDecoder: WorkletNode is not initialized');
         }
 
         try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch SOFA: ${response.statusText}`);
+            let buffer: ArrayBuffer;
+            if (typeof urlOrBuffer === 'string') {
+                const response = await fetch(urlOrBuffer);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch SOFA: ${response.statusText}`);
+                }
+                buffer = await response.arrayBuffer();
+                console.log(`OBRDecoder: Fetched and loading SOFA from ${urlOrBuffer}`);
+            } else {
+                buffer = urlOrBuffer;
+                console.log('OBRDecoder: Loading SOFA from provided ArrayBuffer');
             }
-            const buffer = await response.arrayBuffer();
             this.workletNode.port.postMessage({ type: 'LOAD_SOFA', payload: buffer });
-            console.log(`OBRDecoder: Sent LOAD_SOFA message for ${url}`);
         } catch (error) {
             console.error('OBRDecoder: Failed to load SOFA file:', error);
             throw error;

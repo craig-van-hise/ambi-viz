@@ -99,4 +99,27 @@ describe('OBRDecoder', () => {
             payload: expect.any(ArrayBuffer)
         });
     });
+
+    it('loadSofa accepts ArrayBuffer directly', async () => {
+        const decoder = new OBRDecoder(mockCtx, 3);
+        const mockPort = { postMessage: vi.fn() };
+        const mockWorkletNode = { port: mockPort, connect: vi.fn() };
+        (globalThis as unknown as { AudioWorkletNode: unknown }).AudioWorkletNode = vi.fn().mockImplementation(function () {
+            return mockWorkletNode;
+        });
+        (globalThis as unknown as { fetch: unknown }).fetch = vi.fn()
+            .mockResolvedValueOnce({ ok: true, arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) });
+        (globalThis as unknown as { WebAssembly: { compile: unknown } }).WebAssembly = { compile: vi.fn().mockResolvedValue({}) };
+
+        await decoder.init();
+        const testBuffer = new ArrayBuffer(5);
+        await decoder.loadSofa(testBuffer);
+
+        expect(mockPort.postMessage).toHaveBeenCalledWith({
+            type: 'LOAD_SOFA',
+            payload: testBuffer
+        });
+        // Fetch should NOT have been called for the SOFA file
+        expect(globalThis.fetch).toHaveBeenCalledTimes(1); // Only for WASM
+    });
 });

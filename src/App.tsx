@@ -324,11 +324,27 @@ export default function App() {
     }
   }, [audioEngine, headTracking]);
 
-  const handleHrtfSelect = useCallback(async (url: string) => {
-    setHrtfUrl(url);
-    persistState({ hrtfUrl: url });
-    if (audioEngine.obrDecoder) {
-      try { await audioEngine.obrDecoder.loadSofa(url); } catch (e) { console.error(e); }
+  const handleHrtfSelect = useCallback(async (value: string | File) => {
+    if (typeof value === 'string') {
+      setHrtfUrl(value);
+      persistState({ hrtfUrl: value });
+      if (audioEngine.obrDecoder) {
+        try { await audioEngine.obrDecoder.loadSofa(value); } catch (e) { console.error(e); }
+      }
+    } else {
+      // Handle File upload
+      try {
+        const buffer = await value.arrayBuffer();
+        if (audioEngine.obrDecoder) {
+          await audioEngine.obrDecoder.loadSofa(buffer);
+          // Set UI display but don't persist "Custom: ..." to localStorage 
+          // as it won't be fetchable on reload.
+          setHrtfUrl(`Custom: ${value.name}`);
+        }
+      } catch (e) {
+        console.error("App: Failed to load custom SOFA:", e);
+        alert("Failed to load custom SOFA file.");
+      }
     }
   }, [audioEngine, persistState]);
 
@@ -1362,7 +1378,7 @@ export default function App() {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <HrtfSelector onSelect={handleHrtfSelect} />
+              <HrtfSelector onSelect={handleHrtfSelect} currentValue={hrtfUrl} />
             </div>
             <div className="p-5 border-t border-white/10 flex justify-end">
               <button

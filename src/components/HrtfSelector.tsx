@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 interface HrtfSelectorProps {
-    onSelect: (url: string) => void;
+    onSelect: (value: string | File) => void;
+    currentValue: string;
 }
 
 const hrtfOptions = [
@@ -9,7 +10,17 @@ const hrtfOptions = [
     { label: 'Neumann KU100 48k', value: `${import.meta.env.BASE_URL}hrtf/Neumann_KU100_48k.sofa` }
 ];
 
-export const HrtfSelector: React.FC<HrtfSelectorProps> = ({ onSelect }) => {
+export const HrtfSelector: React.FC<HrtfSelectorProps> = ({ onSelect, currentValue }) => {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const isBuiltIn = hrtfOptions.some(opt => opt.value === currentValue);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            onSelect(file);
+        }
+    };
+
     return (
         <div style={{
             margin: '20px 0',
@@ -19,7 +30,15 @@ export const HrtfSelector: React.FC<HrtfSelectorProps> = ({ onSelect }) => {
             <label htmlFor="hrtf-select" style={{ marginRight: '10px' }}>Select HRTF: </label>
             <select
                 id="hrtf-select"
-                onChange={(e) => onSelect(e.target.value)}
+                value={isBuiltIn ? currentValue : 'custom'}
+                onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === 'upload') {
+                        fileInputRef.current?.click();
+                    } else if (value !== 'custom') {
+                        onSelect(value);
+                    }
+                }}
                 style={{
                     backgroundColor: '#1a1a1a',
                     color: '#fff',
@@ -35,7 +54,18 @@ export const HrtfSelector: React.FC<HrtfSelectorProps> = ({ onSelect }) => {
                         {option.label}
                     </option>
                 ))}
+                {!isBuiltIn && (
+                    <option value="custom">{currentValue}</option>
+                )}
+                <option value="upload">Upload Custom...</option>
             </select>
+            <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                accept=".sofa"
+                onChange={handleFileChange}
+            />
         </div>
     );
 };
