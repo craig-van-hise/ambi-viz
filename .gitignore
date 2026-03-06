@@ -16,3 +16,6 @@ terminal.log
 *.log
 project_tree.txt
 
+
+# Cleanup
+xCleanup/
