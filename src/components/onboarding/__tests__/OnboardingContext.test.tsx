@@ -3,7 +3,7 @@
  */
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, cleanup, screen, fireEvent } from '@testing-library/react';
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { OnboardingProvider, OnboardingContext } from '../OnboardingContext';
 
 const store: Record<string, string> = {};

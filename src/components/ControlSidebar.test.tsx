@@ -3,7 +3,6 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
-import React from 'react';
 import { ControlSidebar } from './ControlSidebar';
 
 afterEach(cleanup);
@@ -22,12 +21,12 @@ describe('ControlSidebar component (Phase 2)', () => {
     onZoomChange: vi.fn(),
     gain: 1.0,
     onGainChange: vi.fn(),
-    cameraUIState: { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0 },
+    cameraUIState: { x: 0, y: 3.55, z: 3.7, yaw: 0, pitch: 0, roll: 0 },
     onCameraUIChange: vi.fn(),
     onCameraReset: vi.fn(),
     visualParams: { densityThreshold: 0, densityMult: 0, emissionMult: 0, heatmapKnee: 0, edgeFalloff: 0, dissipationRate: 0 },
     onVisualParamsChange: vi.fn(),
-    deformationParams: { frequency: 0, amplitude: 0, speed: 0 },
+    deformationParams: { amplitude: 0.5, baseRadius: 0.5, sharpness: 1.0, colorIntensity: 0.5, smoothing: 0.5, resolution: 128, wireframe: false },
     onDeformationParamsChange: vi.fn(),
     onVisualReset: vi.fn(),
     eskfParams: { tau: 0, R_scalar: 0, Q_scalar: 0 },

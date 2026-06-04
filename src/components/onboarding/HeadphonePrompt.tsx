@@ -1,4 +1,3 @@
-import React from 'react';
 import { useOnboarding } from './OnboardingContext';
 import { Headphones } from 'lucide-react';
 

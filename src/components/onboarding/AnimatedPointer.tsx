@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, ArrowLeft, ArrowUp, ArrowDown } from 'lucide-react';
 
@@ -7,7 +6,7 @@ interface AnimatedPointerProps {
   direction: 'left' | 'right' | 'up' | 'down';
 }
 
-export const AnimatedPointer: React.FC<AnimatedPointerProps> = ({ text, direction }) => {
+export const AnimatedPointer = ({ text, direction }: AnimatedPointerProps) => {
   const getArrow = () => {
     switch (direction) {
       case 'left': return <ArrowLeft className="w-8 h-8 text-cyan-400 animate-pulse" />;
@@ -22,22 +21,22 @@ export const AnimatedPointer: React.FC<AnimatedPointerProps> = ({ text, directio
       case 'left':
         return {
           animate: { x: [-10, 3, -10] },
-          transition: { repeat: Infinity, duration: 1.5, ease: "easeInOut" }
+          transition: { repeat: Infinity, duration: 1.5, ease: "easeInOut" as const }
         };
       case 'right':
         return {
           animate: { x: [10, -3, 10] },
-          transition: { repeat: Infinity, duration: 1.5, ease: "easeInOut" }
+          transition: { repeat: Infinity, duration: 1.5, ease: "easeInOut" as const }
         };
       case 'up':
         return {
           animate: { y: [-10, 3, -10] },
-          transition: { repeat: Infinity, duration: 1.5, ease: "easeInOut" }
+          transition: { repeat: Infinity, duration: 1.5, ease: "easeInOut" as const }
         };
       case 'down':
         return {
           animate: { y: [10, -3, 10] },
-          transition: { repeat: Infinity, duration: 1.5, ease: "easeInOut" }
+          transition: { repeat: Infinity, duration: 1.5, ease: "easeInOut" as const }
         };
     }
   };

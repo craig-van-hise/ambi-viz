@@ -3,7 +3,6 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, fireEvent, cleanup } from '@testing-library/react';
-import React from 'react';
 import { InfoModal } from './InfoModal';
 import { OnboardingContext } from './onboarding/OnboardingContext';
 
@@ -11,7 +10,7 @@ afterEach(cleanup);
 
 describe('InfoModal Content and Attribution', () => {
     it('contains Freesound and Google Open Binaural Renderer attribution', () => {
-        const { getByText, container } = render(
+        const { container } = render(
             <InfoModal isOpen={true} onClose={() => {}} />
         );
         expect(container.textContent).toContain('Freesound');

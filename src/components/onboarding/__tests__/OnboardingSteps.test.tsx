@@ -3,7 +3,7 @@
  */
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, cleanup, screen, fireEvent } from '@testing-library/react';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { OnboardingProvider, OnboardingContext, useOnboarding } from '../OnboardingContext';
 import { AnimatedPointer } from '../AnimatedPointer';
 import { HeadphonePrompt } from '../HeadphonePrompt';
@@ -99,7 +99,7 @@ describe('Onboarding Steps 2 & 3 (Phase 3)', () => {
     });
     const onPlay = vi.fn();
 
-    const { rerender } = render(<MockApp isTracking={isTracking} toggleTracking={toggleTracking} onPlay={onPlay} />);
+    render(<MockApp isTracking={isTracking} toggleTracking={toggleTracking} onPlay={onPlay} />);
     
     // First, complete HEADPHONES step
     const headphoneBtn = screen.getByRole('button', { name: /I'm wearing headphones/i });
@@ -144,7 +144,7 @@ describe('Onboarding Steps 2 & 3 (Phase 3)', () => {
     const toggleTracking = vi.fn();
     const onPlay = vi.fn();
 
-    const { rerender } = render(<MockApp isTracking={isTracking} toggleTracking={toggleTracking} onPlay={onPlay} />);
+    render(<MockApp isTracking={isTracking} toggleTracking={toggleTracking} onPlay={onPlay} />);
     
     // Complete HEADPHONES step
     const headphoneBtn = screen.getByRole('button', { name: /I'm wearing headphones/i });
@@ -207,7 +207,7 @@ describe('Onboarding Steps 2 & 3 (Phase 3)', () => {
     const mockContext = {
       currentStep: 'PLAYBACK' as const,
       advanceStep: vi.fn(),
-      restartOnboarding: vi.fn(),
+      resetOnboarding: vi.fn(),
     };
     
     const { container } = render(

@@ -3,7 +3,6 @@
  */
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, cleanup, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
 import { OnboardingProvider, OnboardingContext } from '../OnboardingContext';
 import { HeadphonePrompt } from '../HeadphonePrompt';
 
