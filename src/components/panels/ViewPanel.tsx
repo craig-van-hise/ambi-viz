@@ -2,15 +2,13 @@ import React from 'react';
 import { Tooltip } from '../Tooltip';
 import type { ViewMode, VisualizationMode } from '../../visualizer/AmbiScene';
 
-interface ViewAndTrackingPanelProps {
+interface ViewPanelProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   visualizationMode: VisualizationMode;
   setVisualizationMode: (mode: VisualizationMode) => void;
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
-  isTrackingCam: boolean;
-  setIsTrackingCam: (isTracking: boolean) => void;
   zoomFov: number;
   onZoomChange: (fov: number) => void;
   gain: number;
@@ -18,15 +16,13 @@ interface ViewAndTrackingPanelProps {
   onSliderDrag: (isDragging: boolean) => void;
 }
 
-export const ViewAndTrackingPanel: React.FC<ViewAndTrackingPanelProps> = ({
+export const ViewPanel: React.FC<ViewPanelProps> = ({
   isCollapsed,
   onToggleCollapse,
   visualizationMode,
   setVisualizationMode,
   viewMode,
   setViewMode,
-  isTrackingCam,
-  setIsTrackingCam,
   zoomFov,
   onZoomChange,
   gain,
@@ -41,7 +37,7 @@ export const ViewAndTrackingPanel: React.FC<ViewAndTrackingPanelProps> = ({
       >
         <div className="flex items-center gap-2">
           <span className={`material-symbols-outlined text-sm text-slate-400 transition-transform ${isCollapsed ? '-rotate-90' : ''}`}>expand_more</span>
-          <h3 className="text-[10px] font-normal uppercase tracking-widest text-slate-500 group-hover:text-slate-400 transition-colors">View & Tracking</h3>
+          <h3 className="text-[10px] font-normal uppercase tracking-widest text-slate-500 group-hover:text-slate-400 transition-colors">View</h3>
         </div>
       </div>
 
@@ -72,20 +68,6 @@ export const ViewAndTrackingPanel: React.FC<ViewAndTrackingPanelProps> = ({
                 className={`px-3 py-1 text-[10px] font-bold rounded transition-colors ${viewMode === 'outside' ? 'bg-primary-dark text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
               >Outside</button>
             </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-300 normal-case">Head Tracking</span>
-            <button
-              onClick={() => setIsTrackingCam(!isTrackingCam)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${isTrackingCam
-                ? 'bg-green-600 text-white hover:bg-green-500 shadow-[0_0_10px_rgba(22,163,74,0.3)]'
-                : 'bg-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-white/5'
-                }`}
-            >
-              <span className="material-symbols-outlined text-sm">videocam</span>
-              <span>{isTrackingCam ? 'Tracking Active' : 'Start Tracking'}</span>
-            </button>
           </div>
 
           <div className="space-y-3 pt-2">

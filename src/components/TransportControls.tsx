@@ -1,5 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useContext } from 'react';
 import type { PlaybackState } from '../audio/AudioEngine';
+import { OnboardingContext } from './onboarding/OnboardingContext';
+import { AnimatedPointer } from './onboarding/AnimatedPointer';
 
 interface TransportControlsProps {
   playbackState: PlaybackState;
@@ -39,6 +41,7 @@ export const TransportControls: React.FC<TransportControlsProps> = ({
   onShowSettings,
 }) => {
   const isScrubbing = useRef(false);
+  const onboarding = useContext(OnboardingContext);
 
   return (
     <div className="absolute bottom-0 left-0 w-full z-40 px-4 py-4 flex flex-col @2xl:flex-row items-center justify-between gap-y-3 gap-x-6">
@@ -77,15 +80,30 @@ export const TransportControls: React.FC<TransportControlsProps> = ({
           >
             <span className="material-symbols-outlined text-xl">skip_previous</span>
           </button>
-          <button
-            onClick={() => { if (playbackState === 'playing') onPause(); else onPlay(); }}
-            className={`transport-btn ${playbackState === 'playing' ? 'transport-active' : ''}`}
-            title={playbackState === 'playing' ? 'Pause' : 'Play'}
-          >
-            <span className="material-symbols-outlined text-2xl font-bold">
-              {playbackState === 'playing' ? 'pause' : 'play_arrow'}
-            </span>
-          </button>
+          
+          <div className="relative">
+            {onboarding?.currentStep === 'PLAYBACK' && (
+              <div className="absolute bottom-full left-1/2 -translate-x-[40px] mb-8 z-50">
+                <AnimatedPointer text="Step 3: Press Play" direction="down" />
+              </div>
+            )}
+            <button
+              onClick={() => {
+                if (playbackState === 'playing') onPause();
+                else onPlay();
+                
+                if (onboarding?.currentStep === 'PLAYBACK') {
+                  onboarding.advanceStep();
+                }
+              }}
+              className={`transport-btn ${playbackState === 'playing' ? 'transport-active' : ''}`}
+              title={playbackState === 'playing' ? 'Pause' : 'Play'}
+            >
+              <span className="material-symbols-outlined text-2xl font-bold">
+                {playbackState === 'playing' ? 'pause' : 'play_arrow'}
+              </span>
+            </button>
+          </div>
           <button
             onClick={onStop}
             className={`transport-btn ${playbackState === 'stopped' && progress === 0 ? 'transport-active' : ''}`}

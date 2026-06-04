@@ -1,10 +1,13 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, fireEvent, cleanup } from '@testing-library/react';
 import React from 'react';
 import { InfoModal } from './InfoModal';
+import { OnboardingContext } from './onboarding/OnboardingContext';
+
+afterEach(cleanup);
 
 describe('InfoModal Content and Attribution', () => {
     it('contains Freesound and Google Open Binaural Renderer attribution', () => {
@@ -32,5 +35,30 @@ describe('InfoModal Content and Attribution', () => {
         expect(table).toBeTruthy();
         const rows = table?.querySelectorAll('tbody tr');
         expect(rows?.length).toBeGreaterThanOrEqual(9);
+    });
+
+    it('Given the InfoModal is open, When the user clicks "Restart Walkthrough", Assert that the context reset function is called and the modal close function is called', () => {
+        const mockReset = vi.fn();
+        const mockClose = vi.fn();
+        
+        const mockContextValue = {
+            currentStep: 'COMPLETED' as const,
+            advanceStep: vi.fn(),
+            resetOnboarding: mockReset,
+        };
+
+        const { getByRole } = render(
+            <OnboardingContext.Provider value={mockContextValue}>
+                <InfoModal isOpen={true} onClose={mockClose} />
+            </OnboardingContext.Provider>
+        );
+
+        const restartBtn = getByRole('button', { name: /Restart Walkthrough/i });
+        expect(restartBtn).toBeTruthy();
+        
+        fireEvent.click(restartBtn);
+        
+        expect(mockReset).toHaveBeenCalled();
+        expect(mockClose).toHaveBeenCalled();
     });
 });

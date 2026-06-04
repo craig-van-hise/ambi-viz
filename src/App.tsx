@@ -19,6 +19,8 @@ import { ControlSidebar } from './components/ControlSidebar';
 import { Footer } from './components/Footer';
 import { InfoModal } from './components/InfoModal';
 import { SettingsModal } from './components/SettingsModal';
+import { OnboardingProvider, OnboardingContext } from './components/onboarding/OnboardingContext';
+import { HeadphonePrompt } from './components/onboarding/HeadphonePrompt';
 
 export interface VisualParams {
   densityThreshold: number;
@@ -592,109 +594,119 @@ export default function App() {
   }, [isDraggingLeft, isDraggingRight]);
 
   return (
-    <div className={`bg-background-dark font-ui text-slate-100 overflow-hidden h-full flex flex-col antialiased ${isDraggingLeft || isDraggingRight ? 'select-none cursor-col-resize' : ''}`}>
-      <Header 
-        showQueue={showQueue}
-        onToggleQueue={() => setShowQueue(!showQueue)}
-        showTransport={showTransport}
-        onToggleTransport={() => setShowTransport(!showTransport)}
-        showControls={showControls}
-        onToggleControls={() => setShowControls(!showControls)}
-        onShowInfo={() => setShowInfoModal(true)}
-      />
+    <OnboardingProvider>
+      <div className={`bg-background-dark font-ui text-slate-100 overflow-hidden h-full flex flex-col antialiased ${isDraggingLeft || isDraggingRight ? 'select-none cursor-col-resize' : ''}`}>
+        <Header 
+          showQueue={showQueue}
+          onToggleQueue={() => setShowQueue(!showQueue)}
+          showTransport={showTransport}
+          onToggleTransport={() => setShowTransport(!showTransport)}
+          showControls={showControls}
+          onToggleControls={() => setShowControls(!showControls)}
+          onShowInfo={() => setShowInfoModal(true)}
+        />
 
-      <main className="flex-1 relative flex overflow-hidden">
-        {showQueue && (
-          <TrackQueue 
-            width={leftWidth}
-            onResizeStart={() => setIsDraggingLeft(true)}
-            queue={queue}
-            currentIndex={currentIndex}
-            isDragOver={isDragOver}
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onDrop={onDrop}
-            onTrackSelect={handleTrackSelect}
-            onTrackPlay={handleTrackPlay}
-            onRemoveTrack={handleRemoveTrack}
-            onClearQueue={handleClearQueue}
-            onFilesQueued={handleFilesQueued}
-            isLoading={audioEngine.playbackState === 'loading'}
-          />
-        )}
-
-        <MainViewer 
-          containerRef={containerRef}
-          isDragOver={isDragOver}
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          onDrop={onDrop}
-        >
-          {showTransport && (
-            <TransportControls 
-              playbackState={playbackState}
-              progress={progress}
-              onProgressChange={setProgress}
-              onSeek={(p) => audioEngine.seek((p / 100) * audioEngine.getDuration())}
-              activeTrack={activeTrack}
-              formatTime={formatTime}
-              onPrev={handlePrev}
-              onNext={handleNext}
-              onPlay={handlePlay}
-              onPause={handlePause}
-              onStop={handleStop}
-              volume={volume}
-              onVolumeChange={(v) => { setVolume(v); audioEngine.setVolume(v); }}
-              isLooping={isLooping}
-              onToggleLoop={handleLoopToggle}
-              onShowSettings={() => setShowSettingsModal(true)}
+        <main className="flex-1 relative flex overflow-hidden">
+          {showQueue && (
+            <TrackQueue 
+              width={leftWidth}
+              onResizeStart={() => setIsDraggingLeft(true)}
+              queue={queue}
+              currentIndex={currentIndex}
+              isDragOver={isDragOver}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              onTrackSelect={handleTrackSelect}
+              onTrackPlay={handleTrackPlay}
+              onRemoveTrack={handleRemoveTrack}
+              onClearQueue={handleClearQueue}
+              onFilesQueued={handleFilesQueued}
+              isLoading={audioEngine.playbackState === 'loading'}
             />
           )}
-        </MainViewer>
 
-        {showControls && (
-          <ControlSidebar 
-            width={rightWidth}
-            onResizeStart={() => setIsDraggingRight(true)}
-            visualizationMode={visualizationMode}
-            setVisualizationMode={setVisualizationMode}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            isTrackingCam={isTrackingCam}
-            setIsTrackingCam={setIsTrackingCam}
-            zoomFov={viewMode === 'inside' ? insideZoomFov : outsideZoomFov}
-            onZoomChange={handleZoomChange}
-            gain={viewMode === 'inside' ? insideGain : outsideGain}
-            onGainChange={handleGainChange}
-            cameraUIState={cameraUIState}
-            onCameraUIChange={handleCameraUIChange}
-            onCameraReset={handleCameraReset}
-            visualParams={visualParams}
-            onVisualParamsChange={handleVisualParamsChange}
-            deformationParams={deformationParams}
-            onDeformationParamsChange={handleDeformationParamsChange}
-            onVisualReset={handleVisualReset}
-            eskfParams={eskfParams}
-            onESKFParamsChange={handleESKFParams}
-            onESKFReset={handleESKFReset}
-            onSliderDrag={setIsDraggingSlider}
-          />
-        )}
-      </main>
+          <div className="flex-1 relative z-0 flex min-w-0">
+            <MainViewer 
+              containerRef={containerRef}
+              isDragOver={isDragOver}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+            >
+              {showTransport && (
+                <TransportControls 
+                  playbackState={playbackState}
+                  progress={progress}
+                  onProgressChange={setProgress}
+                  onSeek={(p) => audioEngine.seek((p / 100) * audioEngine.getDuration())}
+                  activeTrack={activeTrack}
+                  formatTime={formatTime}
+                  onPrev={handlePrev}
+                  onNext={handleNext}
+                  onPlay={handlePlay}
+                  onPause={handlePause}
+                  onStop={handleStop}
+                  volume={volume}
+                  onVolumeChange={(v) => { setVolume(v); audioEngine.setVolume(v); }}
+                  isLooping={isLooping}
+                  onToggleLoop={handleLoopToggle}
+                  onShowSettings={() => setShowSettingsModal(true)}
+                />
+              )}
+            </MainViewer>
+          </div>
 
-      <Footer 
-        playbackState={playbackState}
-        currentIndex={currentIndex}
-      />
+          {showControls && (
+            <div className="relative z-20">
+              <ControlSidebar 
+                width={rightWidth}
+                onResizeStart={() => setIsDraggingRight(true)}
+                visualizationMode={visualizationMode}
+                setVisualizationMode={setVisualizationMode}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                isTrackingCam={isTrackingCam}
+                setIsTrackingCam={setIsTrackingCam}
+                zoomFov={viewMode === 'inside' ? insideZoomFov : outsideZoomFov}
+                onZoomChange={handleZoomChange}
+                gain={viewMode === 'inside' ? insideGain : outsideGain}
+                onGainChange={handleGainChange}
+                cameraUIState={cameraUIState}
+                onCameraUIChange={handleCameraUIChange}
+                onCameraReset={handleCameraReset}
+                visualParams={visualParams}
+                onVisualParamsChange={handleVisualParamsChange}
+                deformationParams={deformationParams}
+                onDeformationParamsChange={handleDeformationParamsChange}
+                onVisualReset={handleVisualReset}
+                eskfParams={eskfParams}
+                onESKFParamsChange={handleESKFParams}
+                onESKFReset={handleESKFReset}
+                onSliderDrag={setIsDraggingSlider}
+              />
+            </div>
+          )}
+        </main>
 
-      <SettingsModal 
-        isOpen={showSettingsModal}
-        onClose={() => setShowSettingsModal(false)}
-        hrtfUrl={hrtfUrl}
-        onHrtfSelect={handleHrtfSelect}
-      />
+        <Footer 
+          playbackState={playbackState}
+          currentIndex={currentIndex}
+        />
 
-      <InfoModal isOpen={showInfoModal} onClose={() => setShowInfoModal(false)} />
-    </div>
+        <SettingsModal 
+          isOpen={showSettingsModal}
+          onClose={() => setShowSettingsModal(false)}
+          hrtfUrl={hrtfUrl}
+          onHrtfSelect={handleHrtfSelect}
+        />
+
+        <InfoModal isOpen={showInfoModal} onClose={() => setShowInfoModal(false)} />
+
+        <OnboardingContext.Consumer>
+          {(onboarding) => onboarding?.currentStep === 'HEADPHONES' ? <HeadphonePrompt /> : null}
+        </OnboardingContext.Consumer>
+      </div>
+    </OnboardingProvider>
   );
 }

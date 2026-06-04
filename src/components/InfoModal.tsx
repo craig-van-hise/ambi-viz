@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
+import { OnboardingContext } from './onboarding/OnboardingContext';
 
 export interface InfoModalProps {
     isOpen: boolean;
@@ -18,6 +19,8 @@ const ATTRIBUTIONS = [
 ];
 
 export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
+    const onboarding = useContext(OnboardingContext);
+
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
@@ -107,7 +110,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
                                 <li>
                                     <strong>Music Examples</strong>: The included music examples are virtual orchestrations arranged, mixed, and mastered (though not originally composed) by the creator. Discover more audio examples at <a href="https://www.virtualvirgin.net/audio-examples" target="_blank" rel="noopener noreferrer" className="text-primary-light hover:underline">Virtual Virgin</a>.
                                 </li>
-                            </ul>
+                              </ul>
                         </div>
 
                         <div className="space-y-3 pt-6 border-t border-white/10">
@@ -136,7 +139,16 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
                     </div>
                 </div>
                 {/* Footer */}
-                <div className="px-6 py-4 border-t border-white/10 shrink-0 bg-white/5 flex justify-end">
+                <div className="px-6 py-4 border-t border-white/10 shrink-0 bg-white/5 flex justify-end gap-3">
+                    <button
+                        onClick={() => {
+                            onboarding?.resetOnboarding();
+                            onClose();
+                        }}
+                        className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-sm font-medium rounded-lg transition-colors border border-white/10 hover:border-white/20 normal-case cursor-pointer"
+                    >
+                        Restart Walkthrough
+                    </button>
                     <a
                         href="https://github.com/craig-van-hise/ambi-viz"
                         target="_blank"
