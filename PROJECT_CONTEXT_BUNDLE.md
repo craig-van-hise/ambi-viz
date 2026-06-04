@@ -1,9 +1,8 @@
 ### FILE: project_tree.txt
 
 
-/Users/vv2024/Documents/AI Projects/WebApps/ambi-viz
+/Users/vv2024/Documents/Repos - vv2024/Spatial Audio/WebApps/ambi-viz
 ├── 2026-03-06_REPO_REPORT.md
-├── PROJECT_CONTEXT_BUNDLE.md
 ├── PROJECT_STATE.md
 ├── README.md
 ├── REMOTE_LOGGING.md
@@ -17,8 +16,8 @@
 ├── eslint.config.js
 ├── index.html
 ├── llms.txt
-├── package-lock.json
 ├── package.json
+├── pnpm-lock.yaml
 ├── project_tree.txt
 ├── public
 |  ├── Virtual Virgin + VV logo card.png
@@ -120,9 +119,9 @@
 ├── vite.config.ts
 └── vitest.config.ts
 
-directory: 1149 file: 7880
+directory: 29 file: 194 symboliclink: 28
 
-ignored: directory (125)
+ignored: directory (4)
 
 
 [2K[1G

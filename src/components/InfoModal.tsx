@@ -96,22 +96,37 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
                         </div>
 
                         <div className="space-y-3 pt-6 border-t border-white/10">
+                            <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Acknowledgments</h3>
+                            <ul className="list-disc pl-5 text-xs text-slate-400 font-light space-y-2 normal-case">
+                                <li>
+                                    <strong>Google Open Binaural Renderer (OBR)</strong>: Ambisonic decoding and spatialization powered by Google's OBR (Apache-2.0).
+                                </li>
+                                <li>
+                                    <strong>Audio Asset</strong>: '3rd Order Ambi Clock Test.opus' is adapted from <a href="https://freesound.org/people/clucs/sounds/428571/" target="_blank" rel="noopener noreferrer" className="text-primary-light hover:underline">Ambisonic Clock by clucs</a> on Freesound.
+                                </li>
+                                <li>
+                                    <strong>Music Examples</strong>: The included music examples are virtual orchestrations arranged, mixed, and mastered (though not originally composed) by the creator. Discover more audio examples at <a href="https://www.virtualvirgin.net/audio-examples" target="_blank" rel="noopener noreferrer" className="text-primary-light hover:underline">Virtual Virgin</a>.
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div className="space-y-3 pt-6 border-t border-white/10">
                             <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Open Source Attribution</h3>
-                            <div className="bg-black/40 rounded-xl border border-white/5 overflow-hidden">
-                                <table className="w-full text-left text-xs normal-case">
+                            <div className="overflow-x-auto bg-black/40 rounded-xl border border-white/5">
+                                <table className="w-full text-left text-sm normal-case min-w-[500px]">
                                     <thead className="bg-white/5 text-slate-400 border-b border-white/5">
                                         <tr>
-                                            <th className="px-4 py-2 font-medium">Library</th>
-                                            <th className="px-4 py-2 font-medium">Author</th>
-                                            <th className="px-4 py-2 font-medium">License</th>
+                                            <th className="p-2 font-medium text-left">Library</th>
+                                            <th className="p-2 font-medium text-left">Author</th>
+                                            <th className="p-2 font-medium text-left">License</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-white/5 text-slate-300">
+                                    <tbody className="text-slate-300">
                                         {ATTRIBUTIONS.map((attr, idx) => (
                                             <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
-                                                <td className="px-4 py-2.5 font-mono text-[11px] text-primary-light">{attr.name}</td>
-                                                <td className="px-4 py-2.5">{attr.author}</td>
-                                                <td className="px-4 py-2.5 text-slate-400">{attr.license}</td>
+                                                <td className="p-2 text-left font-mono text-[11px] text-primary-light border-b border-gray-700/50">{attr.name}</td>
+                                                <td className="p-2 text-left border-b border-gray-700/50">{attr.author}</td>
+                                                <td className="p-2 text-left text-slate-400 border-b border-gray-700/50">{attr.license}</td>
                                             </tr>
                                         ))}
                                     </tbody>
