@@ -4,7 +4,7 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 
 ## Features
 
--   **Predictive Head-Tracking (ESKF)**: Low-latency 6DOF audio rotation using an Error-State Kalman Filter in tangent space with visual debugging (ghost/predicted arrows).
+-   **Predictive Head-Tracking (ESKF)**: Low-latency 3DOF audio rotation using an Error-State Kalman Filter in tangent space with visual debugging (ghost/predicted arrows).
 -   **Dynamic Tuning**: Real-time ESKF parameter adjustment (τ, R, Q) with descriptive tooltips for latency and jitter management.
 -   **Bidirectional Camera Controls**: 
     -   Integrated **Yaw/Pitch/Roll** sliders that move in real-time to mirror head tracking or manual canvas dragging.
@@ -47,7 +47,7 @@ A high-performance web application for visualizing Ambisonic audio fields in rea
 -   **Frontend**: React + TypeScript + Vite
 -   **3D Graphics**: Three.js + Custom GLSL Shaders
 -   **Audio**: Web Audio API + OBR WASM + AudioWorklet
--   **Tracking**: MediaPipe Face Landmarker + 6DOF ESKF
+-   **Tracking**: MediaPipe Face Landmarker + 3DOF ESKF
 
 ## Project Structure
 
